@@ -1,0 +1,12 @@
+mujoco
+mujoco_python_viewer
+imageio
+pystache
+pyyaml
+lxml
+rich
+dm_control
+torch
+numpy
+transformations
+absl-py

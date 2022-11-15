@@ -1,0 +1,85 @@
+<mujoco model="example">
+  <compiler angle="radian" coordinate="global"/>
+  <option gravity="0 0 0"/>
+
+  <default>
+    <geom rgba=".8 .6 .4 1"/>
+  </default>
+
+  {{#complete}}
+  <asset>
+    <mesh name="FIXATEUR" file="./meshes/Segmentation_DAU-DP.stl" scale="0.01 0.01 0.01"/>
+    <mesh name="DAU-MCP" file="./meshes/Segmentation_DAU-MCP.stl" scale="0.01 0.01 0.01"/>
+    <mesh name="DAU-PIP" file="./meshes/Segmentation_DAU-PIP.stl" scale="0.01 0.01 0.01"/>
+    <mesh name="DAU-DP" file="./meshes/Segmentation_DAU-DP.stl" scale="0.01 0.01 0.01"/>
+    <mesh name="TRACKER-DAU" file="./meshes/Segmentation_TRACKER-DAU.stl" scale="0.01 0.01 0.01"/>
+    <mesh name="TRACKER-DAU-MCP" file="./meshes/Segmentation_TRACKER-DAU-MCP.stl" scale="0.01 0.01 0.01"/>
+    <mesh name="ZF-MCP" file="./meshes/Segmentation_ZF-MCP.stl" scale="0.01 0.01 0.01"/>
+    <mesh name="ZF-PIP" file="./meshes/Segmentation_ZF-PIP.stl" scale="0.01 0.01 0.01"/>
+    <mesh name="ZF-DP" file="./meshes/Segmentation_ZF-DP.stl" scale="0.01 0.01 0.01"/>
+    <mesh name="TRACKER-ZF" file="./meshes/Segmentation_TRACKER-ZF.stl" scale="0.01 0.01 0.01"/>
+    <mesh name="TRACKER-ZF-MCP" file="./meshes/Segmentation_TRACKER-ZF-MCP.stl" scale="0.01 0.01 0.01"/>
+  </asset>
+  {{/complete}}
+
+  <worldbody>
+{{#complete}}
+    <camera name="cam0" pos="0 -1.8 -0.4" euler="90 0 0" mode="trackcom"/>
+{{/complete}}
+    <body name="dau" pos="0 0 0">
+    <geom type="sphere" size="0.1 0.1 0.1" rgba="0 0 1 .4"/>
+    <body name="mcp">
+      <joint name="BONES_to_DAU_MCP" type="hinge" axis="{{dau.mcp.axis}}" pos="{{dau.mcp.pos}}" limited="true" range="{{dau.mcp.range}}"/>
+      {{#complete}}
+      <geom pos="{{dau.offset}}" type="mesh" mesh="DAU-MCP"/>
+      {{/complete}}
+
+      {{#complete}}
+      <geom pos="{{dau.mcp.markers.a}}" type="sphere" size="0.05 0.05 0.05" rgba="0 0 1 .4"/>
+      <geom pos="{{dau.mcp.markers.b}}" type="sphere" size="0.05 0.05 0.05" rgba="0 0 1 .4"/>
+      <geom pos="{{dau.mcp.markers.c}}" type="sphere" size="0.05 0.05 0.05" rgba="0 0 1 .4"/>
+      {{/complete}}
+
+
+      <body name="pip">
+        <body name="pip-tracker">
+          {{#complete}}
+          <geom pos="{{dau.pip.markers.a}}" type="sphere" size="0.05 0.05 0.05" rgba="0 0 1 .4"/>
+          <geom pos="{{dau.pip.markers.b}}" type="sphere" size="0.05 0.05 0.05" rgba="0 0 1 .4"/>
+          <geom pos="{{dau.pip.markers.c}}" type="sphere" size="0.05 0.05 0.05" rgba="0 0 1 .4"/>
+          {{/complete}}
+        </body>
+        <joint name="DAU_MCP_to_DAU_PIP" type="hinge" axis="{{dau.pip.axis}}" pos="{{dau.pip.pos}}" limited="true" range="{{dau.pip.range}}"/>
+        {{#complete}}
+        <geom pos="{{dau.offset}}" type="mesh" mesh="DAU-PIP"/>
+        {{/complete}}
+        <body name="fingertip">
+          <joint name="DAU_PIP_to_DAU_DP" type="hinge" axis="{{dau.dp.axis}}" pos="{{dau.dp.pos}}" limited="true" range="{{dau.dp.range}}"/>
+          {{#complete}}
+          <geom  pos="{{dau.offset}}" type="mesh" mesh="DAU-DP"/>
+          {{/complete}}
+          <body name="tracker-dau">
+          {{#complete}}
+            <geom  pos="{{dau.offset}}" type="mesh" mesh="TRACKER-DAU" rgba=".8 .0 .0 1"/>
+          {{/complete}}
+          </body>
+        </body>
+      </body>
+      <body name="tracker-dau-mcp">
+          {{#complete}}
+          <geom pos="{{dau.offset}}" type="mesh" mesh="TRACKER-DAU-MCP" rgba=".8 .0 .0 1"/>
+          {{/complete}}
+      </body>
+    </body>
+  </body>
+</worldbody>
+
+{{#complete}}
+  <actuator>
+    <position name="mcp_motor" joint="BONES_to_DAU_MCP" kp="100" gear="1" ctrllimited="true" ctrlrange="-5 5"/>
+    <position name="pip_motor" joint="DAU_MCP_to_DAU_PIP" kp="100" gear="1" ctrllimited="true" ctrlrange="-5 5"/>
+    <position name="dp_motor" joint="DAU_PIP_to_DAU_DP" kp="100" gear="1" ctrllimited="true" ctrlrange="-5 5"/>
+  </actuator>
+{{/complete}}
+
+</mujoco>

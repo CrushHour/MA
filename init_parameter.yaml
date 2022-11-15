@@ -1,0 +1,13 @@
+dau:
+  mcp:
+    axis: "1 0.1 0.1"
+    pos: "0 0 0"
+    range: "-2 1"
+  pip:
+    axis: "-1 1 0"
+    pos: "0 0 0.2"
+    range: "0 2.5"
+  dp:
+    axis: "-1 1.1 0.1"
+    pos: "0 0 0.4"
+    range: "0 1"

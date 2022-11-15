@@ -1,0 +1,23 @@
+Data recording day
+==================
+
+- ct-scan -> tracker-to-body, tracker in global coordinate system (niko)
+    - exports: landmarks in ct scan space (niko)
+- initial mjcf parameters creation
+    - imports: landmarks
+    - exports: yaml file
+- argmax_gym run (sinus curve, torque)
+    - export: initial dataset
+- finger_forward_model.py
+    - import: initial yaml file, intitial dataset
+    - export: yaml file, encoder graph
+- argmax_gym run (angle targets)
+    - import: encoder graph
+    - export: final dataset
+
+Analysis
+========
+
+- finger_dynamic_model:
+    - import: yaml file, final dataset, encoder graph (initial)
+    - export: sequence model graph
