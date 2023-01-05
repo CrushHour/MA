@@ -10,6 +10,30 @@ import time
 from datetime import datetime
 
 # def init
+"""
+ZUWEISUNG
+Strecker 1 zeigerfinger: 4
+Strecker 2 zeigerfinger: 6
+
+Beuger 1 zeigerfinger: 3
+Beuger 2 zeigerfinger: 2
+
+Strecker 1 Daumen: 7
+Strecker 2 Daumen: 5
+
+Daumen Abspreitzer: 0
+Daumen Beuger: 1
+
+Id
+ZF PP : 1007
+ZF DP : 1008
+
+DAUMEN DP : 1009
+DAUMEN MC : 1010
+
+FORCETORQUE: 1011
+"""
+
 safe_path = '/home/robotlab/Documents/GitHub/MA_Schote/MA/Data'
 
 json_out = {
@@ -74,6 +98,10 @@ if __name__ == '__main__':
         #Bewegungsbefehl
         action = 3 * action_off + 3 * action_amp * np.cos(t - action_phase)
         obs, reward, done, image = env.step(action)
+
+        if t%1000 <= 2:
+            print(t%1000)
+            print(action)
         
         #Bewegung Speichern
         append_obs = obs[0].tolist()
@@ -89,7 +117,7 @@ if __name__ == '__main__':
     # dump json
     json_out['observation'] = obs_handler.output_dict
     tt = time.localtime()
-    current_time = time.strftime("%H_%M_%S", tt)
+    current_time = time.strftime("%Y_%m_%d_%H_%M_%S", tt)
 
     with open(f'{safe_path}/{current_time}.json', 'w') as f:
         json.dump(json_out, f, indent=2)
@@ -97,6 +125,7 @@ if __name__ == '__main__':
     #save video
     frame_width = int(cap.get(3))
     frame_height = int(cap.get(4))
+    print(frame_width,',', frame_height)
     out = cv.VideoWriter(f'{safe_path}/Video/{current_time}.avi',cv.VideoWriter_fourcc(*'DIVX'), frameSize=(frame_width,frame_height), fps=25)
     for i in range(len(video_list)):
         frame = video_list[i]

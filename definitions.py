@@ -50,7 +50,7 @@ Extensor Policis -> Motor 7 (I)
 Extensor Policis -> Motor 5 (II)
 
 """
-dt_daumen = 0.8
+dt_daumen = 0.8 # Org.: 0.8
 # STRECKER
 # define the motor, amp and offset
 DAUMEN_STRECKER_1_MOTOR = 7
