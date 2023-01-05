@@ -99,9 +99,7 @@ if __name__ == '__main__':
         action = 3 * action_off + 3 * action_amp * np.cos(t - action_phase)
         obs, reward, done, image = env.step(action)
 
-        if t%1000 <= 2:
-            print(t%1000)
-            print(action)
+        print(action)
         
         #Bewegung Speichern
         append_obs = obs[0].tolist()
