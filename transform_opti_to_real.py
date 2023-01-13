@@ -26,7 +26,8 @@ def get_opti_positions(filename):
 
     return name, opti_positions
 	
-def plot_ply(tracker_points, opti_points, n):
+def plot_ply(tracker_points, opti_points, line_1, line_2, line_3, line_4):
+    n = len(tracker_points)
     fig = plt.figure()
     ax = fig.add_subplot(projection = '3d')
     x, y, z = [], [], []
@@ -35,7 +36,7 @@ def plot_ply(tracker_points, opti_points, n):
             x.append(tracker_points[i][0])
             y.append(tracker_points[i][1])
             z.append(tracker_points[i][2])
-    ax.scatter(x,y,z,c='g', marker='^')
+    ax.scatter(x,y,z,c='b', marker='^')
     print('x:')
     print(x)
     for i in range(0,n):
@@ -45,10 +46,16 @@ def plot_ply(tracker_points, opti_points, n):
     print('x2:')
     print(x2)
     ax.scatter(x2,y2,z2, c='r', marker='o')
+    ax.plot([line_1[0][0],line_1[1][0]],[line_1[0][1],line_1[1][1]], zs=[line_1[0][2],line_1[1][2]], c='b')
+    ax.plot([line_2[0][0],line_2[1][0]],[line_2[0][1],line_2[1][1]], zs=[line_2[0][2],line_2[1][2]], c='b')
+    ax.plot([line_3[0][0],line_3[1][0]],[line_3[0][1],line_3[1][1]], zs=[line_3[0][2],line_3[1][2]], c='r')
+    ax.plot([line_4[0][0],line_4[1][0]],[line_4[0][1],line_4[1][1]], zs=[line_4[0][2],line_4[1][2]], c='r')
+
     plt.show()
 
 
-def get_min_max_dis(points, n):
+def get_min_max_dis(points):
+    n = len(points)
     d_comp_max = 0
     d_comp_min = 100000000000000
     for i in range(n):
@@ -75,16 +82,18 @@ def get_min_max_dis(points, n):
 
 class Tracker_3dicke:
     numTrackers = 5
-    positions = [[0, 0, 75], [-42, 0, 46], [25, 0, 46], [0, 37, 41.5], [0, -44, 41.5]] # [x,y,z,x2,y2,z2,...]
+    positions = [[0, 0, 75], [-42, 0, 46], [25, 0, 46], [0, 37, 41.5], [0, -44, 41.5]] # [[x,y,z],[x2,y2,z2],...]
     name, opti_positions = get_opti_positions('MakerJS_3dicke.csv')
 
 class Tracker_Nico:
     numTrackers = 5
-    positions = [[0, 0, 61], [-41, 0, 35], [20, 0, 35], [-10, 31, 35], [-10, -14, 35]] # [x,y,z,x2,y2,z2,...]
+    positions = [[0, 0, 61], [-41, 0, 35], [20, 0, 35], [-10, 31, 35], [-10, -14, 35]] # [[x,y,z],[x2,y2,z2],...]
     name, opti_positions = get_opti_positions('Tracker Nico.csv')
 
 
 #%% asd
 if __name__ == '__main__':
     print(Tracker_Nico.opti_positions)
-    plot_ply(Tracker_Nico.positions, Tracker_Nico.opti_positions, Tracker_Nico.numTrackers)
+    v_max_tracker, v_min_tracker = get_min_max_dis(Tracker_Nico.positions)
+    v_max_opti, v_min_opti = get_min_max_dis(Tracker_Nico.opti_positions)
+    plot_ply(Tracker_Nico.positions, Tracker_Nico.opti_positions, v_max_tracker, v_min_tracker, v_max_opti, v_min_opti)
