@@ -8,6 +8,7 @@ from pyquaternion import Quaternion
 import csv
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.spatial.transform import Rotation as Rot
+from scipy.spatial import distance
 
 #%% transformation optitrack tracker to real tracker
 path_csv = "/home/robotlab/Documents/GitHub/MA_Schote/MA/Data"
@@ -58,7 +59,7 @@ def plot_ply(tracker_points, opti_points, line_1, line_2, line_3, line_4):
 def get_min_max_dis(points):
     n = len(points)
     d_comp_max = 0
-    d_comp_min = 100000000000000
+    d_comp_min = math.inf
     for i in range(n):
         print('i:', i)
         for j in range(n-1,-1+i,-1):
@@ -84,44 +85,26 @@ def sort_points_by_dis(points):
     n = len(points)
     pairs = []
     for i in range(n):
-        print('i:', i)
-        for j in range(n - 1, -1 + i, -1):
-            if j != i:
-                print('    j:', j)
-                dx = points[j][0] - points[i][0]
-                dy = points[j][1] - points[i][1]
-                dz = points[j][2] - points[i][2]
-
-                d_diff = math.sqrt(dx ** 2 + dy ** 2 + dz ** 2)
-
-                # erstelle Liste die alle Punkte distanzen, plus euklidische Distanz enthält
-                pairs.append([points[j], points[i], d_diff])
-
-    # Sortiere Punktepaare nach euklidischer Distanz. Aufsteigend von kurz nach lang.
+        for j in range(i+1, n):
+            d_diff = distance.euclidean(points[i],points[j])
+            pairs.append([points[i], points[j], d_diff])
     pairs.sort(key=lambda x: x[2])
-
     return pairs
 
 def compare_point_lists(pairs1, points1, pairs2, points2):
     '''Lese Punktepaare, und Punktewolken ein. Vergleiche Positionen der Punkte anhand
     der Stellen in den Punktepaaren, in denen sie
     vorkommen.'''
-    distance_value_in_points1 = [[], [], [], [], []]
-    distance_value_in_points2 = [[], [], [], [], []]
+    distance_value_in_points1 = [[] for _ in range(len(points1))]
+    distance_value_in_points2 = [[] for _ in range(len(points2))]
 
     '''Erstelle für jeden Punkt eine Liste, in der Steht in welcher Distanz er vokommt.'''
     for i in range(len(pairs1)):
         for j in range(len(points1)):
-            try:
-                pairs1[i].index(points1[j])
+            if points1[j] in pairs1[i]:
                 distance_value_in_points1[j].append(i + 1)
-            except:
-                pass
-            try:
-                pairs2[i].index(points2[j])
+            if points2[j] in pairs2[i]:
                 distance_value_in_points2[j].append(i + 1)
-            except:
-                pass
     print(distance_value_in_points1)
     print(distance_value_in_points2)
 
@@ -136,7 +119,33 @@ def compare_point_lists(pairs1, points1, pairs2, points2):
     points_2_out = [x for _, x in sorted(zip(index_list, points2))]
 
     return points1, points_2_out
-
+    # %% 
+def calculate_transformation_matrix(markers1, markers2):
+    '''Setzt vorraus, dass die Punktelisten korrekt sortiert sind.'''
+    # Convert lists of markers to arrays
+    markers1 = np.array(markers1, dtype=float)
+    markers2 = np.array(markers2, dtype=float)
+    # Center the markers at the origin
+    markers1 -= np.mean(markers1, axis=0)
+    markers2 -= np.mean(markers2, axis=0)
+    # Calculate the cross-covariance matrix
+    cross_cov = np.dot(markers1.T, markers2)
+    # Calculate the singular value decomposition
+    U, S, V_T = np.linalg.svd(cross_cov)
+    # Calculate the rotation matrix
+    R = np.dot(U, V_T)
+    # Check for reflection
+    if np.linalg.det(R) < 0:
+        V_T[2,:] *= -1
+        R = np.dot(U, V_T)
+    # Calculate the translation vector
+    t = np.mean(markers2, axis=0) - np.dot(np.mean(markers1, axis=0), R)
+    # Concatenate the rotation and translation matrices
+    transformation_matrix = np.eye(4)
+    transformation_matrix[:3, :3] = R
+    transformation_matrix[:3, 3] = t
+    return transformation_matrix
+# %%
 def Rotation_Matrix(phi, theta, psi, degrees = False):
     '''Gibt Rotationsmatrix für Eulerwinkel zurück.'''
     if phi > 2*math.pi or theta > 2*math.pi or \
