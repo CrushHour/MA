@@ -7,6 +7,7 @@ from mpl_toolkits import mplot3d
 from pyquaternion import Quaternion
 import csv
 from mpl_toolkits.mplot3d import Axes3D
+from scipy.spatial.transform import Rotation as Rot
 
 #%% transformation optitrack tracker to real tracker
 path_csv = "/home/robotlab/Documents/GitHub/MA_Schote/MA/Data"
@@ -37,14 +38,14 @@ def plot_ply(tracker_points, opti_points, line_1, line_2, line_3, line_4):
             y.append(tracker_points[i][1])
             z.append(tracker_points[i][2])
     ax.scatter(x,y,z,c='b', marker='^')
-    print('x:')
-    print(x)
+    #print('x:')
+    #print(x)
     for i in range(0,n):
             x2.append(opti_points[i][0])
             y2.append(opti_points[i][1])
             z2.append(opti_points[i][2])
-    print('x2:')
-    print(x2)
+    #print('x2:')
+    #print(x2)
     ax.scatter(x2,y2,z2, c='r', marker='o')
     ax.plot([line_1[0][0],line_1[1][0]],[line_1[0][1],line_1[1][1]], zs=[line_1[0][2],line_1[1][2]], c='b')
     ax.plot([line_2[0][0],line_2[1][0]],[line_2[0][1],line_2[1][1]], zs=[line_2[0][2],line_2[1][2]], c='b')
@@ -80,54 +81,41 @@ def get_min_max_dis(points):
     return v_max, v_min
 
 
-def sort_points_by_dis(points):
-    n = len(points)
-    d_comp_max = 0
-    d_comp_min = 100000000000000
-    points_out = points
-    pairs = []
-    for i in range(n):
-        print('i:', i)
-        for j in range(n - 1, -1 + i, -1):
-            if j != i:
-                print('    j:', j)
-                dx = points[j][0] - points[i][0]
-                dy = points[j][1] - points[i][1]
-                dz = points[j][2] - points[i][2]
+def Rotation_Matrix(phi, theta, psi, degrees = False):
+    '''Gibt Rotationsmatrix für Eulerwinkel zurück.'''
+    if phi > 2*math.pi or theta > 2*math.pi or \
+        psi > 2*math.pi or degrees == True:
+        print('Calculating R for Input in Degrees and Euler ZYX.')
+        phi = phi * 180 / math.pi
+        theta = theta * 180 / math.pi
+        psi = psi * 180 / math.pi
+    else: 
+        print('Calculating R for Input in Radians and Euler ZYX.')
+    
+    Rx = np.array([[1, 0, 0], \
+        [0, math.cos(phi), -math.sin(phi)], \
+        [0, math.sin(phi), math.cos(phi)]])
+    
+    Rz = np.array([[math.cos(psi), -math.sin(psi), 0], \
+        [math.sin(psi), math.cos(psi), 0], \
+        [0, 0, 1]])
+    
+    Ry = np.array([[math.cos(theta), 0, math.sin(theta)], \
+        [0, 1, 0], \
+        [-math.sin(theta), 0, math.cos(theta)]])
 
-                d_diff = math.sqrt(dx ** 2 + dy ** 2 + dz ** 2)
+    R_zw = np.matmul(Rz,Ry)
+    R = np.matmul(R_zw,Rx)
+    return R
 
-                pairs.append([points[j], points[i], d_diff])
+def min_max_arrays_to_kosy(min_track, max_track):
+    x = np.linalg.norm(max_track[0]+min_track[1]-min_track[0])
+    z = np.linalg.norm(max_track[1]-max_track[0])
+    y = np.cross(x,z)
 
-    pairs.sort(key=lambda x: x[2])
+    kosy = [x,y,z]
 
-    return pairs
-
-def compare_point_lists(pairs1, points1, pairs2, points2):
-    distance_value_in_points1 = [[], [], [], [], []]
-    distance_value_in_points2 = [[], [], [], [], []]
-
-    # In der sortierten Liste bekommt jeder Punkt, einen Score für die Position an der er steht. Punkte die sich an
-    # höreren Distanzen beteiligen erhalten mehr punkte. Dadurch erhält jeder Punkt einen eideutigen Score
-    for i in range(len(pairs1)):
-        for j in range(len(points1)):
-            try:
-                pairs1[i].index(points1[j])
-                distance_value_in_points1[j].append(i + 1)
-            except:
-                pass
-            try:
-                pairs2[i].index(points2[j])
-                distance_value_in_points2[j].append(i + 1)
-            except:
-                pass
-    print(distance_value_in_points1)
-    print(distance_value_in_points2)
-
-    # https://stackoverflow.com/questions/6618515/sorting-list-based-on-values-from-another-list
-    # points_out = [x for _, x in sorted(zip(distance_value_in_points, points))]
-
-
+    return kosy
 
 class Tracker_3dicke:
     numTrackers = 5
@@ -146,3 +134,6 @@ if __name__ == '__main__':
     v_max_tracker, v_min_tracker = get_min_max_dis(Tracker_Nico.positions)
     v_max_opti, v_min_opti = get_min_max_dis(Tracker_Nico.opti_positions)
     plot_ply(Tracker_Nico.positions, Tracker_Nico.opti_positions, v_max_tracker, v_min_tracker, v_max_opti, v_min_opti)
+    kosy_tracker = min_max_arrays_to_kosy(v_min_tracker, v_max_tracker)
+    print(kosy_tracker)
+# %%
