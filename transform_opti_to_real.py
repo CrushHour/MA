@@ -82,9 +82,6 @@ def get_min_max_dis(points):
 
 def sort_points_by_dis(points):
     n = len(points)
-    d_comp_max = 0
-    d_comp_min = 100000000000000
-    points_out = points
     pairs = []
     for i in range(n):
         print('i:', i)
@@ -124,8 +121,15 @@ def compare_point_lists(pairs1, points1, pairs2, points2):
     print(distance_value_in_points1)
     print(distance_value_in_points2)
 
+    # sort points from CT by order of opti csv export.
+    index_list = []
+    for i in range(len(points1)):
+        index_list.append(distance_value_in_points1.index(distance_value_in_points2[i]))
+
     # https://stackoverflow.com/questions/6618515/sorting-list-based-on-values-from-another-list
-    # points_out = [x for _, x in sorted(zip(distance_value_in_points, points))]
+    points_2_out = [x for _, x in sorted(zip(index_list, points2))]
+
+    return points1, points_2_out
 
 def Rotation_Matrix(phi, theta, psi, degrees = False):
     '''Gibt Rotationsmatrix für Eulerwinkel zurück.'''
