@@ -94,18 +94,22 @@ def sort_points_by_dis(points):
 
                 d_diff = math.sqrt(dx ** 2 + dy ** 2 + dz ** 2)
 
+                # erstelle Liste die alle Punkte distanzen, plus euklidische Distanz enthält
                 pairs.append([points[j], points[i], d_diff])
 
+    # Sortiere Punktepaare nach euklidischer Distanz. Aufsteigend von kurz nach lang.
     pairs.sort(key=lambda x: x[2])
 
     return pairs
 
 def compare_point_lists(pairs1, points1, pairs2, points2):
+    '''Lese Punktepaare, und Punktewolken ein. Vergleiche Positionen der Punkte anhand
+    der Stellen in den Punktepaaren, in denen sie
+    vorkommen.'''
     distance_value_in_points1 = [[], [], [], [], []]
     distance_value_in_points2 = [[], [], [], [], []]
 
-    # In der sortierten Liste bekommt jeder Punkt, einen Score für die Position an der er steht. Punkte die sich an
-    # höreren Distanzen beteiligen erhalten mehr punkte. Dadurch erhält jeder Punkt einen eideutigen Score
+    '''Erstelle für jeden Punkt eine Liste, in der Steht in welcher Distanz er vokommt.'''
     for i in range(len(pairs1)):
         for j in range(len(points1)):
             try:
@@ -121,7 +125,9 @@ def compare_point_lists(pairs1, points1, pairs2, points2):
     print(distance_value_in_points1)
     print(distance_value_in_points2)
 
-    # sort points from CT by order of opti csv export.
+    '''An dieser Stelle soll die Liste der Punkte aus dem CT (2) anhand der Punkte aus dem Opti-Export (1)
+    sortiert werden. Dafür wird der Index einer Distanz Index Kombi von (2) in (1) gesucht und der Index gepseichert.
+    Anhand der entstehenden Liste von Indexen werden die Punkte von (2) umsortiert.'''''
     index_list = []
     for i in range(len(points1)):
         index_list.append(distance_value_in_points1.index(distance_value_in_points2[i]))
