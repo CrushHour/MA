@@ -3,3 +3,4 @@ argmax_gym/messages
 Data/.ipy*
 __pycache__
 Data/Video
+Data/test*

@@ -2,6 +2,7 @@
 import numpy as np
 # split the observation vector into their matching parts
 
+
 class Sensor(object):
     """The General Sensor Object"""
 
@@ -17,7 +18,7 @@ class Sensor(object):
             self._length_mismatch()
 
     def _assign_state_vector(self):
-        pass
+        print('Empty Implementation!')
 
     def _length_mismatch(self):
         print(f'Length Mismatch ({self.__class__.__name__})')
@@ -89,6 +90,8 @@ class ForceTorqueSensor(Sensor):
         self.my = 0
         self.mz = 0
 
+        
+
         self._state_vector = [0, 0, 0, 0, 0, 0]
         self._length = len(self._state_vector)
 
@@ -100,6 +103,8 @@ class ForceTorqueSensor(Sensor):
         self.mx = self._state_vector[3]
         self.my = self._state_vector[4]
         self.mz = self._state_vector[5]
+
+
 
 
 class RigidBody(Sensor):
@@ -133,6 +138,9 @@ class RigidBody(Sensor):
         self._update_state_vector()
         self._length = len(self._state_vector)
 
+        # also init the tmat
+        self._tmat = np.eye(4)
+
     def _update_state_vector(self):
         self._state_vector = [
             self.x,
@@ -162,6 +170,7 @@ class RigidBody(Sensor):
         self.y = self._state_vector[1]
         self.z = self._state_vector[2]
 
+        # MAYBE ITS THE OTHER WAY ROUND...?! -> Optitrack export is in qx, qy, qz, qw order!
         self.qw = self._state_vector[3]
         self.qx = self._state_vector[4]
         self.qy = self._state_vector[5]
@@ -175,12 +184,42 @@ class RigidBody(Sensor):
         self.vbeta = self._state_vector[11]
         self.vgamma = self._state_vector[12]
 
+        # self._calculate_transformation_matrix()
+
+    def _quat_to_rot(self):
+        """add quat to rot to computation graph"""
+        qw, qx, qy, qz = self.qw, self.qx, self.qy. self.qz
+
+        matrix = np.zeros(3, 3)
+
+        matrix[0, 0] = 1. - 2. * qy ** 2 - 2. * qz ** 2
+        matrix[1, 1] = 1. - 2. * qx ** 2 - 2. * qz ** 2
+        matrix[2, 2] = 1. - 2. * qx ** 2 - 2. * qy ** 2
+
+        matrix[0, 1] = 2. * qx * qy - 2. * qz * qw
+        matrix[1, 0] = 2. * qx * qy + 2. * qz * qw
+
+        matrix[0, 2] = 2. * qx * qz + 2 * qy * qw
+        matrix[2, 0] = 2. * qx * qz - 2 * qy * qw
+
+        matrix[1, 2] = 2. * qy * qz - 2. * qx * qw
+        matrix[2, 1] = 2. * qy * qz + 2. * qx * qw
+
+        return matrix
+
+    def _calculate_transformation_matrix(self):
+        """calculate the current transformation matrix"""
+        rotmat = self._quat_to_rot()
+        vec = np.array([self.x, self.y, self.z])
+        self._tmat[:3, :3] = rotmat
+        self._tmat[:3, 3] = vec
+
 
 class ObservationHandler(object):
     """Handle the Observation and split data to the Sensors"""
 
-    def __init__(self, num_motors=8, num_analog_sens=8, num_ft_sensors=1, num_rigid_bodies=5
-    ):
+    def __init__(self, num_motors=8, num_analog_sens=9, num_ft_sensors=1, num_rigid_bodies=5
+                 ):
 
         self.num_motors = num_motors
         self.motors = [
@@ -233,7 +272,8 @@ class ObservationHandler(object):
             return True
 
         else:
-            print(len(obs), self._length)
+            print(len(obs))
+            print(self._length)
             print('Length mismatch!')
             return False
 
@@ -262,7 +302,7 @@ class ObservationHandler(object):
     def append_to_output_dict(self):
         """write the current state to the output dictionary by appending the values"""
         for name, sensors in zip(self.name_list, self.sensor_list):
-            
+
             for idx, sensor in enumerate(sensors):
                 loc_dict = sensor._to_json()
 

@@ -1,0 +1,154 @@
+{
+  "time": [],
+  "action": [],
+  "observation": {
+    "motors": [
+      {
+        "power": [],
+        "torque": [],
+        "vel": []
+      },
+      {
+        "power": [],
+        "torque": [],
+        "vel": []
+      },
+      {
+        "power": [],
+        "torque": [],
+        "vel": []
+      },
+      {
+        "power": [],
+        "torque": [],
+        "vel": []
+      },
+      {
+        "power": [],
+        "torque": [],
+        "vel": []
+      },
+      {
+        "power": [],
+        "torque": [],
+        "vel": []
+      },
+      {
+        "power": [],
+        "torque": [],
+        "vel": []
+      },
+      {
+        "power": [],
+        "torque": [],
+        "vel": []
+      }
+    ],
+    "analogs": [
+      {
+        "dforce": [],
+        "force": []
+      },
+      {
+        "dforce": [],
+        "force": []
+      },
+      {
+        "dforce": [],
+        "force": []
+      },
+      {
+        "dforce": [],
+        "force": []
+      },
+      {
+        "dforce": [],
+        "force": []
+      },
+      {
+        "dforce": [],
+        "force": []
+      },
+      {
+        "dforce": [],
+        "force": []
+      },
+      {
+        "dforce": [],
+        "force": []
+      }
+    ],
+    "force_torques": [
+      {
+        "fx": [],
+        "fy": [],
+        "fz": [],
+        "mx": [],
+        "my": [],
+        "mz": []
+      }
+    ],
+    "rigid_bodies": [
+      {
+        "qw": [],
+        "qx": [],
+        "qy": [],
+        "qz": [],
+        "valpha": [],
+        "vbeta": [],
+        "vgamma": [],
+        "vx": [],
+        "vy": [],
+        "vz": [],
+        "x": [],
+        "y": [],
+        "z": []
+      },
+      {
+        "qw": [],
+        "qx": [],
+        "qy": [],
+        "qz": [],
+        "valpha": [],
+        "vbeta": [],
+        "vgamma": [],
+        "vx": [],
+        "vy": [],
+        "vz": [],
+        "x": [],
+        "y": [],
+        "z": []
+      },
+      {
+        "qw": [],
+        "qx": [],
+        "qy": [],
+        "qz": [],
+        "valpha": [],
+        "vbeta": [],
+        "vgamma": [],
+        "vx": [],
+        "vy": [],
+        "vz": [],
+        "x": [],
+        "y": [],
+        "z": []
+      },
+      {
+        "qw": [],
+        "qx": [],
+        "qy": [],
+        "qz": [],
+        "valpha": [],
+        "vbeta": [],
+        "vgamma": [],
+        "vx": [],
+        "vy": [],
+        "vz": [],
+        "x": [],
+        "y": [],
+        "z": []
+      }
+    ]
+  }
+}

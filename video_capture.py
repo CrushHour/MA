@@ -12,7 +12,7 @@ video_list = []
 if not cap.isOpened():
     print("Cannot open camera")
     exit()
-while dt <= 10:
+while dt <= 100:
     t = datetime.now()
     dt = t - start_time
     dt = dt.seconds
