@@ -2,10 +2,10 @@
 
 #import numpy as np
 import json
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 #from dataclasses import dataclass
 #from ipywidgets import widgets
-#import os
+import os
 #from pyquaternion import Quaternion
 
 """
@@ -32,11 +32,13 @@ DAUMEN MC : 1010
 empty: 1011
 """
 # Opening JSON file
-f = open('data/test_januar/16_21_19.json')
+f = open('Data/test_01_30/2023_01_31_00_47_54.json')
   
 # returns JSON object as 
 # a dictionary
 data = json.load(f)
+f.close()
+
 print('data loaded')
 print(data.keys())
 print('len of time:',len(data['time']))
@@ -49,4 +51,26 @@ print(data['time'][0:10])
 print(data['action'][10])
 #print(len(data['observation']['motors'][0][0]))
 
-f.close()
+'''Prin the actions.'''
+x = data['time'][:100]
+y = data['action'][:100]
+plt.xlabel("time [ms]")
+plt.ylabel("action value")
+plt.title("Actions")
+for i in range(8):
+    plt.plot(x,[pt[0][i] for pt in y],label = 'action %s'%i)
+plt.legend()
+plt.show()
+
+'''Rigid Bodies Plot Raw'''
+for i in range(len(data['observation']['rigid_bodies'])):
+    start = 0
+    stop = -1
+    plt.plot(data['time'][start:stop],data['observation']['rigid_bodies'][i]['x'][start:stop], label = 'x')
+    plt.plot(data['time'][start:stop],data['observation']['rigid_bodies'][i]['y'][start:stop], label = 'y')
+    plt.plot(data['time'][start:stop],data['observation']['rigid_bodies'][i]['z'][start:stop], label = 'z')
+    plt.title("Rigid Body %s"%i)
+    plt.legend()
+    plt.show()
+
+# %%

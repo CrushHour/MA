@@ -14,7 +14,7 @@ Extensor Indicis -> Motor (6) (II)
 
 """
 
-beuger_offset = 0.0
+beuger_offset = 0.4
 # STRECKER
 # define the motor, amp and offset
 ZEIGEFINGER_STRECKER_1_MOTOR = 4
@@ -24,8 +24,8 @@ ZEIGEFINGER_STRECKER_1_PHASE = 0
 
 # define the motor, amp and offset
 ZEIGEFINGER_STRECKER_2_MOTOR = 6
-ZEIGEFINGER_STRECKER_2_AMP = 5
-ZEIGEFINGER_STRECKER_2_OFFSET = 3
+ZEIGEFINGER_STRECKER_2_AMP = 0
+ZEIGEFINGER_STRECKER_2_OFFSET = 8
 ZEIGEFINGER_STRECKER_2_PHASE = 0
 
 
@@ -145,11 +145,12 @@ action_phase[0][DAUMEN_ABSPREITZER_1_MOTOR] = DAUMEN_ABSPREITZER_1_PHASE
 if __name__ == '__main__':
     print(action_amp)
     print(action_off)
-    dt_daumen = 0.4
-    t1 = [t * 0.005 for t in list(range(1000))]
+    dt_daumen = 0.0
+    t1 = [t * 0.005 for t in list(range(3400))]
     t2 = [-np.cos(t - dt_daumen) for t in t1]
     plt.plot(np.cos(t1))
     plt.plot(t2)
+    plt.legend()
     plt.grid()
 
 # %%

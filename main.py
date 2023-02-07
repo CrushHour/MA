@@ -58,7 +58,7 @@ obs, image = env.reset(record=False)
 print('reset')
 
 start_time = datetime.now()
-t_max = 20 * 1000 #ms
+t_max = 60 * 1 * 1000 #ms
 t = 0
 dt = 1000 / 25 #ms
 
@@ -103,7 +103,7 @@ if __name__ == '__main__':
             #Bewegungsbefehl
             cos_in = 0.001 * t - action_phase
             
-            action = 2 * action_off + 3 *action_amp * np.cos(cos_in)
+            action = 2 * action_off + 2 *action_amp * np.cos(cos_in)
             obs, reward, done, image = env.step(action)
             
             #Bewegung Speichern

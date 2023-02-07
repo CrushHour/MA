@@ -21,10 +21,11 @@ def sort_points_by_dis(points):
     for i in range(n):
         for j in range(n - 1, -1 + i, -1):
             if j != i:
-                dx = points[j][0] - points[i][0]
-                dy = points[j][1] - points[i][1]
-                dz = points[j][2] - points[i][2]
-                d_diff = math.sqrt(dx ** 2 + dy ** 2 + dz ** 2)
+                #dx = points[j][0] - points[i][0]
+                #dy = points[j][1] - points[i][1]
+                #dz = points[j][2] - points[i][2]
+                #d_diff = math.sqrt(dx ** 2 + dy ** 2 + dz ** 2)
+                d_diff = np.linalg.norm(np.array(points[j])-np.array(points[i]))
                 # erstelle Liste die alle Punkte distanzen, plus euklidische Distanz enthält
                 pairs.append([points[j], points[i], d_diff])
     # Sortiere Punktepaare nach euklidischer Distanz. Aufsteigend von kurz nach lang.
@@ -217,6 +218,7 @@ class Tracker(object):
                 coordinates.append(
                     [float(row[2]), float(row[3]), float(row[4])])
         self.marker_pos_def = coordinates
+        # reader schließen?
 
     def calculate_transformation_matrix(self):
         """the required tranformation matrix between system 1 and 2"""
@@ -258,6 +260,7 @@ class Tracker(object):
         transformation_matrix[:3, 3] = t
         """
         This matrix points FROM def TO ct
+        I checked and can cofirm.
         """
         self.t_ct_def = transformation_matrix
         self.get_inverse()
@@ -349,13 +352,13 @@ class TrackerHandler(object):
 
 # %%
 if __name__ == '__main__':
-    tr = Tracker(0, './trackers/51k.csv')
+    tr = Tracker(0, './Data/Trackers/DAU_DIP.csv')
 
 
 # %%
 
 
-def read_markerdata(path='./data/Take 2021-12-06 03.42.36 PM.csv', body_name='ZF DP', bodyt_markerf=True):
+def read_markerdata(path='/home/robotlab/Documents/GitHub/MA_Schote/MA/Data/test_01_31/Take 2023-01-31 06.07.05 PM.csv', body_name='DAU DIP', bodyt_markerf=True):
     """read the data of the specific body from the csv file
     -> get position for marker; -> get position + orientation for rigid body
     """

@@ -181,8 +181,7 @@ def min_max_arrays_to_kosy(min_track, max_track):
     kosy = [x,y,z]
 
     return kosy
->>>>>>> origin/main
-
+    
 class Tracker_3dicke:
     numTrackers = 5
     positions = [[0, 0, 75], [-42, 0, 46], [25, 0, 46], [0, 37, 41.5], [0, -44, 41.5]] # [[x,y,z],[x2,y2,z2],...]
