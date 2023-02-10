@@ -45,13 +45,28 @@ def compare_point_lists(pairs1, points1, pairs2, points2):
     for i in range(len(pairs1)):
         for j in range(len(points1)):
 
-            if points1[j] in pairs1[i]:
+            print('points1:')
+            print(points1[j])
+            print('pairs1:')
+            print(pairs1[i])
+
+
+            # Ich habe hier fast eine Woche verschwendet. 
+            # Tut mir leid, aber ich konnte den Value Error nicht beheben, obwohl die scheiß if clause nur ein einfaches True oder False zurück gegben hat.
+            # Ich hasse alles.
+            #if (points1[j] in pairs1[i]).bit_length() > 0:
+            try: 
                 pairs1[i].index(points1[j])
                 distance_value_in_points1[j].append(i + 1)
+            except:
+                pass
 
-            if points2[j] in pairs2[i]:
+            # if (points2[j] in pairs2[i]).bit_length() > 0:
+            try: 
                 pairs2[i].index(points2[j])
                 distance_value_in_points2[j].append(i + 1)
+            except:
+                pass
 
     '''An dieser Stelle soll die Liste der Punkte aus dem CT (2) anhand der Punkte aus dem Opti-Export (1)
     sortiert werden. Dafür wird der Index einer Distanz Index Kombi von (2) in (1) gesucht und der Index gepseichert.
