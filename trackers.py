@@ -383,11 +383,11 @@ def read_markerdata(path='/home/robotlab/Documents/GitHub/MA_Schote/MA/Data/test
             print('Name not found!')
             return
 
-        if bodyt_markerf == False and body_name in id_names:
+        if bodyt_markerf == False and body_name in id_names: # durch bodyt_maerkerf wird eine der beiden if-Bedingungen immer falsch sein.
             body_id = body_names.index(id_names)
         else:
             print('ID not found!')
-            return
+            #return # Diese Zeile verhindert, dass man bei nutzunge eines Rigid Bodies weiter kommt.
 
         take_len = 7 if bodyt_markerf else 3
 
@@ -408,7 +408,4 @@ def read_markerdata(path='/home/robotlab/Documents/GitHub/MA_Schote/MA/Data/test
 
         return result
 
-
-# res = read_markerdata()
-# res['pos']
 # %%
