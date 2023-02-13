@@ -125,21 +125,13 @@ def calculate_transformation_matrix(markers1, markers2):
     # Convert lists of markers to arrays
     markers1 = np.array(markers1, dtype=float)
     markers2 = np.array(markers2, dtype=float)
-    # Center the markers at the origin
-    markers1 -= np.mean(markers1, axis=0)
-    markers2 -= np.mean(markers2, axis=0)
-    # Calculate the cross-covariance matrix
-    cross_cov = np.dot(markers1.T, markers2)
-    # Calculate the singular value decomposition
-    U, S, V_T = np.linalg.svd(cross_cov)
-    # Calculate the rotation matrix
-    R = np.dot(U, V_T)
-    # Check for reflection
-    if np.linalg.det(R) < 0:
-        V_T[2,:] *= -1
-        R = np.dot(U, V_T)
+
+    # Calculate the rotation matrix, R transforms b to a.
+    R = Rot.align_vectors(markers2,markers1)
+
     # Calculate the translation vector
     t = np.mean(markers2, axis=0) - np.dot(np.mean(markers1, axis=0), R)
+    
     # Concatenate the rotation and translation matrices
     transformation_matrix = np.eye(4)
     transformation_matrix[:3, :3] = R
