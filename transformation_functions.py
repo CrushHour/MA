@@ -32,7 +32,8 @@ def get_opti_positions(filename):
                 for i in range(2,5):
                     opti_positions[-1].append(float(row[i]))
 
-    return name, opti_positions
+    #return name, opti_positions
+    return opti_positions
 	
 def plot_ply(tracker_points, opti_points, line_1, line_2, line_3, line_4):
     n = len(tracker_points)
@@ -185,10 +186,9 @@ def min_max_arrays_to_kosy(min_track, max_track):
 
 #%% asd
 if __name__ == '__main__':
-    print(Tracker_Nico.opti_positions)
     v_max_tracker, v_min_tracker = get_min_max_dis(Tracker_Nico.positions)
     v_max_opti, v_min_opti = get_min_max_dis(Tracker_Nico.opti_positions)
-    plot_ply(Tracker_Nico.positions, Tracker_Nico.opti_positions, v_max_tracker, v_min_tracker, v_max_opti, v_min_opti)
+    #plot_ply(Tracker_Nico.positions, Tracker_Nico.opti_positions, v_max_tracker, v_min_tracker, v_max_opti, v_min_opti)
     kosy_tracker = min_max_arrays_to_kosy(v_min_tracker, v_max_tracker)
     print(kosy_tracker)
 

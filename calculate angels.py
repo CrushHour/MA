@@ -5,6 +5,7 @@ import os
 import numpy as np
 import scipy
 
+# Definition der Pfade
 data_path = 'Data/test_01_31/'
 test_file = '2023_01_31_18_12_48.json'
 opti_data = 'Take 2023-01-31 06.11.42 PM.csv'
@@ -18,10 +19,9 @@ Tracker_55 = trackers.Tracker(0, './Data/Trackers/ZF_DIP.csv', ctname="Slicer3D/
 Tracker_M4_gross = trackers.Tracker(0, './Data/Trackers/ZF_MCP.csv', ctname="Slicer3D/Tracker_M4_gross.mrk.json")
 Tracker_53 = trackers.Tracker(0, './Data/Trackers/DAU_DIP.csv', ctname="Slicer3D/Tracker53.mrk.json")
 Tracker_M4_klein = trackers.Tracker(0, './Data/Trackers/DAU_MCP.csv', ctname="Slicer3D/Tracker_M4_klein.mrk.json")
-Tracker_FT = trackers.Tracker(0, './Data/Trackers/FT.csv', ctname=None)
+Tracker_FT = trackers.Tracker(0, './Data/Trackers/FT.csv', ctname=None) # Tracker_52
 
-Marker_ZF = trackers.Tracker(0, defname=None, ctname="Slicer3D/Tracker53.mrk.json")
-
+# Winkel ZF
 
 
 
