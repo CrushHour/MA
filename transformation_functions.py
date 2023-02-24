@@ -6,12 +6,18 @@ import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
 from pyquaternion import Quaternion
 import csv
+import json
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial import distance
 
 #%% transformation optitrack tracker to real tracker
-path_csv = "/home/robotlab/Documents/GitHub/MA_Schote/MA/Data"
+path_csv = "Data"
+ct_folder = "Slicer3D"
+
+def import_CT_information(ct_folder, origin_name):
+    
+    return 
 
 def get_opti_positions(filename):
     path = path_csv + "/" + filename
@@ -174,15 +180,7 @@ def min_max_arrays_to_kosy(min_track, max_track):
 
     return kosy
     
-class Tracker_3dicke:
-    numTrackers = 5
-    positions = [[0, 0, 75], [-42, 0, 46], [25, 0, 46], [0, 37, 41.5], [0, -44, 41.5]] # [[x,y,z],[x2,y2,z2],...]
-    name, opti_positions = get_opti_positions('MakerJS_3dicke.csv')
 
-class Tracker_Nico:
-    numTrackers = 5
-    positions = [[0, 0, 61], [-41, 0, 35], [20, 0, 35], [-10, 31, 35], [-10, -14, 35]] # [[x,y,z],[x2,y2,z2],...]
-    name, opti_positions = get_opti_positions('Tracker Nico.csv')
 
 
 #%% asd
@@ -193,4 +191,14 @@ if __name__ == '__main__':
     plot_ply(Tracker_Nico.positions, Tracker_Nico.opti_positions, v_max_tracker, v_min_tracker, v_max_opti, v_min_opti)
     kosy_tracker = min_max_arrays_to_kosy(v_min_tracker, v_max_tracker)
     print(kosy_tracker)
+
+    class Tracker_3dicke:
+        numTrackers = 5
+        positions = [[0, 0, 75], [-42, 0, 46], [25, 0, 46], [0, 37, 41.5], [0, -44, 41.5]] # [[x,y,z],[x2,y2,z2],...]
+        name, opti_positions = get_opti_positions('MakerJS_3dicke.csv')
+
+    class Tracker_Nico:
+        numTrackers = 5
+        positions = [[0, 0, 61], [-41, 0, 35], [20, 0, 35], [-10, 31, 35], [-10, -14, 35]] # [[x,y,z],[x2,y2,z2],...]
+        name, opti_positions = get_opti_positions('Tracker Nico.csv')
 # %%
