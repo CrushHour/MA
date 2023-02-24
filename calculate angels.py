@@ -9,8 +9,18 @@ data_path = 'Data/test_01_31/'
 test_file = '2023_01_31_18_12_48.json'
 opti_data = 'Take 2023-01-31 06.11.42 PM.csv'
 
-ZF_DIP_raw = trackers.read_markerdata(os.path.join(data_path,opti_data), '55', True)
-Tracker_55 = trackers.Tracker(0, './Data/Trackers/DAU_DIP.csv', ctname="Slicer3D/Tracker55.mrk.json")
+# Laden des Testfiles als csv
+
+# Laden des Testfiles als json vom Stream.
+
+# Definieren der Tracker und Marker als jeweils eine Tracker Klasse
+Tracker_55 = trackers.Tracker(0, './Data/Trackers/ZF_DIP.csv', ctname="Slicer3D/Tracker55.mrk.json")
+Tracker_M4_gross = trackers.Tracker(0, './Data/Trackers/ZF_MCP.csv', ctname="Slicer3D/Tracker_M4_gross.mrk.json")
+Tracker_53 = trackers.Tracker(0, './Data/Trackers/DAU_DIP.csv', ctname="Slicer3D/Tracker53.mrk.json")
+Tracker_M4_klein = trackers.Tracker(0, './Data/Trackers/DAU_MCP.csv', ctname="Slicer3D/Tracker_M4_klein.mrk.json")
+Tracker_FT = trackers.Tracker(0, './Data/Trackers/FT.csv', ctname=None)
+
+Marker_ZF = trackers.Tracker(0, defname=None, ctname="Slicer3D/Tracker53.mrk.json")
 
 
 
