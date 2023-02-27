@@ -35,6 +35,7 @@ def get_opti_positions(filename):
 def csv_test_load(testrun_path, tracker_designation_motive):
     tracker_def_start = 0
     data = np.array(object=([],[],[],[],[],[],[],[]))
+    row_counter = 0
     
     '''This function is suppose to read in the trakcing data of a single tracker
     of a specified testrun from an motive .csv export.'''
@@ -43,14 +44,15 @@ def csv_test_load(testrun_path, tracker_designation_motive):
         
         '''Define wich rows have position data for the specified tracker'''
         for row in spamreader:
-
+            row_counter += 1
             for i in range(len(row)):
                 if row[i] == tracker_designation_motive:
                     tracker_def_start = i
-                    # put here list with eigt entries starting at i
+                    coloums = np.arange(i, i+8, 1)
                     '''Add data to output after coloums are known.'''
-                elif tracker_def_start != 0:
-                    for i, col in enumerate(colums):
+                    '''Zeilen in csv-Datei: Spalte, LEER, LEER, Typ (Ridig Body, Marker), ID, Achsen-Typ, Achse, Werte...'''
+                elif tracker_def_start != 0 and row_counter >= 9:
+                    for i, col in enumerate(coloums):
                         data[i,:] = row[col]
           
     return data
@@ -208,13 +210,13 @@ def min_max_arrays_to_kosy(min_track, max_track):
 if __name__ == '__main__':
     raw_data = csv_test_load(r'C:\\GitHub\\MA\\Data\test_01_31\\Take 2023-01-31 06.11.42 PM.csv', '55')
 
-    class Tracker_3dicke:
-        numTrackers = 5
-        positions = [[0, 0, 75], [-42, 0, 46], [25, 0, 46], [0, 37, 41.5], [0, -44, 41.5]] # [[x,y,z],[x2,y2,z2],...]
-        name, opti_positions = get_opti_positions('MakerJS_3dicke.csv')
-
-    class Tracker_Nico:
-        numTrackers = 5
-        positions = [[0, 0, 61], [-41, 0, 35], [20, 0, 35], [-10, 31, 35], [-10, -14, 35]] # [[x,y,z],[x2,y2,z2],...]
-        name, opti_positions = get_opti_positions('Tracker Nico.csv')
+ #   class Tracker_3dicke:
+ #       numTrackers = 5
+ #       positions = [[0, 0, 75], [-42, 0, 46], [25, 0, 46], [0, 37, 41.5], [0, -44, 41.5]] # [[x,y,z],[x2,y2,z2],...]
+ #       name, opti_positions = get_opti_positions('MakerJS_3dicke.csv')
+#
+#    class Tracker_Nico:
+#        numTrackers = 5
+#        positions = [[0, 0, 61], [-41, 0, 35], [20, 0, 35], [-10, 31, 35], [-10, -14, 35]] # [[x,y,z],[x2,y2,z2],...]
+#        name, opti_positions = get_opti_positions('Tracker Nico.csv')
 # %%
