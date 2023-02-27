@@ -10,7 +10,8 @@ data_path = 'Data/test_01_31/'
 test_file = '2023_01_31_18_12_48.json'
 opti_data = 'Take 2023-01-31 06.11.42 PM.csv'
 
-# Laden des Testfiles als csv
+''' Laden des Testfiles als csv, Optitrack Rohdaten '''
+raw_data = transformation_functions.csv_test_load()
 
 # Laden des Testfiles als json vom Stream.
 
@@ -20,6 +21,8 @@ Tracker_M4_gross = trackers.Tracker(0, './Data/Trackers/ZF_MCP.csv', ctname="Sli
 Tracker_53 = trackers.Tracker(0, './Data/Trackers/DAU_DIP.csv', ctname="Slicer3D/Tracker53.mrk.json")
 Tracker_M4_klein = trackers.Tracker(0, './Data/Trackers/DAU_MCP.csv', ctname="Slicer3D/Tracker_M4_klein.mrk.json")
 Tracker_FT = trackers.Tracker(0, './Data/Trackers/FT.csv', ctname=None) # Tracker_52
+
+raw_testdata = 
 
 # Winkel ZF
 

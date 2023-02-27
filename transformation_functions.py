@@ -15,11 +15,8 @@ from scipy.spatial import distance
 path_csv = "Data"
 ct_folder = "Slicer3D"
 
-def import_CT_information(ct_folder, origin_name):
-    
-    return 
-
 def get_opti_positions(filename):
+    '''Loads tracker information of a given tracker export file.'''
     path = path_csv + "/" + filename
     opti_positions = []
     with open(path, newline='') as csvfile:
@@ -34,6 +31,29 @@ def get_opti_positions(filename):
 
     #return name, opti_positions
     return opti_positions
+
+def csv_test_load(testrun_path, tracker_designation_motive):
+    tracker_def_start = 0
+    data = np.array(object=([],[],[],[],[],[],[],[]))
+    
+    '''This function is suppose to read in the trakcing data of a single tracker
+    of a specified testrun from an motive .csv export.'''
+    with open(testrun_path, newline='') as csvfile:
+        spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
+        
+        '''Define wich rows have position data for the specified tracker'''
+        for row in spamreader:
+
+            for i in range(len(row)):
+                if row[i] == tracker_designation_motive:
+                    tracker_def_start = i
+                    # put here list with eigt entries starting at i
+                    '''Add data to output after coloums are known.'''
+                elif tracker_def_start != 0:
+                    for i, col in enumerate(colums):
+                        data[i,:] = row[col]
+          
+    return data
 	
 def plot_ply(tracker_points, opti_points, line_1, line_2, line_3, line_4):
     n = len(tracker_points)
@@ -126,7 +146,7 @@ def compare_point_lists(pairs1, points1, pairs2, points2):
     points_2_out = [x for _, x in sorted(zip(index_list, points2))]
 
     return points1, points_2_out
-    # %% 
+# %% 
 def calculate_transformation_matrix(markers1, markers2):
     '''Setzt vorraus, dass die Punktelisten korrekt sortiert sind.'''
     # Convert lists of markers to arrays
@@ -184,13 +204,9 @@ def min_max_arrays_to_kosy(min_track, max_track):
 
 
 
-#%% asd
+#%% Function tests
 if __name__ == '__main__':
-    v_max_tracker, v_min_tracker = get_min_max_dis(Tracker_Nico.positions)
-    v_max_opti, v_min_opti = get_min_max_dis(Tracker_Nico.opti_positions)
-    #plot_ply(Tracker_Nico.positions, Tracker_Nico.opti_positions, v_max_tracker, v_min_tracker, v_max_opti, v_min_opti)
-    kosy_tracker = min_max_arrays_to_kosy(v_min_tracker, v_max_tracker)
-    print(kosy_tracker)
+    raw_data = csv_test_load(r'C:\\GitHub\\MA\\Data\test_01_31\\Take 2023-01-31 06.11.42 PM.csv', '55')
 
     class Tracker_3dicke:
         numTrackers = 5
