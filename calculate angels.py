@@ -8,11 +8,21 @@ import scipy
 # Definition der Pfade
 data_path = 'Data/test_01_31/'
 test_file = '2023_01_31_18_12_48.json'
-opti_data = 'Take 2023-01-31 06.11.42 PM.csv'
+opti_data = r'C:\\GitHub\\MA\\Data\test_01_31\\Take 2023-01-31 06.11.42 PM.csv'
 
 ''' Laden des Testfiles als csv, Optitrack Rohdaten '''
-raw_data = transformation_functions.csv_test_load()
-
+# Tracker
+opti_traj_55 = transformation_functions.csv_test_load(opti_data,"55")
+opti_traj_Tracker_52 = transformation_functions.csv_test_load(opti_data,"Tracker_52")
+opti_traj_Tracker_53 = transformation_functions.csv_test_load(opti_data,"Tracker 53")
+opti_traj_FTTracker = transformation_functions.csv_test_load(opti_data,"FT-Tracker-4")
+opti_traj_M4_gross = transformation_functions.csv_test_load(opti_data,"M4_gross")
+opti_traj_M4_klein = transformation_functions.csv_test_load(opti_data,"M4_klein")
+# Marker
+opti_traj_Marker_ZF_distal = transformation_functions.csv_test_load(opti_data,"M4_klein")
+opti_traj_Marker_ZF_proximal = transformation_functions.csv_test_load(opti_data,"M4_klein")
+opti_traj_Marker_DAU = transformation_functions.csv_test_load(opti_data,"2016")
+opti_traj_Marker_DAU = opti_traj_Marker_DAU.i
 # Laden des Testfiles als json vom Stream.
 
 # Definieren der Tracker und Marker als jeweils eine Tracker Klasse
@@ -20,9 +30,11 @@ Tracker_55 = trackers.Tracker(0, './Data/Trackers/ZF_DIP.csv', ctname="Slicer3D/
 Tracker_M4_gross = trackers.Tracker(0, './Data/Trackers/ZF_MCP.csv', ctname="Slicer3D/Tracker_M4_gross.mrk.json")
 Tracker_53 = trackers.Tracker(0, './Data/Trackers/DAU_DIP.csv', ctname="Slicer3D/Tracker53.mrk.json")
 Tracker_M4_klein = trackers.Tracker(0, './Data/Trackers/DAU_MCP.csv', ctname="Slicer3D/Tracker_M4_klein.mrk.json")
-Tracker_FT = trackers.Tracker(0, './Data/Trackers/FT.csv', ctname=None) # Tracker_52
+Tracker_FT = trackers.Tracker(0, './Data/Trackers/FT.csv', ctname=None)
+Tracker_52 = trackers.Tracker(0, './Data/Trackers/ZF_DIP.csv', ctname=None) # Basis, hinten an Fixteur externe
 
-raw_testdata = 
+print(Tracker_52.t_ct_def)
+print(Tracker_53.t_ct_def)
 
 # Winkel ZF
 
