@@ -33,28 +33,25 @@ def get_opti_positions(filename):
     return opti_positions
 
 def csv_test_load(testrun_path, tracker_designation_motive):
-    tracker_def_start = 0
-    data = np.array(object=([],[],[],[],[],[],[],[]))
-    row_counter = 0
-    
     '''This function is suppose to read in the trakcing data of a single tracker
     of a specified testrun from an motive .csv export.'''
-    with open(testrun_path, newline='') as csvfile:
-        spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
-        
-        '''Define wich rows have position data for the specified tracker'''
-        for row in spamreader:
-            row_counter += 1
-            for i in range(len(row)):
-                if row[i] == tracker_designation_motive:
-                    tracker_def_start = i
-                    coloums = np.arange(i, i+8, 1)
-                    '''Add data to output after coloums are known.'''
-                    '''Zeilen in csv-Datei: Spalte, LEER, LEER, Typ (Ridig Body, Marker), ID, Achsen-Typ, Achse, Werte...'''
-                elif tracker_def_start != 0 and row_counter >= 9:
-                    for i, col in enumerate(coloums):
-                        data[i,:] = row[col]
-          
+    df = pd.read_csv(testrun_path, header=2, low_memory=False)
+    start_coloum = df.columns.get_loc(tracker_designation_motive)
+    data = df.iloc[3:,start_coloum:start_coloum+8]
+    
+    return data
+
+def marker_variable_id(testrun_path, initialID=None, dtype="csv"):
+    if dtype == "json":
+        print("unable to load from json yet.")
+        #raw_data = load_marker_from_json(testrun_path, initalID)
+
+    else:
+        initialID = "Unlabeled " + str(initialID)
+        raw_data = csv_test_load(testrun_path, initialID)
+        reference_data = raw_data
+        data = raw_data.iloc[:,0]
+
     return data
 	
 def plot_ply(tracker_points, opti_points, line_1, line_2, line_3, line_4):
@@ -209,7 +206,6 @@ def min_max_arrays_to_kosy(min_track, max_track):
 #%% Function tests
 if __name__ == '__main__':
     raw_data = csv_test_load(r'C:\\GitHub\\MA\\Data\test_01_31\\Take 2023-01-31 06.11.42 PM.csv', '55')
-
  #   class Tracker_3dicke:
  #       numTrackers = 5
  #       positions = [[0, 0, 75], [-42, 0, 46], [25, 0, 46], [0, 37, 41.5], [0, -44, 41.5]] # [[x,y,z],[x2,y2,z2],...]
