@@ -49,18 +49,24 @@ def marker_variable_id(testrun_path, initialID=None, dtype="csv"):
     else:
         initialID = "Unlabeled " + str(initialID)
         df = csv_test_load(testrun_path, initialID)
-        reference_data = raw_data
+        
         start_coloum = df.columns.get_loc(initialID)
+        reference_data = raw_data.iloc[:,261:]
         data = raw_data.iloc[:,start_coloum:start_coloum+3]
     
+    # initialize output
+    added_data = np.zeros((data.shape))
+
     empty_cells = np.where(pd.isnull(data))
     ID_end = empty_cells[0][0]
+    search_data = reference_data.iloc[ID_end:,:]
 
     # step one: follow initialID until signal ends
+    added_data[:ID_end,:] = data.iloc[:ID_end,:]
 
     # find next signal from last timestemp, which is closest to 
 
-    return data
+    return added_data
 	
 def plot_ply(tracker_points, opti_points, line_1, line_2, line_3, line_4):
     n = len(tracker_points)
