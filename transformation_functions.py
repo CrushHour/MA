@@ -44,27 +44,44 @@ def csv_test_load(testrun_path, tracker_designation_motive):
 def marker_variable_id(testrun_path, initialID=None, dtype="csv"):
     if dtype == "json":
         print("unable to load from json yet.")
-        #raw_data = load_marker_from_json(testrun_path, initalID)
+        #df = load_marker_from_json(testrun_path, initalID)
+        data = 0
 
     else:
         initialID = "Unlabeled " + str(initialID)
-        df = csv_test_load(testrun_path, initialID)
-        
+        df = pd.read_csv(testrun_path, header=2, low_memory=False)
         start_coloum = df.columns.get_loc(initialID)
-        reference_data = raw_data.iloc[:,261:]
-        data = raw_data.iloc[:,start_coloum:start_coloum+3]
+
+        """Man will nur rechts des intialen Markers, nach Folgemarkern suchen, 
+        da die ID der Marker in Motive immer steigend ist für neue Marker"""
+        #df = df[:,start_coloum:]
+        data = df.iloc[:,start_coloum:start_coloum+3]
     
     # initialize output
     added_data = np.zeros((data.shape))
+    old_ID_end = 0
+    ID_end = np.inf
+    
+    while ID_end <= len(df.index):
 
-    empty_cells = np.where(pd.isnull(data))
-    ID_end = empty_cells[0][0]
-    search_data = reference_data.iloc[ID_end:,:]
+        empty_cells = np.where(pd.isnull(data))
+        ID_end = empty_cells[0][0]
+        search_data = df.iloc[ID_end:,start_coloum:]
 
-    # step one: follow initialID until signal ends
-    added_data[:ID_end,:] = data.iloc[:ID_end,:]
+        # step one: follow initialID until signal ends
+        added_data[old_ID_end:ID_end,:] = data.iloc[:ID_end,:]
+        old_ID_end = ID_end
 
-    # find next signal from last timestemp, which is closest to 
+        # find next signal from last timestemp, which is closest to 
+        last_signal = data.iloc[ID_end,:]
+        min_dis = np.inf
+        iloc_next_signal = 0
+
+        for i, value in enumerate(df[ID_end+1,:]):
+            current_dis = last_signal - value
+            if current_dis < min_dis:
+                iloc_next_signal = i
+        data = df.iloc[ID_end:,iloc_next_signal:iloc_next_signal+3]
 
     return added_data
 	
@@ -219,8 +236,12 @@ def min_max_arrays_to_kosy(min_track, max_track):
 
 #%% Function tests
 if __name__ == '__main__':
-    raw_data = csv_test_load(r'C:\\GitHub\\MA\\Data\test_01_31\\Take 2023-01-31 06.11.42 PM.csv', '55')
- #   class Tracker_3dicke:
+    path = r'C:\\GitHub\\MA\\Data\test_01_31\\Take 2023-01-31 06.11.42 PM.csv'
+    #raw_data = csv_test_load(path, '55')
+    marker_data = marker_variable_id(path, 2016)
+ 
+# %%
+#   class Tracker_3dicke:
  #       numTrackers = 5
  #       positions = [[0, 0, 75], [-42, 0, 46], [25, 0, 46], [0, 37, 41.5], [0, -44, 41.5]] # [[x,y,z],[x2,y2,z2],...]
  #       name, opti_positions = get_opti_positions('MakerJS_3dicke.csv')
@@ -229,4 +250,3 @@ if __name__ == '__main__':
 #        numTrackers = 5
 #        positions = [[0, 0, 61], [-41, 0, 35], [20, 0, 35], [-10, 31, 35], [-10, -14, 35]] # [[x,y,z],[x2,y2,z2],...]
 #        name, opti_positions = get_opti_positions('Tracker Nico.csv')
-# %%
