@@ -59,13 +59,12 @@ def marker_variable_id(testrun_path, initialID=None, dtype="csv"):
     
     # initialize output
     added_data = np.zeros((data.shape))
-    old_ID_end = 0
-    ID_end = np.inf
+    ID_end:int = 0; old_ID_end:int = 0
     
     while ID_end <= len(df.index):
 
         empty_cells = np.where(pd.isnull(data))
-        ID_end = empty_cells[0][0]
+        ID_end = int(empty_cells[0][0])
         search_data = df.iloc[ID_end:,start_coloum:]
 
         # step one: follow initialID until signal ends
