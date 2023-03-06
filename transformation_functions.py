@@ -45,42 +45,61 @@ def marker_variable_id(testrun_path, initialID=None, dtype="csv"):
     if dtype == "json":
         print("unable to load from json yet.")
         #df = load_marker_from_json(testrun_path, initalID)
-        data = 0
+        current_tracker_data = 0
+        iloc_next_signal = 0
+        df = pd.DataFrame()
 
     else:
-        initialID = "Unlabeled " + str(initialID)
+        initialID = str(initialID)
         df = pd.read_csv(testrun_path, header=2, low_memory=False)
-        start_coloum = df.columns.get_loc(initialID)
+        iloc_next_signal = df.columns.get_loc(initialID)
 
         """Man will nur rechts des intialen Markers, nach Folgemarkern suchen, 
         da die ID der Marker in Motive immer steigend ist für neue Marker"""
         #df = df[:,start_coloum:]
-        data = df.iloc[:,start_coloum:start_coloum+3]
+        current_tracker_data = df.iloc[3:,iloc_next_signal:iloc_next_signal+3]
     
-    # initialize output
-    added_data = np.zeros((data.shape))
-    ID_end:int = 0; old_ID_end:int = 0
-    
-    while ID_end <= len(df.index):
+    # initialize variables
+    added_data = np.zeros((current_tracker_data.shape))
+    ID_end:int = 3; old_ID_end:int = 0
 
-        empty_cells = np.where(pd.isnull(data))
-        ID_end = int(empty_cells[0][0])
-        search_data = df.iloc[ID_end:,start_coloum:]
+    
+    while ID_end <= df.index.stop:
+
+        empty_cells = np.where(pd.isnull(df.iloc[ID_end+1:,iloc_next_signal]))
+        ID_end = ID_end + int(empty_cells[0][0])
+        
+        search_data = df.iloc[ID_end:,iloc_next_signal:]
 
         # step one: follow initialID until signal ends
-        added_data[old_ID_end:ID_end,:] = data.iloc[:ID_end,:]
+        added_data[old_ID_end:ID_end,:] = current_tracker_data.iloc[:ID_end,:]
         old_ID_end = ID_end
 
         # find next signal from last timestemp, which is closest to 
-        last_signal = data.iloc[ID_end,:]
+        last_signal = current_tracker_data.iloc[ID_end-1,:]
+        last_signal = np.array(list(map(float, last_signal)))
         min_dis = np.inf
-        iloc_next_signal = 0
+        
+        # in search data eins runter und eins rein, 
+        # wegen zeilennummerierung, und da letztes value aus nan besteht
+        # Zeilen
+        for i, value in enumerate(search_data.values[1:,1:],start=0):
+                # nur die nächsten 100 Zeitschritte 
+                # nach nahe gelegenem Wert durchsuchen
+                if i > 100:
+                    break
 
-        for i, value in enumerate(df[ID_end+1,:]):
-            current_dis = last_signal - value
-            if current_dis < min_dis:
-                iloc_next_signal = i
-        data = df.iloc[ID_end:,iloc_next_signal:iloc_next_signal+3]
+                value = np.array(list(map(float, value)))
+                # Spalten
+                for j in range(0,len(value),3):
+                    if np.isnan(value[j]) or np.isnan(value[j+1]) or np.isnan(value[j+2]):
+                        continue
+                    print("value:", value[j:j+3])
+                    print("i:", i)
+                    current_dis = np.linalg.norm(last_signal) - np.linalg.norm(value[j:j+3])
+                    if current_dis < min_dis:
+                        iloc_next_signal = j
+        current_tracker_data = search_data.iloc[:,iloc_next_signal:iloc_next_signal+3]
 
     return added_data
 	
@@ -237,7 +256,7 @@ def min_max_arrays_to_kosy(min_track, max_track):
 if __name__ == '__main__':
     path = r'C:\\GitHub\\MA\\Data\test_01_31\\Take 2023-01-31 06.11.42 PM.csv'
     #raw_data = csv_test_load(path, '55')
-    marker_data = marker_variable_id(path, 2016)
+    marker_data = marker_variable_id(path, 'Unlabeled 2016')
  
 # %%
 #   class Tracker_3dicke:
