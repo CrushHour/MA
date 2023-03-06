@@ -98,13 +98,16 @@ def marker_variable_id(testrun_path, initialID=None, dtype="csv"):
                 for j in range(0,len(value),3):
                     if np.isnan(value[j]) or np.isnan(value[j+1]) or np.isnan(value[j+2]):
                         continue
+                    
                     #print("value:", value[j:j+3])
                     #print("i:", i)
                     current_dis = np.absolute(np.linalg.norm(last_signal) - np.linalg.norm(value[j:j+3]))
+                    
                     if current_dis < min_dis:
                         iloc_next_signal = j
                         min_dis = current_dis
                         next_line = i
+                        print(next_line)
         current_tracker_data = df.iloc[ID_end+1:,iloc_next_signal:iloc_next_signal+3]
 
     return added_data
