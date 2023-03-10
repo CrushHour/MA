@@ -10,6 +10,7 @@ import json
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial import distance
+from tqdm import tqdm
 
 #%% transformation optitrack tracker to real tracker
 path_csv = "Data"
@@ -57,31 +58,39 @@ def marker_variable_id(testrun_path, initialID=None, dtype="csv"):
         """Man will nur rechts des intialen Markers, nach Folgemarkern suchen, 
         da die ID der Marker in Motive immer steigend ist für neue Marker"""
         #df = df[:,start_coloum:]
-        current_tracker_data = df.iloc[3:,iloc_next_signal:iloc_next_signal+3]
-    
+        
     # initialize variables
-    added_data = np.zeros((current_tracker_data.shape))
-    ID_end:int = 3; old_ID_end:int = 0
+    ID_end:int = 3; old_ID_end:int = 3
     next_line = 3
     dif = []
+    current_tracker_data = df.iloc[old_ID_end:,iloc_next_signal:iloc_next_signal+3]
+    added_data = np.zeros((current_tracker_data.shape))
 
     
-    while ID_end < df.index.stop:
+    for k in tqdm(range(df.index.stop)):
+    #while ID_end <= df.index.stop-3:
 
-        empty_cells = np.where(pd.isnull(df.iloc[next_line:,iloc_next_signal:iloc_next_signal+3]))
-        ID_end = ID_end + int(empty_cells[0][0]) + 1
+        #empty_cells = np.where(pd.isnull(df.iloc[next_line:,iloc_next_signal:iloc_next_signal+3]))
+        empty_cells = np.where(pd.isnull(current_tracker_data))
+
+        #ID_end = ID_end + int(empty_cells[0][0]) + 1
+        ID_end = int(empty_cells[0][0]) + next_line
+
         #print("ID_end:", ID_end)
-        print("dif =", ID_end-old_ID_end)
+        #print("dif =", ID_end-old_ID_end)
         dif.append(ID_end-old_ID_end)
         search_data = df.iloc[ID_end:,iloc_next_signal:]
 
         # step one: follow initialID until signal ends
+        # save data in added_data for output
         added_data[old_ID_end:ID_end,:] = current_tracker_data.iloc[old_ID_end:ID_end,:]
         old_ID_end = ID_end
 
         # find next signal from last timestemp, which is closest to 
-        last_signal = current_tracker_data.iloc[ID_end-1,:]
+        last_signal = current_tracker_data.iloc[ID_end-2, 0:3]
         last_signal = np.array(list(map(float, last_signal)))
+        #print("last signal:", last_signal, last_signal.shape)
+
         min_dis = np.inf
         
         # in search data eins runter und eins rein, 
@@ -94,21 +103,24 @@ def marker_variable_id(testrun_path, initialID=None, dtype="csv"):
                     break
 
                 value = np.array(list(map(float, value)))
+
                 # Spalten
                 for j in range(0,len(value),3):
+
                     if np.isnan(value[j]) or np.isnan(value[j+1]) or np.isnan(value[j+2]):
                         continue
                     
                     #print("value:", value[j:j+3])
                     #print("i:", i)
-                    current_dis = np.absolute(np.linalg.norm(last_signal) - np.linalg.norm(value[j:j+3]))
-                    
-                    if current_dis < min_dis:
-                        iloc_next_signal = j
-                        min_dis = current_dis
-                        next_line = i
-                        print(next_line)
-        current_tracker_data = df.iloc[ID_end+1:,iloc_next_signal:iloc_next_signal+3]
+                    else:
+                        current_dis = np.absolute(np.linalg.norm(last_signal) - np.linalg.norm(value[j:j+3]))
+                        
+                        if current_dis < min_dis:
+                            iloc_next_signal = j
+                            min_dis = current_dis
+                            next_line = i
+                            #print("next line:", next_line)
+        current_tracker_data = df.iloc[3:,iloc_next_signal:iloc_next_signal+3]
 
     return added_data
 	
