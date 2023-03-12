@@ -47,59 +47,66 @@ def marker_variable_id(testrun_path, initialID=None, dtype="csv"):
         print("unable to load from json yet.")
         #df = load_marker_from_json(testrun_path, initalID)
         current_tracker_data = 0
-        iloc_next_signal = 0
+        next_col = 0
         df = pd.DataFrame()
 
     else:
         initialID = str(initialID)
         df = pd.read_csv(testrun_path, header=2, low_memory=False)
-        iloc_next_signal = df.columns.get_loc(initialID)
+        next_col = df.columns.get_loc(initialID)
 
         """Man will nur rechts des intialen Markers, nach Folgemarkern suchen, 
         da die ID der Marker in Motive immer steigend ist für neue Marker"""
         #df = df[:,start_coloum:]
         
     # initialize variables
-    ID_end:int = 3; old_ID_end:int = 3
     next_line = 3
+    next_line_old = 0
     dif = []
-    current_tracker_data = df.iloc[old_ID_end:,iloc_next_signal:iloc_next_signal+3]
+    current_tracker_data = df.iloc[next_line:,next_col:next_col+3]
     added_data = np.zeros((current_tracker_data.shape))
 
     
     for k in tqdm(range(df.index.stop)):
     #while ID_end <= df.index.stop-3:
+        if next_line == df.index.stop:
+            break
 
-        #empty_cells = np.where(pd.isnull(df.iloc[next_line:,iloc_next_signal:iloc_next_signal+3]))
-        empty_cells = np.where(pd.isnull(current_tracker_data))
+        #empty_cells = np.where(pd.isnull(df.iloc[next_line:,next_col:next_col+3]))
+        empty_cells = np.where(pd.isnull(current_tracker_data.iloc[next_line:,:]))
+        # was wenn der nächste Marker mit ein paar Nans beginnt?
+        next_line = int(empty_cells[0][0])
 
-        #ID_end = ID_end + int(empty_cells[0][0]) + 1
-        ID_end = int(empty_cells[0][0]) + next_line
+        if next_line < next_line_old:
+            print("next line < old next line")
+            break
 
-        #print("ID_end:", ID_end)
-        #print("dif =", ID_end-old_ID_end)
-        dif.append(ID_end-old_ID_end)
-        search_data = df.iloc[ID_end:,iloc_next_signal:]
+        dif.append(next_line-next_line_old)
+        search_data = df.values[next_line+1:,next_col+1:]
 
         # step one: follow initialID until signal ends
         # save data in added_data for output
-        added_data[old_ID_end:ID_end,:] = current_tracker_data.iloc[old_ID_end:ID_end,:]
-        old_ID_end = ID_end
+        added_data[next_line_old:next_line,:] = current_tracker_data.iloc[next_line_old:next_line,:]
+        
 
         # find next signal from last timestemp, which is closest to 
-        last_signal = current_tracker_data.iloc[ID_end-2, 0:3]
+        last_signal = current_tracker_data.iloc[next_line-2, 0:3]
         last_signal = np.array(list(map(float, last_signal)))
-        #print("last signal:", last_signal, last_signal.shape)
+
+        if last_signal[0] == np.nan:
+            print("last signal:", last_signal, last_signal.shape)
+            break
 
         min_dis = np.inf
+        current_dis = np.inf
         
         # in search data eins runter und eins rein, 
         # wegen zeilennummerierung, und da letztes value aus nan besteht
         # Zeilen
-        for i, value in enumerate(search_data.values[1:,1:],start=0):
+        for i, value in enumerate(search_data,start=0):
                 # nur die nächsten x Zeitschritte 
                 # nach nahe gelegenem Wert durchsuchen
-                if i > 500:
+                if i > 100:
                     break
 
                 value = np.array(list(map(float, value)))
@@ -116,11 +123,16 @@ def marker_variable_id(testrun_path, initialID=None, dtype="csv"):
                         current_dis = np.absolute(np.linalg.norm(last_signal) - np.linalg.norm(value[j:j+3]))
                         
                         if current_dis < min_dis:
-                            iloc_next_signal = j
+                            next_col = j
                             min_dis = current_dis
                             next_line = i
                             #print("next line:", next_line)
-        current_tracker_data = df.iloc[3:,iloc_next_signal:iloc_next_signal+3]
+        if current_dis == np.inf:
+            print("no marker nearby!")
+            break
+        current_tracker_data = df.iloc[3:,next_col:next_col+3]
+        next_line_old = next_line + 1
+        #ID_end = ID_end + int(empty_cells[0][0]) + 1
 
     return added_data
 	
