@@ -73,9 +73,9 @@ def marker_variable_id(testrun_path, initialID=None, dtype="csv"):
             break
 
         #empty_cells = np.where(pd.isnull(df.iloc[next_line:,next_col:next_col+3]))
-        empty_cells = np.where(pd.isnull(current_tracker_data.iloc[next_line:,:]))
+        filled_cells = np.where(pd.notna(current_tracker_data.iloc[next_line:,:]))
         # was wenn der nächste Marker mit ein paar Nans beginnt?
-        next_line = int(empty_cells[0][0])
+        next_line = int(filled_cells[0].max())
 
         if next_line < next_line_old:
             print("next line < old next line")
@@ -87,7 +87,7 @@ def marker_variable_id(testrun_path, initialID=None, dtype="csv"):
         # step one: follow initialID until signal ends
         # save data in added_data for output
         added_data[next_line_old:next_line,:] = current_tracker_data.iloc[next_line_old:next_line,:]
-        
+        print('writing in:', next_line_old, 'to', next_line)
 
         # find next signal from last timestemp, which is closest to 
         last_signal = current_tracker_data.iloc[next_line-2, 0:3]
