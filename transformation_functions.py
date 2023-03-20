@@ -82,7 +82,7 @@ def marker_variable_id(testrun_path, initialID=None, dtype="csv"):
             break
 
         dif.append(next_line-next_line_old)
-        search_data = df.values[next_line+1:,next_col+1:]
+        search_data = df.values[next_line+1:,next_col:]
 
         # step one: follow initialID until signal ends
         # save data in added_data for output
@@ -288,6 +288,8 @@ def min_max_arrays_to_kosy(min_track, max_track):
 #%% Function tests
 if __name__ == '__main__':
     path = r'C:\\GitHub\\MA\\Data\test_01_31\\Take 2023-01-31 06.11.42 PM.csv'
+    path = '/home/julians/GitHub/MA/Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv'
+
     #raw_data = csv_test_load(path, '55')
     marker_data = marker_variable_id(path, 'Unlabeled 2016')
  
