@@ -82,7 +82,7 @@ def marker_variable_id(testrun_path, initialID=None, dtype="csv"):
             break
 
         dif.append(next_line-next_line_old)
-        search_data = df.values[next_line+1:,next_col:]
+        search_data = df.values[next_line+1:,next_col+3:]
 
         # step one: follow initialID until signal ends
         # save data in added_data for output
