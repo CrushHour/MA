@@ -60,12 +60,17 @@ def marker_variable_id(testrun_path, initialID=None, dtype="csv"):
         #df = df[:,start_coloum:]
         
     # initialize variables
+    j_safe = 0
+    i_safe = 0
     next_line = 3
-    next_line_old = 0
+    
+    next_line_old = 3
     dif = []
-    current_tracker_data = df.iloc[next_line:,next_col:next_col+3]
+    current_tracker_data = df.iloc[next_line_old:,next_col:next_col+3]
     added_data = np.zeros((current_tracker_data.shape))
 
+    filled_cells = np.where(pd.notna(current_tracker_data.iloc[next_line:,:]))
+    next_line = int(filled_cells[0].max())
     
     for k in tqdm(range(df.index.stop)):
     #while ID_end <= df.index.stop-3:
@@ -75,7 +80,7 @@ def marker_variable_id(testrun_path, initialID=None, dtype="csv"):
         #empty_cells = np.where(pd.isnull(df.iloc[next_line:,next_col:next_col+3]))
         filled_cells = np.where(pd.notna(current_tracker_data.iloc[next_line:,:]))
         # was wenn der nächste Marker mit ein paar Nans beginnt?
-        next_line = int(filled_cells[0].max())
+        #next_line = int(filled_cells[0].max())
 
         if next_line < next_line_old:
             print("next line < old next line")
@@ -104,34 +109,87 @@ def marker_variable_id(testrun_path, initialID=None, dtype="csv"):
         # wegen zeilennummerierung, und da letztes value aus nan besteht
         # Zeilen
         for i, value in enumerate(search_data,start=0):
-                # nur die nächsten x Zeitschritte 
-                # nach nahe gelegenem Wert durchsuchen
-                if i > 100:
-                    break
+            # nur die nächsten x Zeitschritte 
+            # nach nahe gelegenem Wert durchsuchen
+            if i >= 4000:
+                break
 
-                value = np.array(list(map(float, value)))
+            value = np.array(list(map(float, value)))
 
-                # Spalten
-                for j in range(0,len(value),3):
+            # Spalten
+            for j in range(0,len(value),3):
 
-                    if np.isnan(value[j]) or np.isnan(value[j+1]) or np.isnan(value[j+2]):
-                        continue
+                if np.isnan(value[j]) or np.isnan(value[j+1]) or np.isnan(value[j+2]):
+                    continue
+                
+                #print("value:", value[j:j+3])
+                #print("i:", i)
+                else:
+                    current_dis = np.absolute(np.linalg.norm(last_signal) - np.linalg.norm(value[j:j+3]))
                     
-                    #print("value:", value[j:j+3])
-                    #print("i:", i)
-                    else:
-                        current_dis = np.absolute(np.linalg.norm(last_signal) - np.linalg.norm(value[j:j+3]))
-                        
-                        if current_dis < min_dis:
-                            next_col = j
-                            min_dis = current_dis
-                            next_line = i
-                            #print("next line:", next_line)
+                    if current_dis < min_dis:
+                        j_safe = j
+                        min_dis = current_dis
+                        i_safe = i
+                        #print("next line:", next_line)
+        
+        next_col += j_safe
+        next_line_old = next_line + 1
+        next_line += i_safe
+
         if current_dis == np.inf:
             print("no marker nearby!")
             break
+        if next_col > df.shape[1] or next_line > df.shape[0]:
+            print("end of dataframe reached!")
+            break
+
         current_tracker_data = df.iloc[3:,next_col:next_col+3]
-        next_line_old = next_line + 1
+        
+        #ID_end = ID_end + int(empty_cells[0][0]) + 1
+
+    return added_data
+
+def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv"):
+    if dtype == "json":
+        print("unable to load from json yet.")
+        #df = load_marker_from_json(testrun_path, initalID)
+        current_tracker_data = 0
+        next_col = 0
+        df = pd.DataFrame()
+
+    else:
+        initialID = str(initialID)
+        df = pd.read_csv(testrun_path, header=2, low_memory=False)
+        next_col = df.columns.get_loc(initialID)
+
+    added_data = np.zeros((df.shape[0],3))
+    
+    for k in tqdm(range(df.index.stop)):
+
+        min_dis = np.inf
+        current_dis = np.inf
+
+        value = np.array(list(map(float, value)))
+
+        # Spalten
+        for j in range(0,len(value),3):
+
+            if np.isnan(value[j]) or np.isnan(value[j+1]) or np.isnan(value[j+2]):
+                continue
+            
+            #print("value:", value[j:j+3])
+            #print("i:", i)
+            else:
+                current_dis = np.absolute(np.linalg.norm(last_signal) - np.linalg.norm(value[j:j+3]))
+                
+                if current_dis < min_dis:
+                    j_safe = j
+                    min_dis = current_dis
+                    #print("next line:", next_line)
+        
+        next_col += j_safe
+        
         #ID_end = ID_end + int(empty_cells[0][0]) + 1
 
     return added_data
@@ -291,7 +349,20 @@ if __name__ == '__main__':
     path = '/home/julians/GitHub/MA/Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv'
 
     #raw_data = csv_test_load(path, '55')
-    marker_data = marker_variable_id(path, 'Unlabeled 2016')
+    marker_ID = 'Unlabeled 2016'
+    marker_data = marker_variable_id_linewise(path, marker_ID)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
+    x = marker_data[:,0]
+    y = marker_data[:,1]
+    z = marker_data[:,2]
+    ax.plot(x, label='x')
+    ax.plot(y, label='y')
+    ax.plot(z, label='z')
+    plt.title(marker_ID)
+    plt.legend()
+    plt.show()
  
 # %%
 #   class Tracker_3dicke:
