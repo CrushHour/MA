@@ -154,7 +154,6 @@ def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv"):
     if dtype == "json":
         print("unable to load from json yet.")
         #df = load_marker_from_json(testrun_path, initalID)
-        current_tracker_data = 0
         next_col = 0
         df = pd.DataFrame()
 
@@ -163,35 +162,42 @@ def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv"):
         df = pd.read_csv(testrun_path, header=2, low_memory=False)
         next_col = df.columns.get_loc(initialID)
 
-    added_data = np.zeros((df.shape[0],3))
-    
-    for k in tqdm(range(df.index.stop)):
+    added_data = np.zeros((df.shape[0]-3,3))
+
+    added_data[0,:] = df.values[3,next_col:next_col+3]
+
+    # Start Zeilenschleife
+    for k in tqdm(range(1,added_data.shape[0])):
+        last_signal = added_data[k-1,:]
 
         min_dis = np.inf
         current_dis = np.inf
 
+        value = df.values[k+3,:]
         value = np.array(list(map(float, value)))
 
         # Spalten
-        for j in range(0,len(value),3):
+        values_to_add = [np.nan, np.nan, np.nan]
 
-            if np.isnan(value[j]) or np.isnan(value[j+1]) or np.isnan(value[j+2]):
-                continue
+        for j in range(next_col,len(value),3):
+
+            #print(df.iloc[0,j:j+3])
+            #Unlabeled 2291      E0C50
+            #Unlabeled 2291.1    E0C50
+            #Unlabeled 2291.2    E0C50
             
-            #print("value:", value[j:j+3])
-            #print("i:", i)
+            if np.isnan(value[j]) or np.isnan(value[j+1]) or np.isnan(value[j+2]):
+                continue            
+
             else:
                 current_dis = np.absolute(np.linalg.norm(last_signal) - np.linalg.norm(value[j:j+3]))
                 
                 if current_dis < min_dis:
-                    j_safe = j
                     min_dis = current_dis
-                    #print("next line:", next_line)
-        
-        next_col += j_safe
-        
-        #ID_end = ID_end + int(empty_cells[0][0]) + 1
+                    values_to_add = value[j:j+3]
 
+        # safe closest values from line k
+        added_data[k,:] = values_to_add
     return added_data
 	
 def plot_ply(tracker_points, opti_points, line_1, line_2, line_3, line_4):
