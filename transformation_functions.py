@@ -162,14 +162,16 @@ def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv"):
         df = pd.read_csv(testrun_path, header=2, low_memory=False)
         next_col = df.columns.get_loc(initialID)
 
+    # variablen initiieren.
+    dis_list = []
     added_data = np.zeros((df.shape[0]-3,3))
 
     added_data[0,:] = df.values[3,next_col:next_col+3]
+    last_signal = added_data[0,:]
 
     # Start Zeilenschleife
     for k in tqdm(range(1,added_data.shape[0])):
-        last_signal = added_data[k-1,:]
-
+        
         min_dis = np.inf
         current_dis = np.inf
 
@@ -195,9 +197,22 @@ def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv"):
                 if current_dis < min_dis:
                     min_dis = current_dis
                     values_to_add = value[j:j+3]
+                    dis_list.append(current_dis)
 
         # safe closest values from line k
-        added_data[k,:] = values_to_add
+        if values_to_add[0] == np.nan:
+            continue
+        else:
+            last_signal == values_to_add
+        
+        # falls die Minimale Distanz zum nächsten Punkt den Grenzwert überschreitet,
+        # wird der Punkt nicht in die Ausgabeliste eingetragen.
+        if min_dis >= 50:
+            added_data[k,:] = [np.nan, np.nan, np.nan]
+        else:
+            added_data[k,:] = values_to_add
+
+    print(dis_list)
     return added_data
 	
 def plot_ply(tracker_points, opti_points, line_1, line_2, line_3, line_4):
