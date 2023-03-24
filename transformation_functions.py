@@ -10,6 +10,7 @@ import json
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial import distance
+from scipy.signal import butter, lfilter, freqz, buttord
 from tqdm import tqdm
 
 #%% transformation optitrack tracker to real tracker
@@ -315,6 +316,18 @@ def compare_point_lists(pairs1, points1, pairs2, points2):
     points_2_out = [x for _, x in sorted(zip(index_list, points2))]
 
     return points1, points_2_out
+
+'''Teifpassfilter'''
+def butter_lowpass(cutoff, fs, order=5):
+    nyq = 0.5 * fs
+    normal_cutoff = cutoff / nyq
+    b, a = butter(order, normal_cutoff, btype='low', analog=False)
+    return b, a
+
+def butter_lowpass_filter(data, cutoff, fs, order=5):
+    b, a = butter_lowpass(cutoff, fs, order=order)
+    y = lfilter(b, a, data)
+    return y
 # %% 
 def calculate_transformation_matrix(markers1, markers2):
     '''Setzt vorraus, dass die Punktelisten korrekt sortiert sind.'''
@@ -381,6 +394,23 @@ if __name__ == '__main__':
     #raw_data = csv_test_load(path, '55')
     marker_ID = 'Unlabeled 2016'
     marker_data = marker_variable_id_linewise(path, marker_ID)
+
+    # Setting standard filter requirements.
+    fs = 120.0
+    order, wn = buttord(0.2, 0.3, 6, 20)
+    cutoff = 3.667  
+    y = butter_lowpass_filter(marker_data, cutoff, fs, order)
+
+
+    plt.subplot(2, 1, 2)
+    plt.plot(marker_data, 'b-', label='marker data')
+    plt.plot(y, 'g-', linewidth=2, label='filtered data')
+    plt.xlabel('Time [sec]')
+    plt.grid()
+    plt.legend()
+
+    plt.subplots_adjust(hspace=0.35)
+    plt.show()
 
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
