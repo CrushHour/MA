@@ -167,7 +167,8 @@ def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv"):
     dis_list = []
     start_value = df.values[start_line,next_col:next_col+3]
 
-    if np.isnan(start_value[0]):
+    """If condition to be able to catch trackers, that a not visiable immidiatly"""
+    if np.isnan(float(start_value[0])):
         filled_cells = np.where(pd.notna(df.iloc[:,next_col]))
         start_line = int(filled_cells[0][3])
         start_value = df.values[start_line,next_col:next_col+3]
@@ -204,7 +205,6 @@ def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv"):
                 if current_dis < min_dis:
                     min_dis = current_dis
                     values_to_add = value[j:j+3]
-                    dis_list.append(current_dis)
 
         # safe closest values from line k
         if values_to_add[0] == np.nan:
@@ -214,9 +214,11 @@ def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv"):
         
         # falls die Minimale Distanz zum nächsten Punkt den Grenzwert überschreitet,
         # wird der Punkt nicht in die Ausgabeliste eingetragen.
-        if min_dis >= 50:
+        dis_list.append(min_dis)
+        if min_dis >= 56:
             added_data[k,:] = [np.nan, np.nan, np.nan]
         else:
+            
             added_data[k,:] = values_to_add
 
     print(dis_list)
@@ -377,7 +379,7 @@ if __name__ == '__main__':
     path = './Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv'
 
     #raw_data = csv_test_load(path, '55')
-    marker_ID = 'Unlabeled 2023'
+    marker_ID = 'Unlabeled 2016'
     marker_data = marker_variable_id_linewise(path, marker_ID)
 
     fig = plt.figure()
