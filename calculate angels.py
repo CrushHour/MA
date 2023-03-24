@@ -8,7 +8,8 @@ import scipy
 # Definition der Pfade
 data_path = 'Data/test_01_31/'
 test_file = '2023_01_31_18_12_48.json'
-opti_data = r'C:\\GitHub\\MA\\Data\test_01_31\\Take 2023-01-31 06.11.42 PM.csv'
+opti_data = '/home/julians/GitHub/MA/Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv'
+#opti_data = r'C:\\GitHub\\MA\\Data\test_01_31\\Take 2023-01-31 06.11.42 PM.csv'
 
 ''' Laden des Testfiles als csv, Optitrack Rohdaten '''
 # Tracker
@@ -19,10 +20,12 @@ opti_traj_FTTracker = transformation_functions.csv_test_load(opti_data,"FT-Track
 opti_traj_M4_gross = transformation_functions.csv_test_load(opti_data,"M4_gross")
 opti_traj_M4_klein = transformation_functions.csv_test_load(opti_data,"M4_klein")
 # Marker
-opti_traj_Marker_ZF_distal = transformation_functions.csv_test_load(opti_data,"M4_klein")
-opti_traj_Marker_ZF_proximal = transformation_functions.csv_test_load(opti_data,"M4_klein")
-opti_traj_Marker_DAU = transformation_functions.csv_test_load(opti_data,"2016")
-opti_traj_Marker_DAU = opti_traj_Marker_DAU.i
+# abgebrochen
+#opti_traj_Marker_ZF_distal = transformation_functions.marker_variable_id_linewise(opti_data,"M4_klein")
+
+opti_traj_Marker_ZF_proximal = transformation_functions.marker_variable_id_linewise(opti_data,"Unlabeled 2403")
+opti_traj_Marker_DAU = transformation_functions.marker_variable_id_linewise(opti_data,"Unlabeled 2016")
+
 # Laden des Testfiles als json vom Stream.
 
 # Definieren der Tracker und Marker als jeweils eine Tracker Klasse

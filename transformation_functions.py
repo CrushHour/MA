@@ -163,10 +163,17 @@ def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv"):
         next_col = df.columns.get_loc(initialID)
 
     # variablen initiieren.
+    start_line = 3
     dis_list = []
-    added_data = np.zeros((df.shape[0]-3,3))
+    start_value = df.values[start_line,next_col:next_col+3]
 
-    added_data[0,:] = df.values[3,next_col:next_col+3]
+    if np.isnan(start_value[0]):
+        filled_cells = np.where(pd.notna(df.iloc[:,next_col]))
+        start_line = int(filled_cells[0][3])
+        start_value = df.values[start_line,next_col:next_col+3]
+
+    added_data = np.zeros((df.shape[0]-start_line,3)) 
+    added_data[0,:] = start_value
     last_signal = added_data[0,:]
 
     # Start Zeilenschleife
@@ -367,10 +374,10 @@ def min_max_arrays_to_kosy(min_track, max_track):
 #%% Function tests
 if __name__ == '__main__':
     path = r'C:\\GitHub\\MA\\Data\test_01_31\\Take 2023-01-31 06.11.42 PM.csv'
-    path = '/home/julians/GitHub/MA/Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv'
+    path = './Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv'
 
     #raw_data = csv_test_load(path, '55')
-    marker_ID = 'Unlabeled 2016'
+    marker_ID = 'Unlabeled 2023'
     marker_data = marker_variable_id_linewise(path, marker_ID)
 
     fig = plt.figure()
