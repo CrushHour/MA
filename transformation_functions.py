@@ -2,6 +2,7 @@
 import pandas as pd
 import numpy as np
 import math
+from PIL import Image
 import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
 from pyquaternion import Quaternion
@@ -222,7 +223,7 @@ def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv"):
             
             added_data[k,:] = values_to_add
 
-    print(dis_list)
+    #print(dis_list)
     return added_data
 	
 def plot_ply(tracker_points, opti_points, line_1, line_2, line_3, line_4):
@@ -397,7 +398,11 @@ if __name__ == '__main__':
 
     # Setting standard filter requirements.
     fs = 120.0
-    order, wn = buttord(0.2, 0.3, 6, 20)
+    Gp = 1
+    Gs = 10
+    wp = 0.25
+    ws = 1
+    order, wn = buttord(wp, ws, Gp, Gs)
     cutoff = 3.667  
     y = butter_lowpass_filter(marker_data, cutoff, fs, order)
 
