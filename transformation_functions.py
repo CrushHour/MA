@@ -11,6 +11,7 @@ from pyquaternion import Quaternion
 import csv
 import json
 from mpl_toolkits.mplot3d import Axes3D
+from scipy import interpolate
 from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial import distance
 from scipy.signal import butter, lfilter, freqz, buttord, filtfilt
@@ -327,7 +328,7 @@ def butter_lowpass(wn, fs, order=5):
 
 def butter_lowpass_filter(data, cutoff, fs, order=1):
     b, a = butter_lowpass(cutoff, fs, order=order)
-    y = lfilter(b, a, data, axis = 0)
+    y = filtfilt(b, a, data, axis = 0)
     return y
 
 def plot_tiefpass(fs, Gp, Gs, wp, ws, marker_data):
@@ -335,10 +336,10 @@ def plot_tiefpass(fs, Gp, Gs, wp, ws, marker_data):
     y = butter_lowpass_filter(marker_data, wn, fs, order)
     
     # Plotting
-    plt.subplot(2, 1, 2)
-    plt.plot(marker_data, 'b-', label='marker data')
+    plt.subplot(1, 1, 1)
+    plt.plot(marker_data, 'b-', linewidth=0.25, label='marker data')
 
-    plt.plot(y, 'r-', linewidth=2, label='filtered data')
+    plt.plot(y, 'r-', linewidth=0.5, label='filtered data')
     plt.xlabel('Time [120 Hz]')
     plt.grid()
     plt.legend()
@@ -400,7 +401,11 @@ def min_max_arrays_to_kosy(min_track, max_track):
 
     return kosy
     
-
+def nan_helper(a):
+    x, y = np.indices(a.shape)
+    interp = np.array(a)
+    interp[np.isnan(interp)] = interpolate.griddata((x[~np.isnan(a)], y[~np.isnan(a)]), a[~np.isnan(a)], (x[np.isnan(a)], y[np.isnan(a)])) 
+    return interp
 
 
 #%% Function tests
@@ -411,20 +416,20 @@ if __name__ == '__main__':
     #raw_data = csv_test_load(path, '55')
     marker_ID = 'Unlabeled 2016'
     marker_data = marker_variable_id_linewise(path, marker_ID)
-
+    inter_data = nan_helper(marker_data)
     # Setting standard filter requirements.
     fs = 120.0
     Gp = 0.1
-    Gs = 1
-    wp = 0.25
-    ws = 2
+    Gs = 3.0
+    wp = 0.8
+    ws = 1.1
 
-    #plot_tiefpass(fs, Gp, Gs, wp, ws, marker_data)
+    plot_tiefpass(fs, Gp, Gs, wp, ws, inter_data)
     filtered_data = interact(plot_tiefpass, fs = fixed(fs), Gp = widgets.FloatSlider(value=1, min=0,max=2,step=0.1),
                                       Gs = widgets.FloatSlider(value=10, min=0,max=120,step=1), 
                                       wp = widgets.FloatSlider(value=0.25, min=0,max=2,step=0.05), 
                                       ws = widgets.FloatSlider(value=1, min=0,max=2,step=0.05),
-                                        marker_data = fixed(marker_data))
+                                        marker_data = fixed(inter_data))
  
 # %%
 #   class Tracker_3dicke:
