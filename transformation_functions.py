@@ -325,9 +325,9 @@ def butter_lowpass(wn, fs, order=5):
     b, a = butter(order, wn, btype='low', analog=False, fs=fs)
     return b, a
 
-def butter_lowpass_filter(data, cutoff, fs, order=5):
+def butter_lowpass_filter(data, cutoff, fs, order=1):
     b, a = butter_lowpass(cutoff, fs, order=order)
-    y = filtfilt(b, a, data,axis=0)
+    y = lfilter(b, a, data, axis = 0)
     return y
 
 def plot_tiefpass(fs, Gp, Gs, wp, ws, marker_data):
@@ -344,6 +344,7 @@ def plot_tiefpass(fs, Gp, Gs, wp, ws, marker_data):
     plt.legend()
 
     plt.subplots_adjust(hspace=0.35)
+    return y
 # %% 
 def calculate_transformation_matrix(markers1, markers2):
     '''Setzt vorraus, dass die Punktelisten korrekt sortiert sind.'''
@@ -413,13 +414,13 @@ if __name__ == '__main__':
 
     # Setting standard filter requirements.
     fs = 120.0
-    Gp = 1
-    Gs = 10
+    Gp = 0.1
+    Gs = 1
     wp = 0.25
-    ws = 10
+    ws = 2
 
     #plot_tiefpass(fs, Gp, Gs, wp, ws, marker_data)
-    interact(plot_tiefpass, fs = fixed(fs), Gp = widgets.FloatSlider(value=1, min=0,max=2,step=0.1),
+    filtered_data = interact(plot_tiefpass, fs = fixed(fs), Gp = widgets.FloatSlider(value=1, min=0,max=2,step=0.1),
                                       Gs = widgets.FloatSlider(value=10, min=0,max=120,step=1), 
                                       wp = widgets.FloatSlider(value=0.25, min=0,max=2,step=0.05), 
                                       ws = widgets.FloatSlider(value=1, min=0,max=2,step=0.05),
