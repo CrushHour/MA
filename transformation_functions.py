@@ -4,6 +4,8 @@ import numpy as np
 import math
 from PIL import Image
 import matplotlib.pyplot as plt
+from ipywidgets import interact, interactive, fixed, interact_manual
+import ipywidgets as widgets
 from mpl_toolkits import mplot3d
 from pyquaternion import Quaternion
 import csv
@@ -11,7 +13,7 @@ import json
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial import distance
-from scipy.signal import butter, lfilter, freqz, buttord
+from scipy.signal import butter, lfilter, freqz, buttord, filtfilt
 from tqdm import tqdm
 
 #%% transformation optitrack tracker to real tracker
@@ -318,17 +320,30 @@ def compare_point_lists(pairs1, points1, pairs2, points2):
 
     return points1, points_2_out
 
-'''Teifpassfilter'''
-def butter_lowpass(cutoff, fs, order=5):
-    nyq = 0.5 * fs
-    normal_cutoff = cutoff / nyq
-    b, a = butter(order, normal_cutoff, btype='low', analog=False)
+'''Tiefpassfilter'''
+def butter_lowpass(wn, fs, order=5):
+    b, a = butter(order, wn, btype='low', analog=False, fs=fs)
     return b, a
 
 def butter_lowpass_filter(data, cutoff, fs, order=5):
     b, a = butter_lowpass(cutoff, fs, order=order)
-    y = lfilter(b, a, data)
+    y = filtfilt(b, a, data,axis=0)
     return y
+
+def plot_tiefpass(fs, Gp, Gs, wp, ws, marker_data):
+    order, wn = buttord(wp, ws, Gp, Gs)
+    y = butter_lowpass_filter(marker_data, wn, fs, order)
+    
+    # Plotting
+    plt.subplot(2, 1, 2)
+    plt.plot(marker_data, 'b-', label='marker data')
+
+    plt.plot(y, 'r-', linewidth=2, label='filtered data')
+    plt.xlabel('Time [120 Hz]')
+    plt.grid()
+    plt.legend()
+
+    plt.subplots_adjust(hspace=0.35)
 # %% 
 def calculate_transformation_matrix(markers1, markers2):
     '''Setzt vorraus, dass die Punktelisten korrekt sortiert sind.'''
@@ -401,33 +416,14 @@ if __name__ == '__main__':
     Gp = 1
     Gs = 10
     wp = 0.25
-    ws = 1
-    order, wn = buttord(wp, ws, Gp, Gs)
-    cutoff = 3.667  
-    y = butter_lowpass_filter(marker_data, cutoff, fs, order)
+    ws = 10
 
-
-    plt.subplot(2, 1, 2)
-    plt.plot(marker_data, 'b-', label='marker data')
-    plt.plot(y, 'g-', linewidth=2, label='filtered data')
-    plt.xlabel('Time [sec]')
-    plt.grid()
-    plt.legend()
-
-    plt.subplots_adjust(hspace=0.35)
-    plt.show()
-
-    fig = plt.figure()
-    ax = fig.add_subplot(1, 1, 1)
-    x = marker_data[:,0]
-    y = marker_data[:,1]
-    z = marker_data[:,2]
-    ax.plot(x, label='x')
-    ax.plot(y, label='y')
-    ax.plot(z, label='z')
-    plt.title(marker_ID)
-    plt.legend()
-    plt.show()
+    #plot_tiefpass(fs, Gp, Gs, wp, ws, marker_data)
+    interact(plot_tiefpass, fs = fixed(fs), Gp = widgets.FloatSlider(value=1, min=0,max=2,step=0.1),
+                                      Gs = widgets.FloatSlider(value=10, min=0,max=120,step=1), 
+                                      wp = widgets.FloatSlider(value=0.25, min=0,max=2,step=0.05), 
+                                      ws = widgets.FloatSlider(value=1, min=0,max=2,step=0.05),
+                                        marker_data = fixed(marker_data))
  
 # %%
 #   class Tracker_3dicke:
