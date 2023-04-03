@@ -25,9 +25,9 @@ opti_traj_M4_klein = transformation_functions.csv_test_load(opti_data,"M4_klein"
 
 opti_traj_Marker_ZF_proximal = transformation_functions.marker_variable_id_linewise(opti_data,"Unlabeled 2403")
 opti_traj_Marker_DAU = transformation_functions.marker_variable_id_linewise(opti_data,"Unlabeled 2016")
-Cog_Marker_DAU = transformation_functions.stl_cog("")
+Cog_Marker_DAU = transformation_functions.stl_cog("/home/julians/LRZ Sync+Share/MA_Schote/300 Experiments/slicer_export_29_03_2023/Blender_30_03/D_IP_29_03_blend.stl")
 print(Cog_Marker_DAU)
-Cog_Marker_ZF_proximal = transformation_functions.stl_cog("")
+Cog_Marker_ZF_proximal = transformation_functions.stl_cog("/home/julians/LRZ Sync+Share/MA_Schote/300 Experiments/slicer_export_29_03_2023/Blender_30_03/")
 print(Cog_Marker_ZF_proximal)
 # Laden des Testfiles als json vom Stream.
 

@@ -155,7 +155,7 @@ def marker_variable_id(testrun_path, initialID=None, dtype="csv"):
 
     return added_data
 
-def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv"):
+def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv", d_max == np.inf):
     if dtype == "json":
         print("unable to load from json yet.")
         #df = load_marker_from_json(testrun_path, initalID)
@@ -407,6 +407,10 @@ def nan_helper(a):
     interp[np.isnan(interp)] = interpolate.griddata((x[~np.isnan(a)], y[~np.isnan(a)]), a[~np.isnan(a)], (x[np.isnan(a)], y[np.isnan(a)])) 
     return interp
 
+def stl_cog(file_path):
+    stl_data = stl.mesh.Mesh.from_file(path)
+    volume, cog, inertia = stl_data.get_mass_properties()
+    return cog
 
 #%% Function tests
 if __name__ == '__main__':
