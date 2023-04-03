@@ -25,7 +25,10 @@ opti_traj_M4_klein = transformation_functions.csv_test_load(opti_data,"M4_klein"
 
 opti_traj_Marker_ZF_proximal = transformation_functions.marker_variable_id_linewise(opti_data,"Unlabeled 2403")
 opti_traj_Marker_DAU = transformation_functions.marker_variable_id_linewise(opti_data,"Unlabeled 2016")
-
+Cog_Marker_DAU = transformation_functions.stl_cog("")
+print(Cog_Marker_DAU)
+Cog_Marker_ZF_proximal = transformation_functions.stl_cog("")
+print(Cog_Marker_ZF_proximal)
 # Laden des Testfiles als json vom Stream.
 
 # Definieren der Tracker und Marker als jeweils eine Tracker Klasse
