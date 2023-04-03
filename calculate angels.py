@@ -8,7 +8,7 @@ import scipy
 # Definition der Pfade
 data_path = 'Data/test_01_31/'
 test_file = '2023_01_31_18_12_48.json'
-opti_data = '/home/julians/GitHub/MA/Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv'
+opti_data = './Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv'
 #opti_data = r'C:\\GitHub\\MA\\Data\test_01_31\\Take 2023-01-31 06.11.42 PM.csv'
 
 ''' Laden des Testfiles als csv, Optitrack Rohdaten '''
@@ -41,6 +41,8 @@ Tracker_52 = trackers.Tracker(0, './Data/Trackers/ZF_DIP.csv', ctname=None) # Ba
 
 print(Tracker_52.t_ct_def)
 print(Tracker_53.t_ct_def)
+
+# Winkel DAU
 
 # Winkel ZF
 
