@@ -1,4 +1,7 @@
 #%% import
+import os
+from datetime import datetime
+import trackers
 import pandas as pd
 import numpy as np
 import stl
@@ -156,7 +159,7 @@ def marker_variable_id(testrun_path, initialID=None, dtype="csv"):
 
     return added_data
 
-def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv", d_max = np.inf):
+def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv", d_max = 56):
     if dtype == "json":
         print("unable to load from json yet.")
         #df = load_marker_from_json(testrun_path, initalID)
@@ -221,7 +224,7 @@ def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv", d_max
         # falls die Minimale Distanz zum nächsten Punkt den Grenzwert überschreitet,
         # wird der Punkt nicht in die Ausgabeliste eingetragen.
         dis_list.append(min_dis)
-        if min_dis >= 56:
+        if min_dis >= d_max:
             added_data[k,:] = [np.nan, np.nan, np.nan]
         else:
             
@@ -316,7 +319,7 @@ def compare_point_lists(pairs1, points1, pairs2, points2):
     index_list = []
     for i in range(len(points1)):
         index_list.append(distance_value_in_points1.index(distance_value_in_points2[i]))
-
+ 
     # https://stackoverflow.com/questions/6618515/sorting-list-based-on-values-from-another-list
     points_2_out = [x for _, x in sorted(zip(index_list, points2))]
 
@@ -337,16 +340,20 @@ def plot_tiefpass(fs, Gp, Gs, wp, ws, marker_data):
     y = butter_lowpass_filter(marker_data, wn, fs, order)
     
     # Plotting
-    plt.subplot(1, 1, 1)
-    plt.plot(marker_data, 'b-', linewidth=0.25, label='marker data')
+    fig = plt.subplot(1, 1, 1)
+    fig.plot(marker_data, 'b-', linewidth=0.25, label='marker data')
 
-    plt.plot(y, 'r-', linewidth=0.5, label='filtered data')
+    fig.plot(y, 'r-', linewidth=0.5, label='filtered data')
     plt.xlabel('Time [120 Hz]')
-    plt.grid()
-    plt.legend()
+    plt.title("Marker")
+    fig.grid()
+    fig.legend()
 
     plt.subplots_adjust(hspace=0.35)
-    return y
+    now = datetime.now()
+    plot_file_title = "marker_" + now.strftime("%d_%m_%Y_%H_%M_%S")
+    plt.savefig(plot_file_title, format="pdf")
+    return fig
 # %% 
 def calculate_transformation_matrix(markers1, markers2):
     '''Setzt vorraus, dass die Punktelisten korrekt sortiert sind.'''
@@ -408,19 +415,37 @@ def nan_helper(a):
     interp[np.isnan(interp)] = interpolate.griddata((x[~np.isnan(a)], y[~np.isnan(a)]), a[~np.isnan(a)], (x[np.isnan(a)], y[np.isnan(a)])) 
     return interp
 
-def stl_cog(file_path):
-    stl_data = stl.mesh.Mesh.from_file(file_path)
-    volume, cog, inertia = stl_data.get_mass_properties()
-    return cog
+class bone_stl(trackers.Tracker):
+    def t_cog_trackerorigin(self):
+        t_CT = np.array([0,0,0])
+        return t_CT
+    
+    def __init__(self, folder_path = "./Data/STL", finger_name = "") -> None:
+        directory = os.fsencode(folder_path)
+        
+        for file in os.listdir(directory):
+            filename = os.fsdecode(file)
+            if filename.find(finger_name) >= 0: 
+                # print(os.path.join(directory, filename))
+                file_path = os.path.join(folder_path, filename)
+                stl_data = stl.mesh.Mesh.from_file(file_path)
+            else:
+                continue
+        self.volume, self.cog, self.inertia = stl_data.get_mass_properties()
+        #self.t_tracker_CT = t_cog_trackerorigin()
+    
+    
 
 #%% Function tests
 if __name__ == '__main__':
-    path = r'C:\\GitHub\\MA\\Data\test_01_31\\Take 2023-01-31 06.11.42 PM.csv'
+    ZF_DIP = bone_stl(finger_name="ZF_DIP")
+
+    #path = r'C:\\GitHub\\MA\\Data\test_01_31\\Take 2023-01-31 06.11.42 PM.csv'
     path = './Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv'
 
     #raw_data = csv_test_load(path, '55')
     marker_ID = 'Unlabeled 2016'
-    marker_data = marker_variable_id_linewise(path, marker_ID)
+    marker_data = marker_variable_id_linewise(path, marker_ID, "csv", 40)
     inter_data = nan_helper(marker_data)
     # Setting standard filter requirements.
     fs = 120.0
@@ -429,13 +454,14 @@ if __name__ == '__main__':
     wp = 0.8
     ws = 1.1
 
-    plot_tiefpass(fs, Gp, Gs, wp, ws, inter_data)
-    filtered_data = interact(plot_tiefpass, fs = fixed(fs), Gp = widgets.FloatSlider(value=1, min=0,max=2,step=0.1),
-                                      Gs = widgets.FloatSlider(value=10, min=0,max=120,step=1), 
-                                      wp = widgets.FloatSlider(value=0.25, min=0,max=2,step=0.05), 
-                                      ws = widgets.FloatSlider(value=1, min=0,max=2,step=0.05),
+    pic = plot_tiefpass(fs, Gp, Gs, wp, ws, inter_data)
+    filtered_data = interact(plot_tiefpass, fs = fixed(fs), Gp = widgets.FloatSlider(value=Gp, min=0,max=2,step=0.1),
+                                      Gs = widgets.FloatSlider(value=Gs, min=0,max=120,step=1), 
+                                      wp = widgets.FloatSlider(value=wp, min=0,max=2,step=0.05), 
+                                      ws = widgets.FloatSlider(value=ws, min=0,max=2,step=0.05),
                                         marker_data = fixed(inter_data))
- 
+    
+
 # %%
 #   class Tracker_3dicke:
  #       numTrackers = 5
