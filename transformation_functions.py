@@ -415,6 +415,17 @@ def nan_helper(a):
     interp[np.isnan(interp)] = interpolate.griddata((x[~np.isnan(a)], y[~np.isnan(a)]), a[~np.isnan(a)], (x[np.isnan(a)], y[np.isnan(a)])) 
     return interp
 
+def read_markups(path):
+    """read the data of the marker points from the ct scan"""
+    # 1. load mounting points
+    with open(path) as jsonfile:
+        data = json.load(jsonfile)
+
+    # extract point infos
+    point_data = data['markups'][0]['controlPoints']
+    point_list = [point['position'] for point in point_data]
+    return point_list
+
 class bone_stl(trackers.Tracker):
     def t_cog_trackerorigin(self):
         t_CT = np.array([0,0,0])
