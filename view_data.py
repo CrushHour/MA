@@ -44,6 +44,7 @@ print(data.keys())
 print('len of time:',len(data['time']))
 print('len of observation:', len(data['observation']))
 print(data['observation'].keys())
+print(data['observation']['rigid_bodies'])
 print('len of motors:', len(data['observation']['motors']))
 print('len of action:',len(data['action']))
 
