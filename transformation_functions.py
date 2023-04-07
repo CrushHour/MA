@@ -352,7 +352,7 @@ def plot_tiefpass(fs, Gp, Gs, wp, ws, marker_data):
     plt.subplots_adjust(hspace=0.35)
     now = datetime.now()
     plot_file_title = "marker_" + now.strftime("%d_%m_%Y_%H_%M_%S")
-    plt.savefig(plot_file_title, format="pdf")
+    # plt.savefig(plot_file_title + ".pdf", format="pdf")
     return fig
 # %% 
 def calculate_transformation_matrix(markers1, markers2):
@@ -425,11 +425,18 @@ def read_markups(path):
     point_data = data['markups'][0]['controlPoints']
     point_list = [point['position'] for point in point_data]
     return point_list
-
+'''Hilfspunkte 1-4 an Daumen.
+	1 mittig-distal
+	2 Distal
+	3 mittig- proximal
+	4 proximal
+	
+Hilfspunkte 5-9 an Zeigefinger (ZF)
+	8, 9: Kontakpunkt distal-mittig
+	7 Kontaktpunkt mittig-proximal
+	5 proximal
+6 mittig-proximal'''
 class bone_stl(trackers.Tracker):
-    def t_cog_trackerorigin(self):
-        t_CT = np.array([0,0,0])
-        return t_CT
     
     def __init__(self, folder_path = "./Data/STL", finger_name = "") -> None:
         directory = os.fsencode(folder_path)
