@@ -435,10 +435,32 @@ Hilfspunkte 5-9 an Zeigefinger (ZF)
 	8, 9: Kontakpunkt distal-mittig
 	7 Kontaktpunkt mittig-proximal
 	5 proximal
-6 mittig-proximal'''
+    6 mittig-proximal'''
+
+def t_cog_trackerorigin(tracker_origin = np.array([0,0,0]), cog = np.array([0,0,0])):
+    t = np.array([0,0,0])
+    t = cog - tracker_origin
+    return t
+
+def get_helper_points(helper_ids = [1,2,3,4,5,6,7,8,9], path = './Slicer3D/Hilfspunkte.mrk.json'):
+    helper_points = []
+
+    # 1. load mounting points
+    with open(path) as jsonfile:
+        data = json.load(jsonfile)
+
+    # extract point infos
+    point_data = data['markups'][0]['controlPoints']
+    helper_points = [point['position'] for point in point_data]
+    return helper_points
 class bone_stl(trackers.Tracker):
     
     def __init__(self, folder_path = "./Data/STL", finger_name = "") -> None:
+
+
+        
+        super.__init__(self, 0, './Data/Trackers/' + finger_name + '.csv')
+        #tr = trackers.Tracker.__init__(self, 0, './Data/Trackers/DAU_DIP.csv')
         directory = os.fsencode(folder_path)
         
         for file in os.listdir(directory):
@@ -449,10 +471,21 @@ class bone_stl(trackers.Tracker):
                 stl_data = stl.mesh.Mesh.from_file(file_path)
             else:
                 continue
-        self.volume, self.cog, self.inertia = stl_data.get_mass_properties()
-        #self.t_tracker_CT = t_cog_trackerorigin()
-    
-    
+        self.volume, self.cog_stl, self.inertia = stl_data.get_mass_properties()
+        self.t_tracker_CT = np.subtract(self.cog_stl, self.marker_pos_ct)
+        self.d_tracker_CT = np.linalg.norm(self.t_tracker_CT)
+        
+        helper_ids = []
+        if finger_name == "DAU_DIP":
+            helper_ids = [2,1]
+        elif finger_name == "DAU_MCP":
+            helper_ids = [1,3]
+        elif finger_name == "ZF_DIP":
+            helper_ids = [8,9]
+        elif finger_name == "ZF_MCP":
+            helper_ids = [7,5]
+
+# %%
 
 #%% Function tests
 if __name__ == '__main__':
