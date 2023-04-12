@@ -443,6 +443,9 @@ def t_cog_trackerorigin(tracker_origin = np.array([0,0,0]), cog = np.array([0,0,
     return t
 
 def get_helper_points(helper_ids = [1,2,3,4,5,6,7,8,9], path = './Slicer3D/Hilfspunkte.mrk.json'):
+    # change format of helper_ids to string
+    helper_ids = [str(i) for i in helper_ids]
+    
     helper_points = []
 
     # 1. load mounting points
@@ -451,15 +454,14 @@ def get_helper_points(helper_ids = [1,2,3,4,5,6,7,8,9], path = './Slicer3D/Hilfs
 
     # extract point infos
     point_data = data['markups'][0]['controlPoints']
-    helper_points = [point['position'] for point in point_data]
+    helper_points = [point['position'] for point in point_data if point['id'] in helper_ids]
     return helper_points
+
 class bone_stl(trackers.Tracker):
     
     def __init__(self, folder_path = "./Data/STL", finger_name = "") -> None:
-
-
+        super.__init__(0, './Data/Trackers/'  + finger_name + '.csv')
         
-        super.__init__(self, 0, './Data/Trackers/' + finger_name + '.csv')
         #tr = trackers.Tracker.__init__(self, 0, './Data/Trackers/DAU_DIP.csv')
         directory = os.fsencode(folder_path)
         
@@ -484,11 +486,14 @@ class bone_stl(trackers.Tracker):
             helper_ids = [8,9]
         elif finger_name == "ZF_MCP":
             helper_ids = [7,5]
+        self.helper_points = get_helper_points(helper_ids)
 
 # %%
 
 #%% Function tests
 if __name__ == '__main__':
+    hp = get_helper_points()
+    print(hp)
     ZF_DIP = bone_stl(finger_name="ZF_DIP")
 
     #path = r'C:\\GitHub\\MA\\Data\test_01_31\\Take 2023-01-31 06.11.42 PM.csv'
