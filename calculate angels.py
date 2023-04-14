@@ -25,10 +25,8 @@ opti_traj_M4_klein = transformation_functions.csv_test_load(opti_data,"M4_klein"
 
 opti_traj_Marker_ZF_proximal = transformation_functions.marker_variable_id_linewise(opti_data,"Unlabeled 2403")
 opti_traj_Marker_DAU = transformation_functions.marker_variable_id_linewise(opti_data,"Unlabeled 2016")
-Cog_Marker_DAU = transformation_functions.bone_stl("/home/julians/LRZ Sync+Share/MA_Schote/300 Experiments/slicer_export_29_03_2023/Blender_30_03/D_IP_29_03_blend.stl")
-print(Cog_Marker_DAU.cog)
-Cog_Marker_ZF_proximal = transformation_functions.bone_stl("/home/julians/LRZ Sync+Share/MA_Schote/300 Experiments/slicer_export_29_03_2023/Blender_30_03/")
-print(Cog_Marker_ZF_proximal)
+Marker_DAU = transformation_functions.bone_stl("./Data/STL/", 'DAU_DIP')
+Marker_ZF_proximal = transformation_functions.bone_stl("./Data/STL/", "ZF_DIP")
 # Laden des Testfiles als json vom Stream.
 
 # Definieren der Tracker und Marker als jeweils eine Tracker Klasse
@@ -40,7 +38,9 @@ Tracker_FT = trackers.Tracker(0, './Data/Trackers/FT.csv', ctname=None)
 Tracker_52 = trackers.Tracker(0, './Data/Trackers/ZF_DIP.csv', ctname=None) # Basis, hinten an Fixteur externe
 
 print(Tracker_52.t_ct_def)
-print(Tracker_53.t_ct_def)
+
+# opti_taj_Marker data transformation in CT coordinatesystem
+
 
 # Winkel DAU
 

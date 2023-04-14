@@ -460,16 +460,16 @@ def get_helper_points(helper_ids = [1,2,3,4,5,6,7,8,9], path = './Slicer3D/Hilfs
 class bone_stl(trackers.Tracker):
     
     def __init__(self, folder_path = "./Data/STL", finger_name = "") -> None:
-        super.__init__(0, './Data/Trackers/'  + finger_name + '.csv')
+        super().__init__(0, './Data/Trackers/'  + finger_name + '.csv')
         
         #tr = trackers.Tracker.__init__(self, 0, './Data/Trackers/DAU_DIP.csv')
         directory = os.fsencode(folder_path)
         
-        for file in os.listdir(directory):
+        for file in os.listdir(folder_path):
             filename = os.fsdecode(file)
-            if filename.find(finger_name) >= 0: 
+            if file.find(finger_name) >= 0: 
                 # print(os.path.join(directory, filename))
-                file_path = os.path.join(folder_path, filename)
+                file_path = os.path.join(folder_path, file)
                 stl_data = stl.mesh.Mesh.from_file(file_path)
             else:
                 continue
@@ -492,8 +492,7 @@ class bone_stl(trackers.Tracker):
 
 #%% Function tests
 if __name__ == '__main__':
-    hp = get_helper_points()
-    print(hp)
+
     ZF_DIP = bone_stl(finger_name="ZF_DIP")
 
     #path = r'C:\\GitHub\\MA\\Data\test_01_31\\Take 2023-01-31 06.11.42 PM.csv'
@@ -519,12 +518,12 @@ if __name__ == '__main__':
     
 
 # %%
-#   class Tracker_3dicke:
+#   Tracker_3dicke:
  #       numTrackers = 5
  #       positions = [[0, 0, 75], [-42, 0, 46], [25, 0, 46], [0, 37, 41.5], [0, -44, 41.5]] # [[x,y,z],[x2,y2,z2],...]
  #       name, opti_positions = get_opti_positions('MakerJS_3dicke.csv')
 #
-#    class Tracker_Nico:
+#    Tracker_Nico:
 #        numTrackers = 5
 #        positions = [[0, 0, 61], [-41, 0, 35], [20, 0, 35], [-10, 31, 35], [-10, -14, 35]] # [[x,y,z],[x2,y2,z2],...]
 #        name, opti_positions = get_opti_positions('Tracker Nico.csv')
