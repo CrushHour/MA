@@ -182,6 +182,8 @@ class Tracker(object):
             # define a test scenario
             self.perform_test()
 
+        # this assumes that the tracker definition file has coordinates in the same
+        # system as the recording file? - Julian
         self.t_ct_tr = self.t_ct_def
 
     def perform_test(self):
