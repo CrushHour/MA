@@ -4,7 +4,7 @@ import transformation_functions
 import os
 import numpy as np
 import scipy
-import tqdm
+from tqdm import tqdm
 
 # Definition der Pfade
 data_path = 'Data/test_01_31/'
@@ -31,6 +31,10 @@ Marker_ZF_proximal = transformation_functions.bone_stl(finger_name="ZF_DIP")
 # Laden des Testfiles als json vom Stream.
 
 # Definieren der Tracker und Marker als jeweils eine Tracker Klasse
+# csv tracker entries are: 0: id, 1: name, 2: x, 3: y, 4: z, 5: qx, 6: qy, 7: qz, 8: qw?
+#Rotation	Rotation	Rotation	Rotation	Position	Position	Position	Mean Marker Error
+#X	Y	Z	W	X	Y	Z	
+
 Tracker_55 = trackers.Tracker(0, './Data/Trackers/ZF_DIP.csv', ctname="Slicer3D/Tracker55.mrk.json")
 Tracker_M4_gross = trackers.Tracker(0, './Data/Trackers/ZF_MCP.csv', ctname="Slicer3D/Tracker_M4_gross.mrk.json")
 Tracker_53 = trackers.Tracker(0, './Data/Trackers/DAU_DIP.csv', ctname="Slicer3D/Tracker53.mrk.json")
@@ -42,11 +46,12 @@ print(Tracker_52.t_ct_def)
 
 # opti_taj_Marker data transformation in CT coordinatesystem
 ct_traj_Marker_ZF_proximal = np.zeros((len(opti_traj_Marker_ZF_proximal),3))
-for i in tqdm(range(len(opti_traj_Marker_ZF_proximal))):
+for i in range(len(opti_traj_Marker_ZF_proximal)):
     ct_traj_Marker_ZF_proximal[i] = np.matmul(Tracker_52.t_ct_def[:3,:3], opti_traj_Marker_ZF_proximal[i])
+    ct_traj_Marker_ZF_proximal[i] = ct_traj_Marker_ZF_proximal[i] + Tracker_52.t_ct_def[:3,3]
+print(ct_traj_Marker_ZF_proximal)
 
 
-# angle DAU joints
 
 # angle ZF joints
 
