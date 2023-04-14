@@ -25,8 +25,8 @@ opti_traj_M4_klein = transformation_functions.csv_test_load(opti_data,"M4_klein"
 
 opti_traj_Marker_ZF_proximal = transformation_functions.marker_variable_id_linewise(opti_data,"Unlabeled 2403")
 opti_traj_Marker_DAU = transformation_functions.marker_variable_id_linewise(opti_data,"Unlabeled 2016")
-Marker_DAU = transformation_functions.bone_stl("./Data/STL/", 'DAU_DIP')
-Marker_ZF_proximal = transformation_functions.bone_stl("./Data/STL/", "ZF_DIP")
+Marker_DAU = transformation_functions.bone_stl(finger_name='DAU_DIP')
+Marker_ZF_proximal = transformation_functions.bone_stl(finger_name="ZF_DIP")
 # Laden des Testfiles als json vom Stream.
 
 # Definieren der Tracker und Marker als jeweils eine Tracker Klasse
@@ -40,7 +40,7 @@ Tracker_52 = trackers.Tracker(0, './Data/Trackers/ZF_DIP.csv', ctname=None) # Ba
 print(Tracker_52.t_ct_def)
 
 # opti_taj_Marker data transformation in CT coordinatesystem
-
+ct_traj_Tracker_52 = opti_traj_Tracker_52 * Tracker_52.t_ct_tr
 
 # Winkel DAU
 
