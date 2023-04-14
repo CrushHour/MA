@@ -4,6 +4,7 @@ import transformation_functions
 import os
 import numpy as np
 import scipy
+import tqdm
 
 # Definition der Pfade
 data_path = 'Data/test_01_31/'
@@ -19,10 +20,10 @@ opti_traj_Tracker_53 = transformation_functions.csv_test_load(opti_data,"Tracker
 opti_traj_FTTracker = transformation_functions.csv_test_load(opti_data,"FT-Tracker-4")
 opti_traj_M4_gross = transformation_functions.csv_test_load(opti_data,"M4_gross")
 opti_traj_M4_klein = transformation_functions.csv_test_load(opti_data,"M4_klein")
+
 # Marker
 # abgebrochen
 #opti_traj_Marker_ZF_distal = transformation_functions.marker_variable_id_linewise(opti_data,"M4_klein")
-
 opti_traj_Marker_ZF_proximal = transformation_functions.marker_variable_id_linewise(opti_data,"Unlabeled 2403")
 opti_traj_Marker_DAU = transformation_functions.marker_variable_id_linewise(opti_data,"Unlabeled 2016")
 Marker_DAU = transformation_functions.bone_stl(finger_name='DAU_DIP')
@@ -40,11 +41,14 @@ Tracker_52 = trackers.Tracker(0, './Data/Trackers/ZF_DIP.csv', ctname=None) # Ba
 print(Tracker_52.t_ct_def)
 
 # opti_taj_Marker data transformation in CT coordinatesystem
-ct_traj_Tracker_52 = opti_traj_Tracker_52 * Tracker_52.t_ct_tr
+ct_traj_Marker_ZF_proximal = np.zeros((len(opti_traj_Marker_ZF_proximal),3))
+for i in tqdm(range(len(opti_traj_Marker_ZF_proximal))):
+    ct_traj_Marker_ZF_proximal[i] = np.matmul(Tracker_52.t_ct_def[:3,:3], opti_traj_Marker_ZF_proximal[i])
 
-# Winkel DAU
 
-# Winkel ZF
+# angle DAU joints
+
+# angle ZF joints
 
 
 

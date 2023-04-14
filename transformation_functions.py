@@ -488,6 +488,12 @@ class bone_stl(trackers.Tracker):
             helper_ids = [7,5]
         self.helper_points = get_helper_points(helper_ids)
 
+        self.t_proxi_CT = t_cog_trackerorigin(self.helper_points[0], self.marker_pos_ct)
+        self.d_proxi_CT = np.linalg.norm(self.t_tracker_CT)
+
+        self.t_dist_CT = t_cog_trackerorigin(self.helper_points[1], self.marker_pos_ct)
+        self.d_dist_CT = np.linalg.norm(self.t_tracker_CT)
+
 # %%
 
 #%% Function tests
