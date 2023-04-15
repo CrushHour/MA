@@ -353,7 +353,7 @@ def plot_tiefpass(fs, Gp, Gs, wp, ws, marker_data):
     now = datetime.now()
     plot_file_title = "marker_" + now.strftime("%d_%m_%Y_%H_%M_%S")
     # plt.savefig(plot_file_title + ".pdf", format="pdf")
-    return fig
+    return y
 # %% 
 def calculate_transformation_matrix(markers1, markers2):
     '''Setzt vorraus, dass die Punktelisten korrekt sortiert sind.'''
@@ -373,6 +373,14 @@ def calculate_transformation_matrix(markers1, markers2):
     transformation_matrix[:3, 3] = t
     return transformation_matrix
 # %%
+# calculate angle beween two vectors
+def angle_between(v1, v2):
+    """ Returns the angle in radians between vectors 'v1' and 'v2'::
+    """
+    v1_u = v1 / np.linalg.norm(v1)
+    v2_u = v2 / np.linalg.norm(v2)
+    return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
+
 def Rotation_Matrix(phi, theta, psi, degrees = False):
     '''Gibt Rotationsmatrix für Eulerwinkel zurück.'''
     if phi > 2*math.pi or theta > 2*math.pi or \
@@ -439,7 +447,7 @@ Hilfspunkte 5-9 an Zeigefinger (ZF)
 
 def t_cog_trackerorigin(tracker_origin = np.array([0,0,0]), cog = np.array([0,0,0])):
     t = np.array([0,0,0])
-    t = cog - tracker_origin
+    t = np.subtract(cog,tracker_origin)
     return t
 
 def get_helper_points(helper_ids = [1,2,3,4,5,6,7,8,9], path = './Slicer3D/Hilfspunkte.mrk.json'):
@@ -461,12 +469,16 @@ class bone_stl(trackers.Tracker):
     
     def __init__(self, folder_path = "./Data/STL", finger_name = "") -> None:
         super().__init__(0, './Data/Trackers/'  + finger_name + '.csv')
+        # Setting standard filter variables.
+        fs = 120.0
+        Gp = 0.1
+        Gs = 3.0
+        wp = 0.8
+        ws = 1.1
         
         #tr = trackers.Tracker.__init__(self, 0, './Data/Trackers/DAU_DIP.csv')
-        directory = os.fsencode(folder_path)
         
         for file in os.listdir(folder_path):
-            filename = os.fsdecode(file)
             if file.find(finger_name) >= 0: 
                 # print(os.path.join(directory, filename))
                 file_path = os.path.join(folder_path, file)
@@ -480,12 +492,18 @@ class bone_stl(trackers.Tracker):
         helper_ids = []
         if finger_name == "DAU_DIP":
             helper_ids = [2,1]
+            marker_ID = 'Unlabeled 2016'
         elif finger_name == "DAU_MCP":
             helper_ids = [1,3]
+            marker_ID = 'Unlabeled 2016'
         elif finger_name == "ZF_DIP":
             helper_ids = [8,9]
+            marker_ID = 'Unlabeled 2016'
         elif finger_name == "ZF_MCP":
             helper_ids = [7,5]
+            marker_ID = 'Unlabeled 2016'
+
+        # helper points
         self.helper_points = get_helper_points(helper_ids)
 
         self.t_proxi_CT = t_cog_trackerorigin(self.helper_points[0], self.marker_pos_ct)
@@ -493,6 +511,11 @@ class bone_stl(trackers.Tracker):
 
         self.t_dist_CT = t_cog_trackerorigin(self.helper_points[1], self.marker_pos_ct)
         self.d_dist_CT = np.linalg.norm(self.t_tracker_CT)
+
+        # build marker trace from csv file
+        marker_trace = marker_variable_id_linewise(self.path, marker_ID, "csv", 40)
+        inter_data = nan_helper(marker_trace)
+        self.opti_marker_trace = plot_tiefpass(fs, Gp, Gs, wp, ws, inter_data)
 
 # %%
 
@@ -508,7 +531,7 @@ if __name__ == '__main__':
     marker_ID = 'Unlabeled 2016'
     marker_data = marker_variable_id_linewise(path, marker_ID, "csv", 40)
     inter_data = nan_helper(marker_data)
-    # Setting standard filter requirements.
+    # Setting standard filter variables.
     fs = 120.0
     Gp = 0.1
     Gs = 3.0
