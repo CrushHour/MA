@@ -46,12 +46,33 @@ print(Tracker_52.t_ct_def)
 
 # opti_taj_Marker data transformation in CT coordinatesystem
 ct_traj_Marker_ZF_proximal = np.zeros((len(opti_traj_Marker_ZF_proximal),3))
+ct_traj_Marker_DAU = np.zeros((len(opti_traj_Marker_DAU),3))
 for i in range(len(opti_traj_Marker_ZF_proximal)):
+    # Marker ZF proximal
     ct_traj_Marker_ZF_proximal[i] = np.matmul(Tracker_52.t_ct_def[:3,:3], opti_traj_Marker_ZF_proximal[i])
     ct_traj_Marker_ZF_proximal[i] = ct_traj_Marker_ZF_proximal[i] + Tracker_52.t_ct_def[:3,3]
+
+    # Marker DIP
+    ct_traj_Marker_DAU[i] = np.matmul(Tracker_52.t_ct_def[:3,:3], opti_traj_Marker_DAU[i])
+    ct_traj_Marker_DAU[i] = ct_traj_Marker_DAU[i] + Tracker_52.t_ct_def[:3,3]
 print(ct_traj_Marker_ZF_proximal)
 
-
+# postitions of helper_points 2 is derived from tracker 55
+# r_rel_hp2 is the relative position of helper point 2 and is the difference of the position of the helper point 2 and the position of the tracker 52
+hp_DAU_DIP = np.zeros((len(opti_traj_55),3))
+hp_DAU_MCP = np.zeros((len(opti_traj_M4_klein),3))
+r_rel_hp2 = np.zeros((3,3))
+r_rel_hp4 = np.zeros((3,3))
+r_rel_hp2 = np.subtract(hp_DAU_DIP, Tracker_55.t_ct_def[:3,3])
+r_rel_hp4 = np.subtract(hp_DAU_MCP, Tracker_M4_klein.t_ct_def[:3,3])
+# calculate relative position of helper points
+for i in range(len(opti_traj_55)):
+    # helper point 2
+    hp_DAU_DIP[i] = np.matmul(Tracker_55.t_ct_def[:3,:3], opti_traj_55[i])
+    hp_DAU_DIP[i] = hp_DAU_DIP[i] + r_rel_hp2 * Tracker_55.t_ct_def[:3,:3]
+    # helper point 4
+    hp_DAU_MCP[i] = np.matmul(Tracker_M4_klein.t_ct_def[:3,:3], opti_traj_M4_klein[i])
+    hp_DAU_MCP[i] = hp_DAU_MCP[i] + r_rel_hp4 * Tracker_M4_klein.t_ct_def[:3,:3]
 
 # angle ZF joints
 

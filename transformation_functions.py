@@ -513,11 +513,10 @@ class bone_stl(trackers.Tracker):
         self.d_dist_CT = np.linalg.norm(self.t_tracker_CT)
 
         # build marker trace from csv file
-        marker_trace = marker_variable_id_linewise(self.path, marker_ID, "csv", 40)
+        marker_trace = marker_variable_id_linewise('./Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv', marker_ID, "csv", 40)
         inter_data = nan_helper(marker_trace)
         self.opti_marker_trace = plot_tiefpass(fs, Gp, Gs, wp, ws, inter_data)
 
-# %%
 
 #%% Function tests
 if __name__ == '__main__':

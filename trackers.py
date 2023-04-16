@@ -236,6 +236,8 @@ class Tracker(object):
                     [float(row[2]), float(row[3]), float(row[4])])
         self.marker_pos_def = coordinates
         # reader schließen?
+        file.close()
+
 
     def calculate_transformation_matrix(self):
         """the required tranformation matrix between system 1 and 2"""
