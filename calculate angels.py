@@ -22,7 +22,8 @@ opti_traj_M4_gross = transformation_functions.csv_test_load(opti_data,"M4_gross"
 opti_traj_M4_klein = transformation_functions.csv_test_load(opti_data,"M4_klein")
 
 # Marker
-# abgebrochen
+# 
+                        
 #opti_traj_Marker_ZF_distal = transformation_functions.marker_variable_id_linewise(opti_data,"M4_klein")
 opti_traj_Marker_ZF_proximal = transformation_functions.marker_variable_id_linewise(opti_data,"Unlabeled 2403")
 opti_traj_Marker_DAU = transformation_functions.marker_variable_id_linewise(opti_data,"Unlabeled 2016")
@@ -76,6 +77,9 @@ for i in range(len(opti_traj_55)):
 
 # angle ZF joints
 
+#calculate angeles in DAU joints
+alpha = transformation_functions.angle_between()
+beta = transformation_functions.angle_between()
 
 
 #%%
