@@ -450,31 +450,27 @@ def t_cog_trackerorigin(tracker_origin = np.array([0,0,0]), cog = np.array([0,0,
     t = np.subtract(cog,tracker_origin)
     return t
 
-def get_helper_points(helper_ids = [1,2,3,4,5,6,7,8,9], path = './Slicer3D/Hilfspunkte.mrk.json'):
-    # change format of helper_ids to string
-    helper_ids = [str(i) for i in helper_ids]
+def get_helper_points(finger_name: str, path = './Slicer3D/Joints/'):
+    '''Returns the joint points for the finger_name.'''
     
-    helper_points = []
+    helper_points = {'DAU_DIP':[], 'DAU_MCP':[], 'DAU_PIP':[], 'ZF_DIP':[], 'ZF_MCP':[], 'ZF_PIP':[]}
 
-    # 1. load mounting points
-    with open(path) as jsonfile:
-        data = json.load(jsonfile)
+    for key in helper_points.keys():
+        file_path = path + key[:3] + '_A' + key[3:] + '.json'        # 1. load mounting points
+        with open(file_path) as jsonfile:
+            data = json.load(jsonfile)
 
-    # extract point infos
-    point_data = data['markups'][0]['controlPoints']
-    helper_points = [point['position'] for point in point_data if point['id'] in helper_ids]
-    return helper_points
+        # extract point infos
+        point_data = data['markups'][0]['controlPoints']
+        helper_points[key] = [point['position'] for point in point_data]
+        helper_points[key].append(np.mean(helper_points[key], axis=0))
+    return helper_points[finger_name]
 
-class bone_stl(trackers.Tracker):
+class tracker_bone(trackers.Tracker):
     
     def __init__(self, folder_path = "./Data/STL", finger_name = "") -> None:
         super().__init__(0, './Data/Trackers/'  + finger_name + '.csv')
-        # Setting standard filter variables.
-        fs = 120.0
-        Gp = 0.1
-        Gs = 3.0
-        wp = 0.8
-        ws = 1.1
+      
         
         #tr = trackers.Tracker.__init__(self, 0, './Data/Trackers/DAU_DIP.csv')
         
@@ -485,9 +481,6 @@ class bone_stl(trackers.Tracker):
                 stl_data = stl.mesh.Mesh.from_file(file_path)
             else:
                 continue
-        self.volume, self.cog_stl, self.inertia = stl_data.get_mass_properties()
-        self.t_tracker_CT = np.subtract(self.cog_stl, self.marker_pos_ct)
-        self.d_tracker_CT = np.linalg.norm(self.t_tracker_CT)
         
         helper_ids = []
         if finger_name == "DAU_DIP":
@@ -502,9 +495,16 @@ class bone_stl(trackers.Tracker):
         elif finger_name == "ZF_MCP":
             helper_ids = [7,5]
             marker_ID = 'Unlabeled 2016'
+        self.marker_trace = []
 
         # helper points
-        self.helper_points = get_helper_points(helper_ids)
+        self.helper_points = get_helper_points()
+
+        self.volume, self.cog_stl, self.inertia = stl_data.get_mass_properties()
+        self.t_tracker_CT = np.subtract(self.cog_stl, self.marker_pos_ct)
+        self.d_tracker_CT = np.linalg.norm(self.t_tracker_CT)
+
+        self.helper_points = get_helper_points()
 
         self.t_proxi_CT = t_cog_trackerorigin(self.helper_points[0], self.marker_pos_ct)
         self.d_proxi_CT = np.linalg.norm(self.t_tracker_CT)
@@ -512,16 +512,38 @@ class bone_stl(trackers.Tracker):
         self.t_dist_CT = t_cog_trackerorigin(self.helper_points[1], self.marker_pos_ct)
         self.d_dist_CT = np.linalg.norm(self.t_tracker_CT)
 
+        
+
+class marker_bone(tracker_bone):
+    '''Class for the bones with markers on top. Inherits from tracker_bone.'''
+    def __init__(self, folder_path = "./Data/STL", finger_name = "") -> None:
+        super().__init__(folder_path, finger_name)
+
+        base_tracker = tracker_bone(folder_path, finger_name)
+        
+        # Setting standard filter variables.
+        fs = 120.0
+        Gp = 0.1
+        Gs = 3.0
+        wp = 0.8
+        ws = 1.1
+
+
+
+
+
         # build marker trace from csv file
         marker_trace = marker_variable_id_linewise('./Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv', marker_ID, "csv", 40)
         inter_data = nan_helper(marker_trace)
+        # marker trace in different coordinate systems
         self.opti_marker_trace = plot_tiefpass(fs, Gp, Gs, wp, ws, inter_data)
+        self.ct_marker_trace = [i*base_tracker.t_ct_def[:3,:3] + base_tracker.t_ct_def[:3,3] for i in self.opti_marker_trace]
 
 
-#%% Function tests
 if __name__ == '__main__':
 
-    ZF_DIP = bone_stl(finger_name="ZF_DIP")
+    ZF_DIP = tracker_bone(finger_name="ZF_DIP")
+    ZF_MCP = marker_bone(finger_name="ZF_MCP")
 
     #path = r'C:\\GitHub\\MA\\Data\test_01_31\\Take 2023-01-31 06.11.42 PM.csv'
     path = './Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv'

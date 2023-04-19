@@ -1,0 +1,17 @@
+{
+    'ZF_DIP':{
+        'name': 'ZF_DIP',
+        'finger': 'ZF',
+        'joints': 'ZF_DIP',
+    }
+    'ZF_MCP':{
+        'name': 'ZF_DIP',
+        'finger': 'ZF',
+        'joints': 'ZF_DIP', 'ZF_PIP',
+    }
+    'ZF_DIP':{
+        'name': 'ZF_DIP',
+        'finger': 'ZF',
+        'joints': 'ZF_DIP',
+    }
+}
