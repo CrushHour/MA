@@ -3,6 +3,7 @@
         "name": "ZF_DIP",
         "finger": "ZF",
         "tracking": "Tracker",
+        "tracker": "./Data/Trackers/ZF_DIP.csv",
         "stl": "./Data/STL/Segmentation_ZF_DIP.stl",
         "joints": ["./Slicer3D/Joints/ZF_A_DIP.mrk.json"]
     },
@@ -23,6 +24,7 @@
     "ZF_midhand":{
         "name": "ZF_MCP",
         "tracking": "Tracker",
+        "tracker": "./Data/Trackers/ZF_MCP.csv",
         "finger": "ZF",
         "stl": "./Data/STL/Segmentation_ZF_mittelhand.stl",
         "joints": ["./Slicer3D/Joints/ZF_A_MCP.mrk.json"]
@@ -33,8 +35,9 @@
         "name": "DAU_DIP",
         "finger": "DAU",
         "tracking": "Tracker",
+        "tracker": "./Data/Trackers/DAU_DIP.csv",
         "stl": "./Data/STL/Segmentation_DAU_DIP.stl",
-        "joints": "./Slicer3D/Joints/ZF_A_DIP.mrk.json"
+        "joints": ["./Slicer3D/Joints/ZF_A_DIP.mrk.json"]
     },
     "DAU_PIP":{
         "name": "DAU_PIP",
@@ -47,6 +50,7 @@
         "name": "DAU_MCP",
         "finger": "DAU",
         "tracking": "Tracker",
+        "tracker": "./Data/Trackers/DAU_MCP.csv",
         "stl": "./Data/STL/Segmentation_DAU_Phalax_proximalis.stl",
         "joints": ["./Slicer3D/Joints/ZF_A_PIP.mrk.json", "./Slicer3D/Joints/ZF_A_MCP.mrk.json"]
     }

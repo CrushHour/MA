@@ -7,6 +7,7 @@ import scipy
 from tqdm import tqdm
 
 # Definition der Pfade
+test_metadata = transformation_functions.get_test_metadata('Take 2023-01-31 06.11.42 PM.csv')
 data_path = 'Data/test_01_31/'
 test_file = '2023_01_31_18_12_48.json'
 opti_data = './Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv'
@@ -27,8 +28,8 @@ opti_traj_M4_klein = transformation_functions.csv_test_load(opti_data,"M4_klein"
 #opti_traj_Marker_ZF_distal = transformation_functions.marker_variable_id_linewise(opti_data,"M4_klein")
 opti_traj_Marker_ZF_proximal = transformation_functions.marker_variable_id_linewise(opti_data,"Unlabeled 2403")
 opti_traj_Marker_DAU = transformation_functions.marker_variable_id_linewise(opti_data,"Unlabeled 2016")
-Marker_DAU = transformation_functions.bone_stl(finger_name='DAU_DIP')
-Marker_ZF_proximal = transformation_functions.bone_stl(finger_name="ZF_DIP")
+Marker_DAU = transformation_functions.marker_bone(finger_name='DAU_DIP')
+Marker_ZF_proximal = transformation_functions.marker_bone(finger_name="ZF_DIP")
 # Laden des Testfiles als json vom Stream.
 
 # Definieren der Tracker und Marker als jeweils eine Tracker Klasse
@@ -70,7 +71,7 @@ r_rel_hp4 = np.subtract(hp_DAU_MCP, Tracker_M4_klein.t_ct_def[:3,3])
 # calculate relative position of helper points
 for i in range(len(opti_traj_55)):
     # helper point 2
-    hp_DAU_DIP[i] = np.matmul(Tracker_55.t_ct_def[:3,:3], opti_traj_55[i])
+    hp_DAU_DIP[i] = np.matmul(Tracker_55.t_ct_def[:3,:3], opti_traj_55[i]) #opti_traj_55.shape (9120,8)
     hp_DAU_DIP[i] = hp_DAU_DIP[i] + r_rel_hp2 * Tracker_55.t_ct_def[:3,:3]
     # helper point 4
     hp_DAU_MCP[i] = np.matmul(Tracker_M4_klein.t_ct_def[:3,:3], opti_traj_M4_klein[i])

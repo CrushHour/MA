@@ -466,42 +466,74 @@ def get_helper_points(finger_name: str, path = './Slicer3D/Joints/'):
         helper_points[key].append(np.mean(helper_points[key], axis=0))
     return helper_points[finger_name]
 
+def get_joints(path = ['./Slicer3D/Joints/']):
+    '''Returns the joint points for the finger_name.'''
+    joint_pos = []
+
+    for file_path in path:
+
+        with open(file_path) as jsonfile:
+            data = json.load(jsonfile)
+
+        # extract point infos
+        point_data = data['markups'][0]['controlPoints']
+        helper_points = [point['position'] for point in point_data]
+        joint_pos.append(np.mean(helper_points, axis=0))
+    return joint_pos
+
+def get_test_metadata(name):
+    '''Returns the metadata of the tracker.'''
+    with open('test_metadata.json') as json_data:
+        d = json.load(json_data)
+        metadata = d[name]
+        json_data.close()
+    return metadata
 class tracker_bone(trackers.Tracker):
     
-    def __init__(self, folder_path = "./Data/STL", finger_name = "") -> None:
-        super().__init__(0, './Data/Trackers/'  + finger_name + '.csv')
-        metadata = self.get_metadata()
-
+    def __init__(self, finger_name = "") -> None:
         self.finger_name = finger_name
-        self.folder_path = folder_path
-
+        metadata = self.get_metadata()
+        try:
+            super().__init__(0, metadata['tracker'])
+        except:
+            print('Tracker not found. Tracker class not initialized.')
         
+        stl_data = stl.mesh.Mesh.from_file(metadata['stl'])
 
         self.volume, self.cog_stl, self.inertia = stl_data.get_mass_properties()
         self.t_tracker_CT = np.subtract(self.cog_stl, self.marker_pos_ct)
         self.d_tracker_CT = np.linalg.norm(self.t_tracker_CT)
 
-        self.helper_points = get_helper_points()
+        self.helper_points = get_joints(metadata['joints'])
 
         self.t_proxi_CT = t_cog_trackerorigin(self.helper_points[0], self.marker_pos_ct)
         self.d_proxi_CT = np.linalg.norm(self.t_tracker_CT)
 
-        self.t_dist_CT = t_cog_trackerorigin(self.helper_points[1], self.marker_pos_ct)
-        self.d_dist_CT = np.linalg.norm(self.t_tracker_CT)
+        try:
+            self.t_dist_CT = t_cog_trackerorigin(self.helper_points[1], self.marker_pos_ct)
+            self.d_dist_CT = np.linalg.norm(self.t_tracker_CT)
+        except:
+            print('No distal joint found.')
+        
 
     def get_metadata(self):
         '''Returns the metadata of the tracker.'''
         with open('hand_metadata.json') as json_data:
-        d = json.loads(json_data)
-        metadata = d[self.finger_name]
-        json_data.close()
+            d = json.load(json_data)
+            metadata = d[self.finger_name]
+            json_data.close()
         return metadata
+    
 class marker_bone(tracker_bone):
     '''Class for the bones with markers on top. Inherits from tracker_bone.'''
-    def __init__(self, folder_path = "./Data/STL", finger_name = "") -> None:
-        super().__init__(folder_path, finger_name)
+    def __init__(self, finger_name = "", test_path = './Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv') -> None:
+        super().__init__(finger_name)
 
-        base_tracker = tracker_bone(folder_path, finger_name)
+        base_tracker = tracker_bone(finger_name)
+        self.testname = os.path.split(test_path)[1]
+        test_metadata = get_test_metadata(self.testname)
+        marker_ID = test_metadata['marker_IDs']
+
         
         # Setting standard filter variables.
         fs = 120.0
@@ -510,16 +542,17 @@ class marker_bone(tracker_bone):
         wp = 0.8
         ws = 1.1
 
+        self.opti_marker_trace = []
+        self.ct_marker_trace = []
 
+        for ID in marker_ID:
+            # build marker trace from csv file
+            marker_trace = marker_variable_id_linewise(test_path, ID, test_metadata["type"], 40)
+            inter_data = nan_helper(marker_trace)
+            # marker trace in different coordinate systems
+            self.opti_marker_trace.append(plot_tiefpass(fs, Gp, Gs, wp, ws, inter_data))
+            self.ct_marker_trace.append([i*base_tracker.t_ct_def[:3,:3] + base_tracker.t_ct_def[:3,3] for i in self.opti_marker_trace[-1]])
 
-
-
-        # build marker trace from csv file
-        marker_trace = marker_variable_id_linewise('./Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv', marker_ID, "csv", 40)
-        inter_data = nan_helper(marker_trace)
-        # marker trace in different coordinate systems
-        self.opti_marker_trace = plot_tiefpass(fs, Gp, Gs, wp, ws, inter_data)
-        self.ct_marker_trace = [i*base_tracker.t_ct_def[:3,:3] + base_tracker.t_ct_def[:3,3] for i in self.opti_marker_trace]
 
 
 if __name__ == '__main__':
