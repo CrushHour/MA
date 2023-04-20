@@ -470,35 +470,12 @@ class tracker_bone(trackers.Tracker):
     
     def __init__(self, folder_path = "./Data/STL", finger_name = "") -> None:
         super().__init__(0, './Data/Trackers/'  + finger_name + '.csv')
-      
-        
-        #tr = trackers.Tracker.__init__(self, 0, './Data/Trackers/DAU_DIP.csv')
-        
-        for file in os.listdir(folder_path):
-            if file.find(finger_name) >= 0: 
-                # print(os.path.join(directory, filename))
-                file_path = os.path.join(folder_path, file)
-                stl_data = stl.mesh.Mesh.from_file(file_path)
-            else:
-                continue
-        
-        helper_ids = []
-        if finger_name == "DAU_DIP":
-            helper_ids = [2,1]
-            marker_ID = 'Unlabeled 2016'
-        elif finger_name == "DAU_MCP":
-            helper_ids = [1,3]
-            marker_ID = 'Unlabeled 2016'
-        elif finger_name == "ZF_DIP":
-            helper_ids = [8,9]
-            marker_ID = 'Unlabeled 2016'
-        elif finger_name == "ZF_MCP":
-            helper_ids = [7,5]
-            marker_ID = 'Unlabeled 2016'
-        self.marker_trace = []
+        metadata = self.get_metadata()
 
-        # helper points
-        self.helper_points = get_helper_points()
+        self.finger_name = finger_name
+        self.folder_path = folder_path
+
+        
 
         self.volume, self.cog_stl, self.inertia = stl_data.get_mass_properties()
         self.t_tracker_CT = np.subtract(self.cog_stl, self.marker_pos_ct)
@@ -512,8 +489,13 @@ class tracker_bone(trackers.Tracker):
         self.t_dist_CT = t_cog_trackerorigin(self.helper_points[1], self.marker_pos_ct)
         self.d_dist_CT = np.linalg.norm(self.t_tracker_CT)
 
-        
-
+    def get_metadata(self):
+        '''Returns the metadata of the tracker.'''
+        with open('hand_metadata.json') as json_data:
+        d = json.loads(json_data)
+        metadata = d[self.finger_name]
+        json_data.close()
+        return metadata
 class marker_bone(tracker_bone):
     '''Class for the bones with markers on top. Inherits from tracker_bone.'''
     def __init__(self, folder_path = "./Data/STL", finger_name = "") -> None:

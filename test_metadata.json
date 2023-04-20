@@ -1,0 +1,10 @@
+{
+    "Take 2023-01-31 06.11.42 PM.csv":{
+        "path":"./Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv",
+        "type":"csv",
+        "initial_maker_ids":[
+            "Unlabeled 2016",
+            "Unlabeled 2403"
+        ]
+    }
+}

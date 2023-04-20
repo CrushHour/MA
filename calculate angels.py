@@ -45,6 +45,7 @@ Tracker_52 = trackers.Tracker(0, './Data/Trackers/ZF_DIP.csv', ctname=None) # Ba
 
 print(Tracker_52.t_ct_def)
 
+
 # opti_taj_Marker data transformation in CT coordinatesystem
 ct_traj_Marker_ZF_proximal = np.zeros((len(opti_traj_Marker_ZF_proximal),3))
 ct_traj_Marker_DAU = np.zeros((len(opti_traj_Marker_DAU),3))
