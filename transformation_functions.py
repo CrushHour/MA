@@ -47,8 +47,8 @@ def csv_test_load(testrun_path, tracker_designation_motive):
     of a specified testrun from an motive .csv export.'''
     df = pd.read_csv(testrun_path, header=2, low_memory=False)
     start_coloum = df.columns.get_loc(tracker_designation_motive)
-    data = df.iloc[3:,start_coloum:start_coloum+8]
-    
+    data = df.values[3:,start_coloum:start_coloum+8]
+    data = np.array([list(map(float, i)) for i in data])
     return data
 
 def marker_variable_id(testrun_path, initialID=None, dtype="csv"):
@@ -381,6 +381,57 @@ def angle_between(v1, v2):
     v2_u = v2 / np.linalg.norm(v2)
     return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
 
+# https://automaticaddison.com/how-to-convert-a-quaternion-to-a-rotation-matrix/
+
+def quaternion_rotation_matrix(Q):
+    """
+    Covert a quaternion into a full three-dimensional rotation matrix.
+ 
+    Input
+    :param Q: A 4 element array representing the quaternion (q0,q1,q2,q3) 
+ 
+    Output
+    :return: A 3x3 element matrix representing the full 3D rotation matrix. 
+             This rotation matrix converts a point in the local reference 
+             frame to a point in the global reference frame.
+    
+    A quaternion rotation is made up of 4 numbers, 
+    whose values all have a minimum of -1 and a maximum of 1, 
+    i.e (0, 0, 0, 1) is a quaternion rotation that is equivalent to 
+    'no rotation' or a rotation of 0 around all axis. But ouptut of this function
+    is a 3x3 matrix: array([[-1,  0,  0],
+                            [ 0, -1,  0],
+                            [ 0,  0,  1]]) for Input [0,0,0,1]
+    https://answers.unity.com/questions/645903/please-explain-quaternions.html#:~:text=A%20quaternion%20rotation%20is%20made,of%200%20around%20all%20axis.
+    """
+    # Extract the values from Q
+    q0 = Q[0]
+    q1 = Q[1]
+    q2 = Q[2]
+    q3 = Q[3]
+     
+    # First row of the rotation matrix
+    r00 = 2 * (q0 * q0 + q1 * q1) - 1
+    r01 = 2 * (q1 * q2 - q0 * q3)
+    r02 = 2 * (q1 * q3 + q0 * q2)
+     
+    # Second row of the rotation matrix
+    r10 = 2 * (q1 * q2 + q0 * q3)
+    r11 = 2 * (q0 * q0 + q2 * q2) - 1
+    r12 = 2 * (q2 * q3 - q0 * q1)
+     
+    # Third row of the rotation matrix
+    r20 = 2 * (q1 * q3 - q0 * q2)
+    r21 = 2 * (q2 * q3 + q0 * q1)
+    r22 = 2 * (q0 * q0 + q3 * q3) - 1
+     
+    # 3x3 rotation matrix
+    rot_matrix = np.array([[r00, r01, r02],
+                           [r10, r11, r12],
+                           [r20, r21, r22]])
+                            
+    return rot_matrix
+
 def Rotation_Matrix(phi, theta, psi, degrees = False):
     '''Gibt Rotationsmatrix für Eulerwinkel zurück.'''
     if phi > 2*math.pi or theta > 2*math.pi or \
@@ -482,15 +533,21 @@ def get_joints(path = ['./Slicer3D/Joints/']):
     return joint_pos
 
 def get_test_metadata(name):
-    '''Returns the metadata of the tracker.'''
+    '''Returns the metadata of the test.'''
     with open('test_metadata.json') as json_data:
         d = json.load(json_data)
         metadata = d[name]
         json_data.close()
     return metadata
+def get_json(path):
+    '''Returns the metadata of the test.'''
+    with open(path) as json_data:
+        d = json.load(json_data)
+        json_data.close()
+    return d
 class tracker_bone(trackers.Tracker):
     
-    def __init__(self, finger_name = "") -> None:
+    def __init__(self, finger_name = "", test_path = './Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv') -> None:
         self.finger_name = finger_name
         metadata = self.get_metadata()
         try:
@@ -514,7 +571,12 @@ class tracker_bone(trackers.Tracker):
             self.d_dist_CT = np.linalg.norm(self.t_tracker_CT)
         except:
             print('No distal joint found.')
-        
+
+        # Get the trajectory of the tracker from the test data
+        self.track_traj_opti = csv_test_load(test_path,metadata['tracker name'])
+        # cog_traj_CT = pos_track_opti * R_opti_ct + r_rel_cog_track * R_opti_ct * R_ct_tracker
+        self.cog_traj_CT = [self.track_traj_opti[i,4:7] * self.t_ct_def[:3,:3] + self.t_tracker_CT * self.t_ct_def * quaternion_rotation_matrix(self.track_traj_opti[i,:4]) for i in range(len(self.track_traj_opti))]
+        self.proxi_traj_CT = [self.track_traj_opti[i,4:7] * self.t_ct_def[:3,:3] + self.t_proxi_CT * self.t_ct_def * quaternion_rotation_matrix(self.track_traj_opti[i,:4]) for i in range(len(self.track_traj_opti))]
 
     def get_metadata(self):
         '''Returns the metadata of the tracker.'''
@@ -526,13 +588,13 @@ class tracker_bone(trackers.Tracker):
     
 class marker_bone(tracker_bone):
     '''Class for the bones with markers on top. Inherits from tracker_bone.'''
-    def __init__(self, finger_name = "", test_path = './Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv') -> None:
-        super().__init__(finger_name)
+    def __init__(self, finger_name = "", test_path = './Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv', init_marker_ID = "Unlabeled ...") -> None:
+        super().__init__(finger_name, test_path=test_path)
 
         base_tracker = tracker_bone(finger_name)
         self.testname = os.path.split(test_path)[1]
         test_metadata = get_test_metadata(self.testname)
-        marker_ID = test_metadata['marker_IDs']
+        
 
         
         # Setting standard filter variables.
@@ -545,16 +607,16 @@ class marker_bone(tracker_bone):
         self.opti_marker_trace = []
         self.ct_marker_trace = []
 
-        for ID in marker_ID:
-            # build marker trace from csv file
-            marker_trace = marker_variable_id_linewise(test_path, ID, test_metadata["type"], 40)
-            inter_data = nan_helper(marker_trace)
-            # marker trace in different coordinate systems
-            self.opti_marker_trace.append(plot_tiefpass(fs, Gp, Gs, wp, ws, inter_data))
-            self.ct_marker_trace.append([i*base_tracker.t_ct_def[:3,:3] + base_tracker.t_ct_def[:3,3] for i in self.opti_marker_trace[-1]])
+        
+        # build marker trace from csv file
+        marker_trace = marker_variable_id_linewise(test_path, init_marker_ID, test_metadata["type"], 40)
+        inter_data = nan_helper(marker_trace)
+        # marker trace in different coordinate systems
+        self.opti_marker_trace.append(plot_tiefpass(fs, Gp, Gs, wp, ws, inter_data))
+        self.ct_marker_trace.append([opti_pose*base_tracker.t_ct_def[:3,:3] + base_tracker.t_ct_def[:3,3] for opti_pose in self.opti_marker_trace[-1]])
 
 
-
+# %%
 if __name__ == '__main__':
 
     ZF_DIP = tracker_bone(finger_name="ZF_DIP")
