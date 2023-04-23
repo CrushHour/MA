@@ -260,6 +260,19 @@ def plot_ply(tracker_points, opti_points, line_1, line_2, line_3, line_4):
 
     plt.show()
 
+def plot_class(i, Tracker1, Tracker2, Tracker3, Tracker4, Tracker5):
+    '''Plot tracker points in 3D for timestep i with different colors and a sphere with radius d around each point'''
+    fig = plt.figure()
+    ax = fig.add_subplot(projection = '3d')
+    ax.scatter(Tracker1[i][0],Tracker1[i][1],Tracker1[i][2], c='b', marker='^')
+    ax.scatter(Tracker2[i][0],Tracker2[i][1],Tracker2[i][2], c='r', marker='o')
+    ax.scatter(Tracker3[i][0],Tracker3[i][1],Tracker3[i][2], c='g', marker='s')
+    ax.scatter(Tracker4[i][0],Tracker4[i][1],Tracker4[i][2], c='y', marker='p')
+    ax.scatter(Tracker5[i][0],Tracker5[i][1],Tracker5[i][2], c='m', marker='*')
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_zlabel('z')
+    plt.show()
 
 def get_min_max_dis(points):
     n = len(points)

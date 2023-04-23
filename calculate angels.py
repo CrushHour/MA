@@ -4,6 +4,8 @@ import transformation_functions as tf
 import numpy as np
 import scipy
 from tqdm import tqdm
+from ipywidgets import interact, interactive, fixed, interact_manual
+import ipywidgets as widgets
 
 # Definition der Pfade
 test_metadata = tf.get_test_metadata('Take 2023-01-31 06.11.42 PM.csv')
@@ -32,8 +34,8 @@ opti_traj_M4_klein = tf.csv_test_load(opti_data,"M4_klein")
 # opti_traj_Marker_DAU = tf.marker_variable_id_linewise(opti_data,"Unlabeled 2016")
 
 # Definieren der Tracker und Marker als jeweils eine Tracker Klasse
-Marker_DAU = tf.marker_bone(finger_name='DAU_DIP',test_path=test_metadata['path'], init_marker_ID=test_metadata['init_marker_ID'][0])
-Marker_ZF_proximal = tf.marker_bone(finger_name="ZF_DIP",test_path=test_metadata['path'], init_marker_ID=test_metadata['init_marker_ID'][0])
+Marker_DAU = tf.marker_bone(finger_name='DAU_DIP',test_path=test_metadata['path'], init_marker_ID=test_metadata['marker_IDs'][0])
+Marker_ZF_proximal = tf.marker_bone(finger_name="ZF_DIP",test_path=test_metadata['path'], init_marker_ID=test_metadata['marker_IDs'][1])
 
 Tracker_ZF_DIP = tf.tracker_bone(0, './Data/Trackers/ZF_DIP.csv', ctname="Slicer3D/Tracker55.mrk.json")
 Tracker_ZF_MCP = tf.tracker_bone(0, './Data/Trackers/ZF_MCP.csv', ctname="Slicer3D/Tracker_M4_gross.mrk.json")
@@ -56,7 +58,14 @@ for i in range(len(opti_traj_Marker_ZF_proximal)):
     ct_traj_Marker_DAU[i] = ct_traj_Marker_DAU[i] + Tracker_52.t_ct_def[:3,3]"""
 
 # %% Visualisierung der Marker und Tracker
-interact(plot_ply, i = widgets.IntSlider(min=0,max=len(Tracker_ZF_DIP.t_opti)-1,step=1,value=0),
+interact(tf.plot_class, i = widgets.IntSlider(min=0,max=len(Tracker_ZF_DIP.track_traj_opti)-1,step=1,value=0),
+         Tracker_ZF_DIP=fixed(Tracker_ZF_DIP.cog_traj_CT),
+         Tracker_ZF_MCP=fixed(Tracker_ZF_MCP.cog_traj_CT),
+         Tracker_DAU_DIP=fixed(Tracker_DAU_DIP.cog_traj_CT),
+         Tracker_DAU_MCP=fixed(Tracker_DAU_MCP.cog_traj_CT),
+         Tracker_FT=fixed(Tracker_FT.cog_traj_CT),Marker_ZF_proximal=fixed(Marker_ZF_proximal.cog_traj_CT),
+         Marker_DAU=fixed(Marker_DAU.cog_traj_CT),
+         Basetracker=fixed(Basetracker.cog_traj_CT))
 
 # angle ZF joints
 alpha = tf.angle_between(1,2)
