@@ -35,17 +35,15 @@ opti_traj_M4_klein = tf.csv_test_load(opti_data,"M4_klein")
 Marker_DAU = tf.marker_bone(finger_name='DAU_DIP',test_path=test_metadata['path'], init_marker_ID=test_metadata['init_marker_ID'][0])
 Marker_ZF_proximal = tf.marker_bone(finger_name="ZF_DIP",test_path=test_metadata['path'], init_marker_ID=test_metadata['init_marker_ID'][0])
 
-Tracker_55 = tf.tracker_bone(0, './Data/Trackers/ZF_DIP.csv', ctname="Slicer3D/Tracker55.mrk.json")
-Tracker_M4_gross = tf.tracker_bone(0, './Data/Trackers/ZF_MCP.csv', ctname="Slicer3D/Tracker_M4_gross.mrk.json")
-Tracker_53 = tf.tracker_bone(0, './Data/Trackers/DAU_DIP.csv', ctname="Slicer3D/Tracker53.mrk.json")
-Tracker_M4_klein = tf.tracker_bone(0, './Data/Trackers/DAU_MCP.csv', ctname="Slicer3D/Tracker_M4_klein.mrk.json")
+Tracker_ZF_DIP = tf.tracker_bone(0, './Data/Trackers/ZF_DIP.csv', ctname="Slicer3D/Tracker55.mrk.json")
+Tracker_ZF_MCP = tf.tracker_bone(0, './Data/Trackers/ZF_MCP.csv', ctname="Slicer3D/Tracker_M4_gross.mrk.json")
+Tracker_DAU_DIP = tf.tracker_bone(0, './Data/Trackers/DAU_DIP.csv', ctname="Slicer3D/Tracker53.mrk.json")
+Tracker_DAU_MCP = tf.tracker_bone(0, './Data/Trackers/DAU_MCP.csv', ctname="Slicer3D/Tracker_M4_klein.mrk.json")
 Tracker_FT = tf.tracker_bone(0, './Data/Trackers/FT.csv', ctname=None)
-Tracker_52 = tf.tracker_bone(0, './Data/Trackers/ZF_DIP.csv', ctname=None) # Basis, hinten an Fixteur externe
-
-print(Tracker_52.t_ct_def)
+Basetracker = tf.tracker_bone(0, './Data/Trackers/ZF_DIP.csv', ctname=None) # Basis, hinten an Fixteur externe
 
 
-# opti_taj_Marker data transformation in CT coordinatesystem
+"""# opti_taj_Marker data transformation in CT coordinatesystem
 ct_traj_Marker_ZF_proximal = np.zeros((len(opti_traj_Marker_ZF_proximal),3))
 ct_traj_Marker_DAU = np.zeros((len(opti_traj_Marker_DAU),3))
 for i in range(len(opti_traj_Marker_ZF_proximal)):
@@ -55,7 +53,10 @@ for i in range(len(opti_traj_Marker_ZF_proximal)):
 
     # Marker DIP
     ct_traj_Marker_DAU[i] = np.matmul(Tracker_52.t_ct_def[:3,:3], opti_traj_Marker_DAU[i])
-    ct_traj_Marker_DAU[i] = ct_traj_Marker_DAU[i] + Tracker_52.t_ct_def[:3,3]
+    ct_traj_Marker_DAU[i] = ct_traj_Marker_DAU[i] + Tracker_52.t_ct_def[:3,3]"""
+
+# %% Visualisierung der Marker und Tracker
+interact(plot_ply, i = widgets.IntSlider(min=0,max=len(Tracker_ZF_DIP.t_opti)-1,step=1,value=0),
 
 # angle ZF joints
 alpha = tf.angle_between(1,2)

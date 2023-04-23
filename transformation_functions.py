@@ -575,11 +575,11 @@ class tracker_bone(trackers.Tracker):
         # Get the trajectory of the tracker from the test data
         self.track_traj_opti = csv_test_load(test_path,metadata['tracker name'])
         # cog_traj_CT = pos_track_opti * R_opti_ct + r_rel_cog_track * R_opti_ct * R_ct_tracker
-        self.cog_traj_CT = [self.track_traj_opti[i,4:7] * self.t_ct_def[:3,:3] + self.t_tracker_CT * self.t_ct_def * quaternion_rotation_matrix(self.track_traj_opti[i,:4]) for i in range(len(self.track_traj_opti))]
-        self.proxi_traj_CT = [self.track_traj_opti[i,4:7] * self.t_ct_def[:3,:3] + self.t_proxi_CT * self.t_ct_def * quaternion_rotation_matrix(self.track_traj_opti[i,:4]) for i in range(len(self.track_traj_opti))]
+        self.cog_traj_CT = [np.matmul(self.track_traj_opti[i,4:7],self.t_ct_def[:3,:3]) + self.t_ct_def[3,:3] + np.matmul(np.matmul(self.t_tracker_CT, self.t_ct_def), quaternion_rotation_matrix(self.track_traj_opti[i,:4])) for i in range(len(self.track_traj_opti))]
+        self.proxi_traj_CT = [np.matmul(self.track_traj_opti[i,4:7],self.t_ct_def[:3,:3]) + self.t_proxi_CT * self.t_ct_def * quaternion_rotation_matrix(self.track_traj_opti[i,:4]) for i in range(len(self.track_traj_opti))]
 
     def get_metadata(self):
-        '''Returns the metadata of the tracker.'''
+        '''Returns the metadata of the Phalanx.'''
         with open('hand_metadata.json') as json_data:
             d = json.load(json_data)
             metadata = d[self.finger_name]
@@ -595,7 +595,6 @@ class marker_bone(tracker_bone):
         self.testname = os.path.split(test_path)[1]
         test_metadata = get_test_metadata(self.testname)
         
-
         
         # Setting standard filter variables.
         fs = 120.0
@@ -613,7 +612,7 @@ class marker_bone(tracker_bone):
         inter_data = nan_helper(marker_trace)
         # marker trace in different coordinate systems
         self.opti_marker_trace.append(plot_tiefpass(fs, Gp, Gs, wp, ws, inter_data))
-        self.ct_marker_trace.append([opti_pose*base_tracker.t_ct_def[:3,:3] + base_tracker.t_ct_def[:3,3] for opti_pose in self.opti_marker_trace[-1]])
+        self.ct_marker_trace.append([np.matmul(opti_pose,base_tracker.t_ct_def[:3,:3]) + base_tracker.t_ct_def[:3,3] for opti_pose in self.opti_marker_trace[-1]])
 
 
 # %%
@@ -646,9 +645,9 @@ if __name__ == '__main__':
 
 # %%
 #   Tracker_3dicke:
- #       numTrackers = 5
- #       positions = [[0, 0, 75], [-42, 0, 46], [25, 0, 46], [0, 37, 41.5], [0, -44, 41.5]] # [[x,y,z],[x2,y2,z2],...]
- #       name, opti_positions = get_opti_positions('MakerJS_3dicke.csv')
+#       numTrackers = 5
+#       positions = [[0, 0, 75], [-42, 0, 46], [25, 0, 46], [0, 37, 41.5], [0, -44, 41.5]] # [[x,y,z],[x2,y2,z2],...]
+#       name, opti_positions = get_opti_positions('MakerJS_3dicke.csv')
 #
 #    Tracker_Nico:
 #        numTrackers = 5
