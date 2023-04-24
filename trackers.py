@@ -182,7 +182,7 @@ class Tracker(object):
             # read jsonfile from ct into memory
             self.read_ctdata()
             # catch the case where the ct file is about a marker instead of a tracker
-            if self.metadata["tracking"] == "tracker":
+            if self.metadata["tracking"] == "Tracker":
                 self.calculate_transformation_matrix()
                 # this assumes that the tracker definition file has coordinates in the same
                 # system as the recording file? - Julian

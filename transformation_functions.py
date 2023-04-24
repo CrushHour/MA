@@ -565,19 +565,21 @@ class tracker_bone(trackers.Tracker):
     def __init__(self, finger_name = "", test_path = './Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv') -> None:
         self.finger_name = finger_name
         metadata = self.get_metadata()
-
-        super().__init__(0, metadata['tracker def opti'], metadata['tracker def CT'], self.finger_name)
-        
+        if metadata["tracking"] == "Tracker":
+            super().__init__(0, metadata['tracker def opti'], metadata['tracker def CT'], self.finger_name)
+        else:
+            print("No tracker data available.", metadata["tracking"])
         stl_data = stl.mesh.Mesh.from_file(metadata['stl'])
 
         self.volume, self.cog_stl, self.inertia = stl_data.get_mass_properties()
-        self.t_tracker_CT = np.subtract(self.cog_stl, self.marker_pos_ct)
-        self.d_tracker_CT = np.linalg.norm(self.t_tracker_CT)
+        if metadata["tracking"] == "tracker":
+            self.t_tracker_CT = np.subtract(self.cog_stl, self.marker_pos_ct)
+            self.d_tracker_CT = np.linalg.norm(self.t_tracker_CT)
 
-        self.helper_points = get_joints(metadata['joints'])
+            self.helper_points = get_joints(metadata['joints'])
 
-        self.t_proxi_CT = t_cog_trackerorigin(self.helper_points[0], self.marker_pos_ct)
-        self.d_proxi_CT = np.linalg.norm(self.t_tracker_CT)
+            self.t_proxi_CT = t_cog_trackerorigin(self.helper_points[0], self.marker_pos_ct)
+            self.d_proxi_CT = np.linalg.norm(self.t_tracker_CT)
 
         try:
             self.t_dist_CT = t_cog_trackerorigin(self.helper_points[1], self.marker_pos_ct)
@@ -585,10 +587,10 @@ class tracker_bone(trackers.Tracker):
         except:
             print('No distal joint found.')
 
-        # Get the trajectory of the tracker from the test data
-        self.track_traj_opti = csv_test_load(test_path,metadata['tracker name'])
-        # cog_traj_CT = pos_track_opti * R_opti_ct + r_rel_cog_track * R_opti_ct * R_ct_tracker
         if metadata["tracking"] == "tracker":
+            # Get the trajectory of the tracker from the test data
+            self.track_traj_opti = csv_test_load(test_path,metadata['tracker name'])
+            # cog_traj_CT = pos_track_opti * R_opti_ct + r_rel_cog_track * R_opti_ct * R_ct_tracker
             self.cog_traj_CT = [np.matmul(self.track_traj_opti[i,4:7],self.t_ct_def[:3,:3]) + self.t_ct_def[3,:3] + np.matmul(np.matmul(self.t_tracker_CT, self.t_ct_def), quaternion_rotation_matrix(self.track_traj_opti[i,:4])) for i in range(len(self.track_traj_opti))]
             self.proxi_traj_CT = [np.matmul(self.track_traj_opti[i,4:7],self.t_ct_def[:3,:3]) + self.t_proxi_CT * self.t_ct_def * quaternion_rotation_matrix(self.track_traj_opti[i,:4]) for i in range(len(self.track_traj_opti))]
 
@@ -603,9 +605,9 @@ class tracker_bone(trackers.Tracker):
 class marker_bone(tracker_bone):
     '''Class for the bones with markers on top. Inherits from tracker_bone.'''
     def __init__(self, finger_name = "", test_path = './Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv', init_marker_ID = "Unlabeled ...") -> None:
-        super().__init__(finger_name, test_path=test_path)
+        super().__init__("ZF_midhand", test_path=test_path)
 
-        base_tracker = tracker_bone("base", test_path=test_path)
+        base_tracker = tracker_bone("ZF_midhand", test_path=test_path)
         self.testname = os.path.split(test_path)[1]
         test_metadata = get_test_metadata(self.testname)
         

@@ -34,7 +34,7 @@ opti_traj_M4_klein = tf.csv_test_load(opti_data,"M4_klein")
 # opti_traj_Marker_DAU = tf.marker_variable_id_linewise(opti_data,"Unlabeled 2016")
 
 # Definieren der Tracker und Marker als jeweils eine Tracker Klasse
-Marker_DAU = tf.marker_bone(finger_name='DAU_DIP',test_path=test_metadata['path'], init_marker_ID=test_metadata['marker_IDs'][0])
+Marker_DAU = tf.marker_bone(finger_name='DAU_PIP',test_path=test_metadata['path'], init_marker_ID=test_metadata['marker_IDs'][0])
 Marker_ZF_proximal = tf.marker_bone(finger_name="ZF_DIP",test_path=test_metadata['path'], init_marker_ID=test_metadata['marker_IDs'][1])
 
 Tracker_ZF_DIP = tf.tracker_bone(0, './Data/Trackers/ZF_DIP.csv', ctname="Slicer3D/Tracker55.mrk.json")
