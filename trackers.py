@@ -164,28 +164,43 @@ class TMatrix(object):
 class Tracker(object):
     """class to handle the"""
 
-    def __init__(self, id_num: int, defname: str, ctname=None):
+    def __init__(self, id_num: int, defname: str, ctname=None, finger_name=None):
         """init the tracker
         1. read files from pointlist
         """
+        self.metadata = self.get_metadata()
         self.id_num = id_num
         self.defname = defname
         self.ctname = ctname
+        self.finger_name = finger_name
+        
         # read definition file into memory
         self.read_markerdata()
 
-        if ctname is not None:
+        
+        if ctname is not None: 
             # read jsonfile from ct into memory
             self.read_ctdata()
-            self.calculate_transformation_matrix()
+            # catch the case where the ct file is about a marker instead of a tracker
+            if self.metadata["tracking"] == "tracker":
+                self.calculate_transformation_matrix()
+                # this assumes that the tracker definition file has coordinates in the same
+                # system as the recording file? - Julian
+                self.t_ct_tr = self.t_ct_def
         else:
             # define a test scenario
             self.perform_test()
 
-        # this assumes that the tracker definition file has coordinates in the same
-        # system as the recording file? - Julian
-        self.t_ct_tr = self.t_ct_def
-
+        
+    
+    def get_metadata(self):
+        '''Returns the metadata of the Phalanx.'''
+        with open('hand_metadata.json') as json_data:
+            d = json.load(json_data)
+            metadata = d[self.finger_name]
+            json_data.close()
+        return metadata
+    
     def perform_test(self):
         """function to perform the test
         # take the 
@@ -207,9 +222,10 @@ class Tracker(object):
         self.marker_pos_ct = points
         _, self.marker_pos_ct = return_sorted_points(
             self.marker_pos_def, self.marker_pos_ct)
-        _ = self.calculate_transformation_matrix()
-        print(np.round(self.t_ct_def, decimals=4))
-        print(np.round(self.t_def_ct, decimals=4))
+        if len(self.marker_pos_ct) == len(self.marker_pos_def):
+            _ = self.calculate_transformation_matrix()
+            print(np.round(self.t_ct_def, decimals=4))
+            print(np.round(self.t_def_ct, decimals=4))
 
     def read_ctdata(self):
         """read the data of the marker points from the ct scan"""
@@ -238,7 +254,7 @@ class Tracker(object):
         # reader schließen?
         file.close()
 
-
+    # von def in CT
     def calculate_transformation_matrix(self):
         """the required tranformation matrix between system 1 and 2"""
         markers2 = self.marker_pos_def

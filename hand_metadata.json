@@ -3,10 +3,11 @@
         "name": "ZF_DIP",
         "finger": "ZF",
         "tracking": "Tracker",
-        "tracker def": "./Data/Trackers/ZF_DIP.csv",
+        "tracker def opti": "./Data/Trackers/ZF_DIP.csv",
+        "tracker def CT": "./Slicer3D/Tracker55.mrk.json",
         "tracker name": "55",
         "stl": "./Data/STL/Segmentation_ZF_DIP.stl",
-        "joints": ["./Slicer3D/Joints/ZF_A_DIP.mrk.json"]
+        "joints": ["./Slicer3D/Joints/ZF_A_DIP.mrk.json",""]
     },
     "ZF_PIP":{
         "name": "ZF_DIP",
@@ -25,11 +26,12 @@
     "ZF_midhand":{
         "name": "ZF_MCP",
         "tracking": "Tracker",
-        "tracker def": "./Data/Trackers/ZF_MCP.csv",
+        "tracker def opti": "./Data/Trackers/ZF_MCP.csv",
+        "tracker def CT": "./Slicer3D/Tracker_M4_gross.mrk.json",
         "tracker name": "Tracker_M4_gross",
         "finger": "ZF",
         "stl": "./Data/STL/Segmentation_ZF_mittelhand.stl",
-        "joints": ["./Slicer3D/Joints/ZF_A_MCP.mrk.json"]
+        "joints": ["./Slicer3D/Joints/ZF_A_MCP.mrk.json",""]
     },
 
 
@@ -37,10 +39,11 @@
         "name": "DAU_DIP",
         "finger": "DAU",
         "tracking": "Tracker",
-        "tracker def": "./Data/Trackers/DAU_DIP.csv",
+        "tracker def opti": "./Data/Trackers/DAU_DIP.csv",
+        "tracker def CT": "./Slicer3D/Tracker_M4_klein.mrk.json",
         "tracker name": "M4_klein",
         "stl": "./Data/STL/Segmentation_DAU_DIP.stl",
-        "joints": ["./Slicer3D/Joints/ZF_A_DIP.mrk.json"]
+        "joints": ["", "./Slicer3D/Joints/ZF_A_DIP.mrk.json"]
     },
     "DAU_PIP":{
         "name": "DAU_PIP",
@@ -53,9 +56,20 @@
         "name": "DAU_MCP",
         "finger": "DAU",
         "tracking": "Tracker",
-        "tracker def": "./Data/Trackers/DAU_MCP.csv",
+        "tracker def opti": "./Data/Trackers/DAU_MCP.csv",
+        "tracker def CT": "./Slicer3D/Tracker53.mrk.json",
         "tracker name": "Tracker_53",
         "stl": "./Data/STL/Segmentation_DAU_Phalax_proximalis.stl",
-        "joints": ["np.nan", "./Slicer3D/Joints/DAU_A_MCP.mrk.json"]
+        "joints": ["./Slicer3D/Joints/DAU_A_MCP.mrk.json", ""]
+    },
+    "base":{
+        "name": "base",
+        "finger": "ZF",
+        "tracking": "Tracker",
+        "tracker def opti": "./Data/Trackers/DAU_MCP.csv",
+        "tracker def CT": "./Slicer3D/Tracker53.mrk.json",
+        "tracker name": "Tracker_53",
+        "stl": "./Data/STL/Segmentation_DAU_Phalax_proximalis.stl",
+        "joints": ["./Slicer3D/Joints/DAU_A_MCP.mrk.json", ""]
     }
 }

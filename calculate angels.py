@@ -67,6 +67,7 @@ interact(tf.plot_class, i = widgets.IntSlider(min=0,max=len(Tracker_ZF_DIP.track
          Marker_DAU=fixed(Marker_DAU.cog_traj_CT),
          Basetracker=fixed(Basetracker.cog_traj_CT))
 
+# %% Berechnung der Winkel zwischen den Markern und den Trackern
 # angle ZF joints
 alpha = tf.angle_between(1,2)
 beta = tf.angle_between(2,3)

@@ -535,14 +535,16 @@ def get_joints(path = ['./Slicer3D/Joints/']):
     joint_pos = []
 
     for file_path in path:
+        if file_path[-5:] != '.json':
+            joint_pos.append(np.array([np.nan,np.nan,np.nan]))
+        else:
+            with open(file_path) as jsonfile:
+                data = json.load(jsonfile)
 
-        with open(file_path) as jsonfile:
-            data = json.load(jsonfile)
-
-        # extract point infos
-        point_data = data['markups'][0]['controlPoints']
-        helper_points = [point['position'] for point in point_data]
-        joint_pos.append(np.mean(helper_points, axis=0))
+            # extract point infos
+            point_data = data['markups'][0]['controlPoints']
+            helper_points = [point['position'] for point in point_data]
+            joint_pos.append(np.mean(helper_points, axis=0))
     return joint_pos
 
 def get_test_metadata(name):
@@ -563,10 +565,8 @@ class tracker_bone(trackers.Tracker):
     def __init__(self, finger_name = "", test_path = './Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv') -> None:
         self.finger_name = finger_name
         metadata = self.get_metadata()
-        try:
-            super().__init__(0, metadata['tracker'])
-        except:
-            print('Tracker not found. Tracker class not initialized.')
+
+        super().__init__(0, metadata['tracker def opti'], metadata['tracker def CT'], self.finger_name)
         
         stl_data = stl.mesh.Mesh.from_file(metadata['stl'])
 
@@ -588,8 +588,9 @@ class tracker_bone(trackers.Tracker):
         # Get the trajectory of the tracker from the test data
         self.track_traj_opti = csv_test_load(test_path,metadata['tracker name'])
         # cog_traj_CT = pos_track_opti * R_opti_ct + r_rel_cog_track * R_opti_ct * R_ct_tracker
-        self.cog_traj_CT = [np.matmul(self.track_traj_opti[i,4:7],self.t_ct_def[:3,:3]) + self.t_ct_def[3,:3] + np.matmul(np.matmul(self.t_tracker_CT, self.t_ct_def), quaternion_rotation_matrix(self.track_traj_opti[i,:4])) for i in range(len(self.track_traj_opti))]
-        self.proxi_traj_CT = [np.matmul(self.track_traj_opti[i,4:7],self.t_ct_def[:3,:3]) + self.t_proxi_CT * self.t_ct_def * quaternion_rotation_matrix(self.track_traj_opti[i,:4]) for i in range(len(self.track_traj_opti))]
+        if metadata["tracking"] == "tracker":
+            self.cog_traj_CT = [np.matmul(self.track_traj_opti[i,4:7],self.t_ct_def[:3,:3]) + self.t_ct_def[3,:3] + np.matmul(np.matmul(self.t_tracker_CT, self.t_ct_def), quaternion_rotation_matrix(self.track_traj_opti[i,:4])) for i in range(len(self.track_traj_opti))]
+            self.proxi_traj_CT = [np.matmul(self.track_traj_opti[i,4:7],self.t_ct_def[:3,:3]) + self.t_proxi_CT * self.t_ct_def * quaternion_rotation_matrix(self.track_traj_opti[i,:4]) for i in range(len(self.track_traj_opti))]
 
     def get_metadata(self):
         '''Returns the metadata of the Phalanx.'''
@@ -604,7 +605,7 @@ class marker_bone(tracker_bone):
     def __init__(self, finger_name = "", test_path = './Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv', init_marker_ID = "Unlabeled ...") -> None:
         super().__init__(finger_name, test_path=test_path)
 
-        base_tracker = tracker_bone(finger_name)
+        base_tracker = tracker_bone("base", test_path=test_path)
         self.testname = os.path.split(test_path)[1]
         test_metadata = get_test_metadata(self.testname)
         
