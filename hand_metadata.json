@@ -28,7 +28,7 @@
         "tracking": "Tracker",
         "tracker def opti": "./Data/Trackers/ZF_MCP.csv",
         "tracker def CT": "./Slicer3D/Tracker_M4_gross.mrk.json",
-        "tracker name": "Tracker_M4_gross",
+        "tracker name": "M4_gross",
         "finger": "ZF",
         "stl": "./Data/STL/Segmentation_ZF_Mittelhand.stl",
         "joints": ["./Slicer3D/Joints/ZF_A_MCP.mrk.json",""]
@@ -58,7 +58,7 @@
         "tracking": "Tracker",
         "tracker def opti": "./Data/Trackers/DAU_MCP.csv",
         "tracker def CT": "./Slicer3D/Tracker53.mrk.json",
-        "tracker name": "Tracker_53",
+        "tracker name": "Tracker 53",
         "stl": "./Data/STL/Segmentation_DAU_Phalax_proximalis.stl",
         "joints": ["./Slicer3D/Joints/DAU_A_MCP.mrk.json", ""]
     },

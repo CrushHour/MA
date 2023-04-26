@@ -260,18 +260,21 @@ def plot_ply(tracker_points, opti_points, line_1, line_2, line_3, line_4):
 
     plt.show()
 
-def plot_class(i, Tracker1, Tracker2, Tracker3, Tracker4, Tracker5):
+def plot_class(i, Trackers: list = []):
     '''Plot tracker points in 3D for timestep i with different colors and a sphere with radius d around each point'''
+    colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
+    markers = ['o', 'v', '^', '<', '>', 's', 'p', '*', 'h', 'H', 'D', 'd', 'P', 'X']
     fig = plt.figure()
     ax = fig.add_subplot(projection = '3d')
-    ax.scatter(Tracker1[i][0],Tracker1[i][1],Tracker1[i][2], c='b', marker='^')
-    ax.scatter(Tracker2[i][0],Tracker2[i][1],Tracker2[i][2], c='r', marker='o')
-    ax.scatter(Tracker3[i][0],Tracker3[i][1],Tracker3[i][2], c='g', marker='s')
-    ax.scatter(Tracker4[i][0],Tracker4[i][1],Tracker4[i][2], c='y', marker='p')
-    ax.scatter(Tracker5[i][0],Tracker5[i][1],Tracker5[i][2], c='m', marker='*')
+    for j in range(len(Trackers)):
+        ax.scatter(Trackers[j][i][0],Trackers[j][i][1],Trackers[j][i][2], c=colors[j], marker=markers[-1])
+    
     ax.set_xlabel('x')
     ax.set_ylabel('y')
     ax.set_zlabel('z')
+    ax.set_xlim(-200,200)
+    ax.set_ylim(-200,200)
+    ax.set_zlim(-200,200)
     plt.show()
 
 def get_min_max_dis(points):
@@ -572,7 +575,7 @@ class tracker_bone(trackers.Tracker):
         stl_data = stl.mesh.Mesh.from_file(metadata['stl'])
 
         self.volume, self.cog_stl, self.inertia = stl_data.get_mass_properties()
-        if metadata["tracking"] == "tracker":
+        if metadata["tracking"] == "Tracker":
             self.t_tracker_CT = np.subtract(self.cog_stl, self.marker_pos_ct)
             self.d_tracker_CT = np.linalg.norm(self.t_tracker_CT)
 
@@ -587,12 +590,17 @@ class tracker_bone(trackers.Tracker):
         except:
             print('No distal joint found.')
 
-        if metadata["tracking"] == "tracker":
+        if metadata["tracking"] == "Tracker":
             # Get the trajectory of the tracker from the test data
             self.track_traj_opti = csv_test_load(test_path,metadata['tracker name'])
             # cog_traj_CT = pos_track_opti * R_opti_ct + r_rel_cog_track * R_opti_ct * R_ct_tracker
-            self.cog_traj_CT = [np.matmul(self.track_traj_opti[i,4:7],self.t_ct_def[:3,:3]) + self.t_ct_def[3,:3] + np.matmul(np.matmul(self.t_tracker_CT, self.t_ct_def), quaternion_rotation_matrix(self.track_traj_opti[i,:4])) for i in range(len(self.track_traj_opti))]
-            self.proxi_traj_CT = [np.matmul(self.track_traj_opti[i,4:7],self.t_ct_def[:3,:3]) + self.t_proxi_CT * self.t_ct_def * quaternion_rotation_matrix(self.track_traj_opti[i,:4]) for i in range(len(self.track_traj_opti))]
+            self.cog_traj_CT = [np.matmul(self.track_traj_opti[i,4:7],self.t_ct_def[:3,:3]) + self.t_ct_def[3,:3] \
+                                + np.matmul(np.matmul(self.t_tracker_CT, self.t_ct_def[:3,:3]), quaternion_rotation_matrix(self.track_traj_opti[i,:4])) \
+                                for i in range(len(self.track_traj_opti))]
+            
+            self.proxi_traj_CT = [np.matmul(self.track_traj_opti[i,4:7],self.t_ct_def[:3,:3]) + \
+                                  np.matmul(np.matmul(self.t_proxi_CT, self.t_ct_def[:3,:3]), quaternion_rotation_matrix(self.track_traj_opti[i,:4])) \
+                                  for i in range(len(self.track_traj_opti))]
 
     def get_metadata(self):
         '''Returns the metadata of the Phalanx.'''
