@@ -64,10 +64,17 @@ for i in range(len(opti_traj_Marker_ZF_proximal)):
     ct_traj_Marker_DAU[i] = ct_traj_Marker_DAU[i] + Tracker_52.t_ct_def[:3,3]"""
 
 # %% Visualisierung der Marker und Tracker
-Tracker_lst = [Tracker_ZF_DIP.cog_traj_CT, Tracker_ZF_MCP.cog_traj_CT, Tracker_DAU_DIP.cog_traj_CT, Tracker_DAU_MCP.cog_traj_CT]
-tf.plot_class(0, )
+ZF_Tracker_lst = [Tracker_ZF_DIP.cog_traj_CT, Tracker_ZF_DIP.proxi_traj_CT, Marker_ZF_proximal.ct_marker_trace, Tracker_ZF_MCP.cog_traj_CT, Tracker_ZF_MCP.proxi_traj_CT]
+DAU_Tracker_lst = [Tracker_DAU_DIP.cog_traj_CT, Tracker_DAU_MCP.cog_traj_CT, Marker_DAU.ct_marker_trace]
+name_lst = ['Tracker_ZF_DIP.cog_traj_CT', 'Tracker_ZF_DIP.proxi_traj_CT' ,'Marker_ZF_proximal.cog_traj_CT','Tracker_ZF_MCP.cog_traj_CT', 'Tracker_ZF_MCP.proxi_traj_CT','Tracker_DAU_DIP.cog_traj_CT', 'Tracker_DAU_MCP.cog_traj_CT', 'Marker_DAU.cog_traj_CT']
+
 interact(tf.plot_class, i = widgets.IntSlider(min=0,max=len(Tracker_ZF_DIP.track_traj_opti)-1,step=1,value=0),
-         Trackers = widgets.fixed(Tracker_lst))
+         Trackers1 = widgets.fixed(ZF_Tracker_lst), 
+         Trackers2 = widgets.fixed(DAU_Tracker_lst),
+         names = widgets.fixed(name_lst))
+
+for i in range(len(Marker_DAU.ct_marker_trace)):
+    print(np.subtract(Marker_DAU.ct_marker_trace[i],Marker_ZF_proximal.ct_marker_trace[i]))
 
 # %% Berechnung der Winkel zwischen den Markern und den Trackern
 # angle ZF joints

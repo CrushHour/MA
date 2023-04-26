@@ -8,6 +8,7 @@ import stl
 import math
 from PIL import Image
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 from ipywidgets import interact, interactive, fixed, interact_manual
 import ipywidgets as widgets
 from mpl_toolkits import mplot3d
@@ -181,18 +182,23 @@ def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv", d_max
         filled_cells = np.where(pd.notna(df.iloc[:,next_col]))
         start_line = int(filled_cells[0][3])
         start_value = df.values[start_line,next_col:next_col+3]
+        print("start value:", start_value)
+        print("start line:", start_line)
 
-    added_data = np.zeros((df.shape[0]-start_line,3)) 
+    #added_data = np.zeros((df.shape[0]-start_line,3)) 
+    added_data = np.zeros((df.shape[0]-3,3)) 
     added_data[0,:] = start_value
     last_signal = added_data[0,:]
 
     # Start Zeilenschleife
-    for k in tqdm(range(1,added_data.shape[0])):
+    #for k in tqdm(range(1,added_data.shape[0])):
+    for k in tqdm(range(start_line,added_data.shape[0])):
         
         min_dis = np.inf
         current_dis = np.inf
 
-        value = df.values[k+3,:]
+        #value = df.values[k+3,:]
+        value = df.values[k,:]
         value = np.array(list(map(float, value)))
 
         # Spalten
@@ -231,6 +237,7 @@ def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv", d_max
             added_data[k,:] = values_to_add
 
     #print(dis_list)
+    print("len added_data for marker %s:" % initialID, len(added_data))
     return added_data
 	
 def plot_ply(tracker_points, opti_points, line_1, line_2, line_3, line_4):
@@ -260,21 +267,28 @@ def plot_ply(tracker_points, opti_points, line_1, line_2, line_3, line_4):
 
     plt.show()
 
-def plot_class(i, Trackers: list = []):
+def plot_class(i, Trackers1: list = [], Trackers2: list = [], names: list = []):
     '''Plot tracker points in 3D for timestep i with different colors and a sphere with radius d around each point'''
     colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
+    morecolors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan']
+    longcolors = ['blue', 'orange', 'green', 'red', 'purple', 'brown', 'pink', 'gray', 'olive', 'cyan']
+    css4colors = list(mcolors.CSS4_COLORS.values())
+    customcolors = longcolors + morecolors + ['darkblue', 'darkgreen', 'darkred', 'darkcyan', 'darkmagenta', 'darkyellow', 'darkgray', 'darkolive', 'darkcyan']
     markers = ['o', 'v', '^', '<', '>', 's', 'p', '*', 'h', 'H', 'D', 'd', 'P', 'X']
     fig = plt.figure()
     ax = fig.add_subplot(projection = '3d')
-    for j in range(len(Trackers)):
-        ax.scatter(Trackers[j][i][0],Trackers[j][i][1],Trackers[j][i][2], c=colors[j], marker=markers[-1])
+    for j in range(len(Trackers1)):
+        ax.scatter(Trackers1[j][i][0],Trackers1[j][i][1],Trackers1[j][i][2], c=customcolors[j], marker=markers[0], label=names[j])
+    for k in range(len(Trackers2)):
+        ax.scatter(Trackers2[k][i][0],Trackers2[k][i][1],Trackers2[k][i][2], c=customcolors[j+k+1], marker=markers[2], label=names[j+k+1])
     
     ax.set_xlabel('x')
     ax.set_ylabel('y')
     ax.set_zlabel('z')
-    ax.set_xlim(-200,200)
-    ax.set_ylim(-200,200)
-    ax.set_zlim(-200,200)
+    ax.set_xlim(-250,250)
+    ax.set_ylim(-250,250)
+    ax.set_zlim(-250,250)
+    ax.legend(loc="upper left",bbox_to_anchor=(1.1, 1), ncol = 1)
     plt.show()
 
 def get_min_max_dis(points):
@@ -487,7 +501,7 @@ def min_max_arrays_to_kosy(min_track, max_track):
 def nan_helper(a):
     x, y = np.indices(a.shape)
     interp = np.array(a)
-    interp[np.isnan(interp)] = interpolate.griddata((x[~np.isnan(a)], y[~np.isnan(a)]), a[~np.isnan(a)], (x[np.isnan(a)], y[np.isnan(a)])) 
+    interp[np.isnan(interp)] = interpolate.griddata((x[~np.isnan(a)], y[~np.isnan(a)]), a[~np.isnan(a)], (x[np.isnan(a)], y[np.isnan(a)]), method='nearest') 
     return interp
 
 def read_markups(path):
@@ -576,16 +590,16 @@ class tracker_bone(trackers.Tracker):
 
         self.volume, self.cog_stl, self.inertia = stl_data.get_mass_properties()
         if metadata["tracking"] == "Tracker":
-            self.t_tracker_CT = np.subtract(self.cog_stl, self.marker_pos_ct)
+            self.t_tracker_CT = np.subtract(self.cog_stl, np.mean(self.marker_pos_ct,axis=0))
             self.d_tracker_CT = np.linalg.norm(self.t_tracker_CT)
 
             self.helper_points = get_joints(metadata['joints'])
 
-            self.t_proxi_CT = t_cog_trackerorigin(self.helper_points[0], self.marker_pos_ct)
+            self.t_proxi_CT = t_cog_trackerorigin(self.helper_points[0], np.mean(self.marker_pos_ct,axis=0))
             self.d_proxi_CT = np.linalg.norm(self.t_tracker_CT)
 
         try:
-            self.t_dist_CT = t_cog_trackerorigin(self.helper_points[1], self.marker_pos_ct)
+            self.t_dist_CT = t_cog_trackerorigin(self.helper_points[1], np.mean(self.marker_pos_ct,axis=0))
             self.d_dist_CT = np.linalg.norm(self.t_tracker_CT)
         except:
             print('No distal joint found.')
@@ -595,11 +609,11 @@ class tracker_bone(trackers.Tracker):
             self.track_traj_opti = csv_test_load(test_path,metadata['tracker name'])
             # cog_traj_CT = pos_track_opti * R_opti_ct + r_rel_cog_track * R_opti_ct * R_ct_tracker
             self.cog_traj_CT = [np.matmul(self.track_traj_opti[i,4:7],self.t_ct_def[:3,:3]) + self.t_ct_def[3,:3] \
-                                + np.matmul(np.matmul(self.t_tracker_CT, self.t_ct_def[:3,:3]), quaternion_rotation_matrix(self.track_traj_opti[i,:4])) \
+                                + np.matmul(np.matmul(self.t_tracker_CT, self.t_ct_def[:3,:3]), Quaternion(self.track_traj_opti[i,:4]).rotation_matrix) \
                                 for i in range(len(self.track_traj_opti))]
             
             self.proxi_traj_CT = [np.matmul(self.track_traj_opti[i,4:7],self.t_ct_def[:3,:3]) + \
-                                  np.matmul(np.matmul(self.t_proxi_CT, self.t_ct_def[:3,:3]), quaternion_rotation_matrix(self.track_traj_opti[i,:4])) \
+                                  np.matmul(np.matmul(self.t_proxi_CT, self.t_ct_def[:3,:3]), Quaternion(self.track_traj_opti[i,:4]).rotation_matrix) \
                                   for i in range(len(self.track_traj_opti))]
 
     def get_metadata(self):
@@ -637,20 +651,19 @@ class marker_bone(tracker_bone):
         # marker trace in different coordinate systems
         self.opti_marker_trace.append(plot_tiefpass(fs, Gp, Gs, wp, ws, inter_data))
         self.ct_marker_trace.append([np.matmul(opti_pose,base_tracker.t_ct_def[:3,:3]) + base_tracker.t_ct_def[:3,3] for opti_pose in self.opti_marker_trace[-1]])
-
+        self.ct_marker_trace = self.ct_marker_trace[0]
 
 # %%
 if __name__ == '__main__':
-
-    ZF_DIP = tracker_bone(finger_name="ZF_DIP")
-    ZF_MCP = marker_bone(finger_name="ZF_MCP")
 
     #path = r'C:\\GitHub\\MA\\Data\test_01_31\\Take 2023-01-31 06.11.42 PM.csv'
     path = './Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv'
 
     #raw_data = csv_test_load(path, '55')
     marker_ID = 'Unlabeled 2016'
+    marker_ID = 'Unlabeled 2403'
     marker_data = marker_variable_id_linewise(path, marker_ID, "csv", 40)
+
     inter_data = nan_helper(marker_data)
     # Setting standard filter variables.
     fs = 120.0
