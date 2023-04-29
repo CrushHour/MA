@@ -267,7 +267,7 @@ def plot_ply(tracker_points, opti_points, line_1, line_2, line_3, line_4):
 
     plt.show()
 
-def plot_class(i, Trackers1: list = [], Trackers2: list = [], names: list = []):
+def plot_class(i, Trackers1: list = [], Trackers2: list = [], names: list = [], radius: list = []):
     '''Plot tracker points in 3D for timestep i with different colors and a sphere with radius d around each point'''
     colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
     morecolors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan']
@@ -277,11 +277,35 @@ def plot_class(i, Trackers1: list = [], Trackers2: list = [], names: list = []):
     markers = ['o', 'v', '^', '<', '>', 's', 'p', '*', 'h', 'H', 'D', 'd', 'P', 'X']
     fig = plt.figure()
     ax = fig.add_subplot(projection = '3d')
+
+    # Plot known tracker points
     for j in range(len(Trackers1)):
         ax.scatter(Trackers1[j][i][0],Trackers1[j][i][1],Trackers1[j][i][2], c=customcolors[j], marker=markers[0], label=names[j])
     for k in range(len(Trackers2)):
         ax.scatter(Trackers2[k][i][0],Trackers2[k][i][1],Trackers2[k][i][2], c=customcolors[j+k+1], marker=markers[2], label=names[j+k+1])
     
+    # Plot lines between known tracker points
+    for j in range(len(Trackers1)-1):
+        ax.plot([Trackers1[j][i][0],Trackers1[j+1][i][0]],[Trackers1[j][i][1],Trackers1[j+1][i][1]], zs=[Trackers1[j][i][2],Trackers1[j+1][i][2]], c='r')
+    for k in range(len(Trackers2)-1):
+        ax.plot([Trackers2[k][i][0],Trackers2[k+1][i][0]],[Trackers2[k][i][1],Trackers2[k+1][i][1]], zs=[Trackers2[k][i][2],Trackers2[k+1][i][2]], c='b')
+    
+    # Plot sphere around known tracker points
+    for j in range(len(Trackers1)):
+        d = radius[j]
+        u, v = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
+        x = Trackers1[j][i][0] + d*np.cos(u)*np.sin(v)
+        y = Trackers1[j][i][1] + d*np.sin(u)*np.sin(v)
+        z = Trackers1[j][i][2] + d*np.cos(v)
+        ax.plot_wireframe(x, y, z, color='r', alpha=0.1)
+    for k in range(len(Trackers2)):
+        d = radius[j+k+1]
+        u, v = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
+        x = Trackers2[k][i][0] + d*np.cos(u)*np.sin(v)
+        y = Trackers2[k][i][1] + d*np.sin(u)*np.sin(v)
+        z = Trackers2[k][i][2] + d*np.cos(v)
+        ax.plot_wireframe(x, y, z, color='b', alpha=0.1)
+
     ax.set_xlabel('x')
     ax.set_ylabel('y')
     ax.set_zlabel('z')
