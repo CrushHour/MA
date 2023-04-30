@@ -6,6 +6,7 @@ import scipy
 from tqdm import tqdm
 from ipywidgets import interact, interactive, fixed, interact_manual
 import ipywidgets as widgets
+import matplotlib.pyplot as plt
 
 # Definition der Pfade
 test_metadata = tf.get_test_metadata('Take 2023-01-31 06.11.42 PM.csv')
@@ -67,7 +68,7 @@ for i in range(len(opti_traj_Marker_ZF_proximal)):
 ZF_Tracker_lst = [Tracker_ZF_DIP.dist_traj_CT,Tracker_ZF_DIP.cog_traj_CT, Marker_ZF_proximal.ct_marker_trace, Tracker_ZF_MCP.proxi_traj_CT, Tracker_ZF_MCP.cog_traj_CT]
 DAU_Tracker_lst = [Tracker_DAU_DIP.cog_traj_CT, Marker_DAU.ct_marker_trace, Tracker_DAU_MCP.cog_traj_CT]
 name_lst = ['Tracker_ZF_DIP.dist_traj_CT','Tracker_ZF_DIP.cog_traj_CT' ,'Marker_ZF_proximal.cog_traj_CT','Tracker_ZF_MCP.proxi_traj_CT','Tracker_ZF_MCP.cog_traj_CT', 'Tracker_DAU_DIP.cog_traj_CT', 'Marker_DAU.cog_traj_CT', 'Tracker_DAU_MCP.cog_traj_CT']
-radius_lst = [Tracker_ZF_DIP.d_proxi_CT,0, Marker_ZF_proximal.d_tracker_CT, Tracker_ZF_MCP.d_proxi_CT, 0, \
+radius_lst = [Tracker_ZF_DIP.d_dist_CT,0, Marker_ZF_proximal.d_tracker_CT, Tracker_ZF_MCP.d_proxi_CT, 0, \
               0, Marker_DAU.d_tracker_CT, 0]
 
 tf.plot_class(0,ZF_Tracker_lst,DAU_Tracker_lst,name_lst,radius_lst, save=False, show=True)
@@ -79,6 +80,12 @@ interact(tf.plot_class, i = widgets.IntSlider(min=0,max=len(Tracker_ZF_DIP.track
          radius = widgets.fixed(radius_lst),
          show = widgets.fixed(True))
 
+# %% Calculate points of the joints, which are not known yet.
+# On the DAU all points are known.
+# On the ZF points of the distal joint are not known.
+# Therefore the points of the distal joint are calculated with the help of the proximal joint.
+
+# calculate points of distal jointk
 
 # %% Check if Markers are unique
 for i in range(len(Marker_DAU.ct_marker_trace)):
@@ -86,13 +93,27 @@ for i in range(len(Marker_DAU.ct_marker_trace)):
 
 # %% Berechnung der Winkel zwischen den Markern und den Trackern
 # angle ZF joints
-alpha = tf.angle_between(1,2)
-beta = tf.angle_between(2,3)
-gamma = tf.angle_between(3,4)
-#calculate angeles in DAU joints
-alpha = tf.angle_between(1,2)
-beta = tf.angle_between(2,3)
+import matplotlib.pyplot as plt
 
+alpha = np.zeros(len(Tracker_ZF_DIP.cog_traj_CT))
+beta = np.zeros(len(Tracker_ZF_DIP.cog_traj_CT))
+gamma = np.zeros(len(Tracker_ZF_DIP.cog_traj_CT))
+delta = np.zeros(len(Tracker_ZF_DIP.cog_traj_CT))
+epsilon = np.zeros(len(Tracker_ZF_DIP.cog_traj_CT))
+
+for i in range(len(Tracker_ZF_DIP.cog_traj_CT)):
+    alpha = tf.angle_between(1,2)
+    beta = tf.angle_between(2,3)
+    gamma = tf.angle_between(3,4)
+    #calculate angeles in DAU joints
+    delta[i] = tf.angle_between(np.subtract(Tracker_DAU_DIP.cog_traj_CT[i],Tracker_DAU_DIP.dist_traj_CT[i]),np.subtract(Marker_DAU.cog_traj_CT[i],Tracker_DAU_DIP.dist_traj_CT[i]))*180/np.pi
+    epsilon[i] = tf.angle_between(np.subtract(Tracker_DAU_MCP.cog_traj_CT[i],Tracker_DAU_MCP.proxi_traj_CT[i]),np.subtract(Marker_DAU.cog_traj_CT[i],Tracker_DAU_MCP.proxi_traj_CT[i]))*180/np.pi
+
+# plotten von delta und epsilon
+plt.plot(delta)
+plt.plot(epsilon)
+plt.legend(['delta (DAU DIP)','epsilon (DAU PIP)'])
+plt.show()
 
 #%%
 # test_points1 = [[2,-5,4], [5,6,7], [-10,0,3], [-3,11,13], [8,5,4]]

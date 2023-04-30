@@ -620,6 +620,9 @@ class tracker_bone(trackers.Tracker):
 
         self.volume, self.cog_stl, self.inertia = stl_data.get_mass_properties()
         if metadata["tracking"] == "Tracker":
+            # Get the trajectory of the tracker from the test data
+            self.track_traj_opti = csv_test_load(test_path,metadata['tracker name'])
+
             self.t_tracker_CT = np.subtract(self.cog_stl, np.mean(self.marker_pos_ct,axis=0))
             self.d_tracker_CT = np.linalg.norm(self.t_tracker_CT)
 
@@ -628,6 +631,9 @@ class tracker_bone(trackers.Tracker):
             if not np.isnan(self.helper_points[0][0]):
                 self.t_proxi_CT = t_cog_trackerorigin(self.helper_points[0], np.mean(self.marker_pos_ct,axis=0))
                 self.d_proxi_CT = np.linalg.norm(self.t_tracker_CT)
+                self.proxi_traj_CT = [np.matmul(self.track_traj_opti[i,4:7],self.t_ct_def[:3,:3]) + \
+                                  np.matmul(np.matmul(self.t_proxi_CT, self.t_ct_def[:3,:3]), Quaternion(self.track_traj_opti[i,:4]).rotation_matrix) \
+                                  for i in range(len(self.track_traj_opti))]
             else:
                 print('No proximal joint found.')
 
@@ -635,20 +641,18 @@ class tracker_bone(trackers.Tracker):
             if not np.isnan(self.helper_points[1][0]):
                 self.t_dist_CT = t_cog_trackerorigin(self.helper_points[1], np.mean(self.marker_pos_ct,axis=0))
                 self.d_dist_CT = np.linalg.norm(self.t_tracker_CT)
+                self.dist_traj_CT = [np.matmul(self.track_traj_opti[i,4:7],self.t_ct_def[:3,:3]) + \
+                                    np.matmul(np.matmul(self.t_dist_CT, self.t_ct_def[:3,:3]), Quaternion(self.track_traj_opti[i,:4]).rotation_matrix) \
+                                    for i in range(len(self.track_traj_opti))]
             else:
                 print('No distal joint found.')
 
-        if metadata["tracking"] == "Tracker":
-            # Get the trajectory of the tracker from the test data
-            self.track_traj_opti = csv_test_load(test_path,metadata['tracker name'])
+            
             # cog_traj_CT = pos_track_opti * R_opti_ct + r_rel_cog_track * R_opti_ct * R_ct_tracker
             self.cog_traj_CT = [np.matmul(self.track_traj_opti[i,4:7],self.t_ct_def[:3,:3]) + self.t_ct_def[3,:3] \
                                 + np.matmul(np.matmul(self.t_tracker_CT, self.t_ct_def[:3,:3]), Quaternion(self.track_traj_opti[i,:4]).rotation_matrix) \
                                 for i in range(len(self.track_traj_opti))]
             
-            self.proxi_traj_CT = [np.matmul(self.track_traj_opti[i,4:7],self.t_ct_def[:3,:3]) + \
-                                  np.matmul(np.matmul(self.t_proxi_CT, self.t_ct_def[:3,:3]), Quaternion(self.track_traj_opti[i,:4]).rotation_matrix) \
-                                  for i in range(len(self.track_traj_opti))]
 
     def get_metadata(self):
         '''Returns the metadata of the Phalanx.'''
