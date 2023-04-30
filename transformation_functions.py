@@ -267,7 +267,7 @@ def plot_ply(tracker_points, opti_points, line_1, line_2, line_3, line_4):
 
     plt.show()
 
-def plot_class(i, Trackers1: list = [], Trackers2: list = [], names: list = [], radius: list = []):
+def plot_class(i, Trackers1: list = [], Trackers2: list = [], names: list = [], radius: list = [], save = False, show = True):
     '''Plot tracker points in 3D for timestep i with different colors and a sphere with radius d around each point'''
     colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
     morecolors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan']
@@ -313,7 +313,13 @@ def plot_class(i, Trackers1: list = [], Trackers2: list = [], names: list = [], 
     ax.set_ylim(-250,250)
     ax.set_zlim(-250,250)
     ax.legend(loc="upper left",bbox_to_anchor=(1.1, 1), ncol = 1)
-    plt.show()
+    if save:
+        dt = datetime.now()
+        dt = dt.strftime("%Y-%m-%d_%H-%M-%S")
+        plt.savefig('plots/plot_class_'+str(i)+'.pdf', dpi=600)
+    if show:
+        plt.show()
+    plt.close()
 
 def get_min_max_dis(points):
     n = len(points)
@@ -619,14 +625,18 @@ class tracker_bone(trackers.Tracker):
 
             self.helper_points = get_joints(metadata['joints'])
 
-            self.t_proxi_CT = t_cog_trackerorigin(self.helper_points[0], np.mean(self.marker_pos_ct,axis=0))
-            self.d_proxi_CT = np.linalg.norm(self.t_tracker_CT)
+            if not np.isnan(self.helper_points[0][0]):
+                self.t_proxi_CT = t_cog_trackerorigin(self.helper_points[0], np.mean(self.marker_pos_ct,axis=0))
+                self.d_proxi_CT = np.linalg.norm(self.t_tracker_CT)
+            else:
+                print('No proximal joint found.')
 
-        try:
-            self.t_dist_CT = t_cog_trackerorigin(self.helper_points[1], np.mean(self.marker_pos_ct,axis=0))
-            self.d_dist_CT = np.linalg.norm(self.t_tracker_CT)
-        except:
-            print('No distal joint found.')
+            # Warum war diese Zeile eins ausgerückt? Als noch try und except drin war?
+            if not np.isnan(self.helper_points[1][0]):
+                self.t_dist_CT = t_cog_trackerorigin(self.helper_points[1], np.mean(self.marker_pos_ct,axis=0))
+                self.d_dist_CT = np.linalg.norm(self.t_tracker_CT)
+            else:
+                print('No distal joint found.')
 
         if metadata["tracking"] == "Tracker":
             # Get the trajectory of the tracker from the test data

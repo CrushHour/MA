@@ -64,19 +64,20 @@ for i in range(len(opti_traj_Marker_ZF_proximal)):
     ct_traj_Marker_DAU[i] = ct_traj_Marker_DAU[i] + Tracker_52.t_ct_def[:3,3]"""
 
 # %% Visualisierung der Marker und Tracker
-ZF_Tracker_lst = [Tracker_ZF_DIP.proxi_traj_CT,Tracker_ZF_DIP.cog_traj_CT, Marker_ZF_proximal.ct_marker_trace, Tracker_ZF_MCP.proxi_traj_CT, Tracker_ZF_MCP.cog_traj_CT]
+ZF_Tracker_lst = [Tracker_ZF_DIP.dist_traj_CT,Tracker_ZF_DIP.cog_traj_CT, Marker_ZF_proximal.ct_marker_trace, Tracker_ZF_MCP.proxi_traj_CT, Tracker_ZF_MCP.cog_traj_CT]
 DAU_Tracker_lst = [Tracker_DAU_DIP.cog_traj_CT, Marker_DAU.ct_marker_trace, Tracker_DAU_MCP.cog_traj_CT]
-name_lst = ['Tracker_ZF_DIP.proxi_traj_CT','Tracker_ZF_DIP.cog_traj_CT' ,'Marker_ZF_proximal.cog_traj_CT','Tracker_ZF_MCP.proxi_traj_CT','Tracker_ZF_MCP.cog_traj_CT', 'Tracker_DAU_DIP.cog_traj_CT', 'Marker_DAU.cog_traj_CT', 'Tracker_DAU_MCP.cog_traj_CT']
+name_lst = ['Tracker_ZF_DIP.dist_traj_CT','Tracker_ZF_DIP.cog_traj_CT' ,'Marker_ZF_proximal.cog_traj_CT','Tracker_ZF_MCP.proxi_traj_CT','Tracker_ZF_MCP.cog_traj_CT', 'Tracker_DAU_DIP.cog_traj_CT', 'Marker_DAU.cog_traj_CT', 'Tracker_DAU_MCP.cog_traj_CT']
 radius_lst = [Tracker_ZF_DIP.d_proxi_CT,0, Marker_ZF_proximal.d_tracker_CT, Tracker_ZF_MCP.d_proxi_CT, 0, \
               0, Marker_DAU.d_tracker_CT, 0]
 
-tf.plot_class(0,ZF_Tracker_lst,DAU_Tracker_lst,name_lst,radius_lst)
+tf.plot_class(0,ZF_Tracker_lst,DAU_Tracker_lst,name_lst,radius_lst, save=False, show=True)
 
 interact(tf.plot_class, i = widgets.IntSlider(min=0,max=len(Tracker_ZF_DIP.track_traj_opti)-1,step=1,value=0),
          Trackers1 = widgets.fixed(ZF_Tracker_lst), 
          Trackers2 = widgets.fixed(DAU_Tracker_lst),
          names = widgets.fixed(name_lst),
-         radius = widgets.fixed(radius_lst))
+         radius = widgets.fixed(radius_lst),
+         show = widgets.fixed(True))
 
 
 # %% Check if Markers are unique
