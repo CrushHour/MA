@@ -619,11 +619,14 @@ class tracker_bone(trackers.Tracker):
         stl_data = stl.mesh.Mesh.from_file(metadata['stl'])
 
         self.volume, self.cog_stl, self.inertia = stl_data.get_mass_properties()
+        
+        '''This Part is only for full trackers.'''
         if metadata["tracking"] == "Tracker":
             # Get the trajectory of the tracker from the test data
             self.track_traj_opti = csv_test_load(test_path,metadata['tracker name'])
 
-            self.t_tracker_CT = np.subtract(self.cog_stl, np.mean(self.marker_pos_ct,axis=0))
+            # np.mean(self.marker_pos_ct,axis=0) ist hier anwendbar, da das mean der maker pos im def file bei [0,0,0] liegt.
+            self.t_tracker_CT = np.subtract(self.cog_stl, np.mean(self.marker_pos_ct,axis=0)) 
             self.d_tracker_CT = np.linalg.norm(self.t_tracker_CT)
 
             self.helper_points = get_joints(metadata['joints'])

@@ -93,7 +93,6 @@ for i in range(len(Marker_DAU.ct_marker_trace)):
 
 # %% Berechnung der Winkel zwischen den Markern und den Trackern
 # angle ZF joints
-import matplotlib.pyplot as plt
 
 alpha = np.zeros(len(Tracker_ZF_DIP.cog_traj_CT))
 beta = np.zeros(len(Tracker_ZF_DIP.cog_traj_CT))

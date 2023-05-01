@@ -254,7 +254,7 @@ class Tracker(object):
         # reader schließen?
         file.close()
 
-    # von def in CT
+    # von def in CT, also von 2 nach 1
     def calculate_transformation_matrix(self):
         """the required tranformation matrix between system 1 and 2"""
         markers2 = self.marker_pos_def
@@ -270,23 +270,38 @@ class Tracker(object):
         markers1 -= markers1_mean
         markers2 -= markers2_mean
 
-        # Calculate the cross-covariance matrix
+        # Calculate the cross-covariance matrix (H= P^T * Q)
         cross_cov = np.dot(markers1.T, markers2)
+        #  folgend nur testweise, wahrscheinlich falsch, da wir ja von 1 nach 2 wollen:
+        # hier widersprechen sich Wikipedia und GitHub
+        cross_cov = np.dot(markers2.T, markers1)
 
         # Calculate the singular value decomposition
         U, S, V_T = np.linalg.svd(cross_cov)
 
+        # decide whether we need to correct our rotation matrix to ensure a right-handed coordinate system
+        # https://igl.ethz.ch/projects/ARAP/svd_rot.pdf
+        # https://en.wikipedia.org/wiki/Kabsch_algorithm
+        d = np.sign(np.linalg.det(np.dot(V_T.T, U.T)))
+        print('d: ', d)
+
+        D = np.eye(3)
+        D[2, 2] = d
+
         # Calculate the rotation matrix
-        R = np.dot(U, V_T)
+        #R = np.dot(U, V_T) # Bist du dir hier sicher Niko? - Julian
+        R = V_T.T @ D @ U.T
         self.R = R
 
         # Check for reflection
         if np.linalg.det(R) < 0:
             V_T[2, :] *= -1
             R = np.dot(U, V_T)
+            R = V_T.T @ U.T # Julian
 
         # Calculate the translation vector
-        t = markers1_mean - np.dot(markers2_mean, R)
+        #t = markers1_mean - np.dot(markers2_mean, R)
+        t = -R @ markers2_mean.T + markers1_mean.T
         self.t = t
 
         # Concatenate the rotation and translation matrices
