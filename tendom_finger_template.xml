@@ -1,0 +1,213 @@
+<mujoco model="example">
+  <compiler angle="radian" coordinate="global"/>
+  <option gravity="0 0 0"/>
+STL
+  <default>
+    <geom rgba=".8 .6 .4 1"/>
+  </default>
+
+  {{#complete}}
+  <asset>
+    <mesh name="DAU-MCP" scale="1 1 1"
+      file="./STL/Segmentation_DAU_MCP.stl"/>
+    <mesh name="DAU-PIP" scale="1 1 1"
+      file="./Data/STL/Segmentation_DAU_Osmetacarpale_1.stl"/>
+    <mesh name="DAU-DP" scale="1 1 1"
+      file="./STL/Segmentation_DAU_DIP.stl"/>
+    <!-- <mesh name="TRACKER-DAU" scale="0.01 0.01 0.01" -->
+    <!--   file="./STL/Segmentation_TRACKER_DAU.stl" /> -->
+    <!-- <mesh name="TRACKER-DAU-MCP" scale="0.01 0.01 0.01" -->
+    <!--   file="./STL/Segmentation_TRACKER_DAU_MCP.stl" /> -->
+    <mesh name="ZF-MCP" scale="1 1 1"
+      file="./STL/Segmentation_ZF_MCP.stl"/>
+    <mesh name="ZF-PIP" scale="1 1 1"
+      file="./STL/Segmentation_ZF_PIP.stl"/>
+    <mesh name="ZF-DP" scale="1 1 1"
+      file="./STL/Segmentation_ZF_DIP.stl"/>
+    <mesh name="ZF-Midhand" scale="1 1 1"
+      file="./STL/Segmentation_ZF_Midhand.stl"/>
+    <!-- <mesh name="TRACKER-ZF" scale="0.01 0.01 0.01" -->
+    <!--   file="./STL/Segmentation_TRACKER-ZF.stl"/> -->
+    <!-- <mesh name="TRACKER-ZF-MCP" scale="0.01 0.01 0.01" -->
+    <!--   file="./STL/Segmentation_TRACKER-ZF-MCP.stl"/> -->
+  </asset>
+  {{/complete}}
+
+  <worldbody>
+    {{#complete}}
+    <light diffuse=".5 .5 .5" pos="0 0 3" dir="0 0 -1"/>
+    <!-- <camera name="cam0" pos="55.858219146728519 -208.64903259277345 -226.24468994140626" euler="90 0 0" mode="trackcom"/> -->
+    {{/complete}}
+    <!-- <body name="dau" pos="0 0 0"> -->
+    <geom type="sphere" size="0.1 0.1 0.1" rgba="0 0 1 .4"/>
+
+    <site name="dau_mcp_extend" pos="-0.1 -0.1 0"/>
+    <site name="dau_mcp_flexor" pos="0.1 0.1 0"/>
+
+    <site name="endeff_target" size="0.05" pos="-0.0737687 0.0716634 0.920508" rgba=".9 .7 .7 .4"/>
+    <site name="endeff_extra" size="0.05" pos="-0.0737687 0.0716634 0.920508"/>
+
+    <body name="mcp">
+      <joint name="BONES_to_DAU_MCP" type="hinge" axis="{{dau.mcp.axis}}"
+        pos="{{dau.mcp.pos}}" limited="true" range="{{dau.mcp.range}}"/>
+
+      {{#complete}}
+      <geom pos="{{dau.offset}}" type="mesh" mesh="DAU-MCP"/>
+
+      <site name="dau_mcp_extend1" pos="-0.12 -0.08 0.3"/>
+      <site name="dau_mcp_extend2" pos="-0.09 -0.08 0.2"/>
+      <site name="dau_mcp_extend3" pos="-0.07 -0.08 0.1"/>
+
+      <site name="dau_mcp_flexor1" pos="0.0233062 0.0651828 0.134013"/>
+      <site name="dau_mcp_flexor2" pos="-0.0143586 0.0393087 0.22329"/>
+      <site name="dau_mcp_flexor3" pos="-0.0352539 0.0441288 0.307898"/>
+      {{/complete}}
+
+      <body name="pip" pos= quat="1 2 3 4">
+        <joint name="DAU_MCP_to_DAU_PIP" type="hinge" axis="{{dau.pip.axis}}"
+          pos="{{dau.pip.pos}}" limited="true" range="{{dau.pip.range}}"/>
+
+        {{#complete}}
+        <geom name="g2" type="cylinder" pos="{{dau.pip.pos}}"
+          euler="1.57 0.785 0" size="0.08 .08" rgba=".3 .9 .3 .4"/>
+
+        <geom pos="{{dau.offset}}" type="mesh" mesh="DAU-PIP"/>
+
+        <site name="dau_pip_extend1" pos="-0.14 -0.056 0.65"/>
+        <site name="dau_pip_extend2" pos="-0.14 -0.056 0.55"/>
+        <site name="dau_pip_extend3" pos="-0.14 -0.056 0.47"/>
+        <site name="dau_pip_flexor2" pos="-0.0925159 0.0467204 0.654203"/>
+        <site name="dau_pip_flexor1" pos="-0.0546413 0.0482011 0.532714"/>
+        {{/complete}}
+
+        <body name="fingertip">
+          <joint name="DAU_PIP_to_DAU_DP" type="hinge" axis="{{dau.dp.axis}}"
+            pos="{{dau.dp.pos}}" limited="true" range="{{dau.dp.range}}"/>
+          {{#complete}}
+          <geom name="g3" type="cylinder" pos="{{dau.dp.pos}}"
+            euler="1.57 0.785 0" size="0.06 .08" rgba=".3 .9 .3 .4"/>
+
+          <geom pos="{{dau.offset}}" type="mesh" mesh="DAU-DP"/>
+          <site name="endeff" size="0.05" pos="-0.0737687 0.0716634 0.920508"/>
+
+          <site name="dau_dp_extend" pos="-0.132 -0.02 0.92"/>
+          <site name="dau_dp_flexor" pos="-0.08 0.08 0.92"/>
+          {{/complete}}
+
+          <body name="tracker-dp" pos="-0.396663 -0.240462 0.885499">
+            <site name="tracker-dp-site" size="0.02" pos="-0.396663 -0.240462 0.885499"/>
+            {{#complete}}
+            <!-- <geom pos="{{dau.offset}}" type="mesh" mesh="TRACKER-DAU" rgba=".8 .0 .0 1" mass="0.01"/> -->  
+            {{/complete}}
+          </body>
+        </body>
+
+        <body name="tracker-pip" pos="-0.263591 -0.150647 0.594923">
+          <site name="tracker-pip-site" size="0.02" pos="-0.263591 -0.150647 0.594923"/>
+        </body>
+      </body>
+      <!-- <body name="tracker-dau-mcp"> -->
+      <!--   {{#complete}} -->
+      <!--   <!-1- <geom pos="{{dau.offset}}" type="mesh" mesh="TRACKER-DAU-MCP" rgba=".8 .0 .0 1" mass="0.01"/> -1-> -->
+      <!--   {{/complete}} -->
+      <!-- </body> -->
+
+      <body name="tracker-mcp" pos="-0.219951 -0.15101 0.197477">
+        <site name="tracker-mcp-site" size="0.02" pos="-0.219951 -0.15101 0.197477"/>
+      </body>
+    </body>
+
+
+    <!-- <body name="zf_mcp"> -->
+    <!--   <!-1- <joint name="BONES_to_ZF_MCP" type="hinge" axis="{{index.mcp.axis}}" pos="{{index.mcp.pos}}" limited="true" range="{{index.mcp.range}}"/> -1-> -->
+    <!--   {{#complete}} -->
+    <!--   <geom pos="{{dau.offset}}" type="mesh" mesh="ZF-MCP"/> -->
+    <!--   {{/complete}} -->
+    <!--   <body name="zf_pip"> -->
+    <!--     <!-1- <body name="pip-tracker"> -1-> -->
+    <!--     <!-1-   {{#complete}} -1-> -->
+    <!--     <!-1-   <geom pos="{{dau.pip.markers.a}}" type="sphere" size="0.05 0.05 0.05" rgba="0 0 1 .4"/> -1-> -->
+    <!--     <!-1-   <geom pos="{{dau.pip.markers.b}}" type="sphere" size="0.05 0.05 0.05" rgba="0 0 1 .4"/> -1-> -->
+    <!--     <!-1-   <geom pos="{{dau.pip.markers.c}}" type="sphere" size="0.05 0.05 0.05" rgba="0 0 1 .4"/> -1-> -->
+    <!--     <!-1-   {{/complete}} -1-> -->
+    <!--     <!-1- </body> -1-> -->
+    <!--     <!-1- <joint name="ZF_MCP_to_ZF_PIP" type="hinge" axis="{{index.pip.axis}}" pos="{{index.pip.pos}}" limited="true" range="{{dau.pip.range}}"/> -1-> -->
+    <!--     {{#complete}} -->
+    <!--     <geom pos="{{dau.offset}}" type="mesh" mesh="ZF-PIP"/> -->
+    <!--     {{/complete}} -->
+    <!--   </body> -->
+    <!-- </body> -->
+  <!-- </body> -->
+</worldbody>
+
+{{#complete}}
+<actuator>
+	<!-- <position name="mcp_motor_pos" joint="BONES_to_DAU_MCP" kp="100" /> -->
+	<!-- <velocity name="mcp_motor_vel" joint="BONES_to_DAU_MCP" kv="10" /> -->
+    <!-- <position name="pip_motor_pos" joint="DAU_MCP_to_DAU_PIP" kp="100" /> -->
+	<!-- <velocity name="pip_motor_vel" joint="DAU_MCP_to_DAU_PIP" kv="10" /> -->
+    <!-- <position name="dp_motor_pos" joint="DAU_PIP_to_DAU_DP" kp="100" /> -->
+    <!-- <velocity name="dp_motor_vel" joint="DAU_PIP_to_DAU_DP" kv="10" /> -->
+    <position
+      name="extensor" tendon="extensor"
+      ctrllimited="false" ctrlrange="1 2"
+      kp="100000"/>
+    <position
+      name="flexor_superficialis" tendon="flexor_superficialis"
+      ctrllimited="false" ctrlrange="1 2"
+      kp="100000"/>
+    <position
+      name="flexor_profundus" tendon="flexor_profundus"
+      ctrllimited="false" ctrlrange="1 2"
+      kp="100000"/>
+  </actuator>
+{{/complete}}
+
+  <sensor>
+    <framepos objtype="site" objname="endeff"/>
+    <framelinvel objtype="site" objname="endeff"/>
+  </sensor>
+
+  <tendon>
+    <!-- extensor -->
+    <spatial name="extensor" width="0.002" rgba=".95 .3 .3 1" limited="false"
+      >
+      <site site="dau_mcp_extend"/>
+      <site site="dau_mcp_extend3"/>
+      <site site="dau_mcp_extend2"/>
+      <site site="dau_mcp_extend1"/>
+      <geom geom="g2"/>
+      <site site="dau_pip_extend3"/>
+      <site site="dau_pip_extend2"/>
+      <site site="dau_pip_extend1"/>
+      <geom geom="g3"/>
+      <site site="dau_dp_extend"/>
+    </spatial>
+
+    <!-- flexor superficialis -->
+    <spatial name="flexor_superficialis" width="0.002" rgba=".3 .95 .3 0.5"
+      limited="false" >
+      <site site="dau_mcp_flexor"/>
+      <site site="dau_mcp_flexor1"/>
+      <site site="dau_mcp_flexor2"/>
+      <site site="dau_mcp_flexor3"/>
+      <geom geom="g2"/>
+      <site site="dau_pip_flexor1"/>
+    </spatial>
+
+    <!-- flexor profundus -->
+    <spatial name="flexor_profundus" width="0.002" rgba=".95 .3 .3 0.5"
+      limited="false" >
+      <site site="dau_mcp_flexor"/>
+      <site site="dau_mcp_flexor1"/>
+      <site site="dau_mcp_flexor2"/>
+      <site site="dau_mcp_flexor3"/>
+      <geom geom="g2"/>
+      <site site="dau_pip_flexor1"/>
+      <site site="dau_pip_flexor2"/>
+      <geom geom="g3"/>
+      <site site="dau_dp_flexor"/>
+    </spatial>
+  </tendon>
+
+</mujoco>

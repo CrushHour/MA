@@ -36,7 +36,7 @@ opti_traj_M4_klein = tf.csv_test_load(opti_data,"M4_klein")
 
 # Definieren der Tracker und Marker als jeweils eine Tracker Klasse
 Marker_DAU = tf.marker_bone(finger_name='DAU_PIP',test_path=test_metadata['path'], init_marker_ID=test_metadata['marker_IDs'][0])
-Marker_ZF_proximal = tf.marker_bone(finger_name="ZF_DIP",test_path=test_metadata['path'], init_marker_ID=test_metadata['marker_IDs'][1])
+Marker_ZF_proximal = tf.marker_bone(finger_name="ZF_PIP",test_path=test_metadata['path'], init_marker_ID=test_metadata['marker_IDs'][1])
 
 #Tracker_ZF_DIP = tf.tracker_bone(0, './Data/Trackers/ZF_DIP.csv', ctname="Slicer3D/Tracker55.mrk.json")
 #Tracker_ZF_MCP = tf.tracker_bone(0, './Data/Trackers/ZF_MCP.csv', ctname="Slicer3D/Tracker_M4_gross.mrk.json")
@@ -66,10 +66,12 @@ for i in range(len(opti_traj_Marker_ZF_proximal)):
 
 # %% Visualisierung der Marker und Tracker
 ZF_Tracker_lst = [Tracker_ZF_DIP.dist_traj_CT,Tracker_ZF_DIP.cog_traj_CT, Marker_ZF_proximal.ct_marker_trace, Tracker_ZF_MCP.proxi_traj_CT, Tracker_ZF_MCP.cog_traj_CT]
-DAU_Tracker_lst = [Tracker_DAU_DIP.cog_traj_CT, Marker_DAU.ct_marker_trace, Tracker_DAU_MCP.cog_traj_CT]
-name_lst = ['Tracker_ZF_DIP.dist_traj_CT','Tracker_ZF_DIP.cog_traj_CT' ,'Marker_ZF_proximal.cog_traj_CT','Tracker_ZF_MCP.proxi_traj_CT','Tracker_ZF_MCP.cog_traj_CT', 'Tracker_DAU_DIP.cog_traj_CT', 'Marker_DAU.cog_traj_CT', 'Tracker_DAU_MCP.cog_traj_CT']
-radius_lst = [Tracker_ZF_DIP.d_dist_CT,0, Marker_ZF_proximal.d_tracker_CT, Tracker_ZF_MCP.d_proxi_CT, 0, \
-              0, Marker_DAU.d_tracker_CT, 0]
+DAU_Tracker_lst = [Tracker_DAU_DIP.cog_traj_CT, Tracker_DAU_DIP.dist_traj_CT, Marker_DAU.ct_marker_trace, Tracker_DAU_MCP.proxi_traj_CT,Tracker_DAU_MCP.cog_traj_CT]
+name_lst = ["Tracker_ZF_DIP.dist_traj_CT","Tracker_ZF_DIP.cog_traj_CT", "Marker_ZF_proximal.ct_marker_trace", "Tracker_ZF_MCP.proxi_traj_CT","Tracker_ZF_MCP.cog_traj_CT",
+            "Tracker_DAU_DIP.cog_traj_CT", "Tracker_DAU_DIP.dist_traj_CT", "Marker_DAU.ct_marker_trace", "Tracker_DAU_MCP.proxi_traj_CT","Tracker_DAU_MCP.cog_traj_CT"]
+
+radius_lst = [Tracker_ZF_DIP.d_dist_CT,0, Marker_ZF_proximal.d_cog_CT, Tracker_ZF_MCP.d_proxi_CT, 0, \
+              0, 0, Marker_DAU.d_cog_CT,0, 0]
 
 tf.plot_class(0,ZF_Tracker_lst,DAU_Tracker_lst,name_lst,radius_lst, save=False, show=True)
 

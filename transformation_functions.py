@@ -312,7 +312,7 @@ def plot_class(i, Trackers1: list = [], Trackers2: list = [], names: list = [], 
     ax.set_xlim(-250,250)
     ax.set_ylim(-250,250)
     ax.set_zlim(-250,250)
-    ax.legend(loc="upper left",bbox_to_anchor=(1.1, 1), ncol = 1)
+    ax.legend(loc="upper left",bbox_to_anchor=(1.1, 1), ncol = 2)
     if save:
         dt = datetime.now()
         dt = dt.strftime("%Y-%m-%d_%H-%M-%S")
@@ -611,29 +611,30 @@ class tracker_bone(trackers.Tracker):
     
     def __init__(self, finger_name = "", test_path = './Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv') -> None:
         self.finger_name = finger_name
-        metadata = self.get_metadata()
-        if metadata["tracking"] == "Tracker":
-            super().__init__(0, metadata['tracker def opti'], metadata['tracker def CT'], self.finger_name)
+        self.metadata = self.get_metadata()
+        if self.metadata["tracking"] == "Tracker":
+            super().__init__(0, self.metadata['tracker def opti'], self.metadata['tracker def CT'], self.finger_name)
         else:
-            print("No tracker data available.", metadata["tracking"])
-        stl_data = stl.mesh.Mesh.from_file(metadata['stl'])
-
+            print("No tracker data available.", self.metadata["tracking"])
+        
+        # get the information of the stl file
+        stl_data = stl.mesh.Mesh.from_file(self.metadata['stl'])
         self.volume, self.cog_stl, self.inertia = stl_data.get_mass_properties()
         
         '''This Part is only for full trackers.'''
-        if metadata["tracking"] == "Tracker":
+        if self.metadata["tracking"] == "Tracker":
             # Get the trajectory of the tracker from the test data
-            self.track_traj_opti = csv_test_load(test_path,metadata['tracker name'])
+            self.track_traj_opti = csv_test_load(test_path, self.metadata['tracker name'])
 
             # np.mean(self.marker_pos_ct,axis=0) ist hier anwendbar, da das mean der maker pos im def file bei [0,0,0] liegt.
-            self.t_tracker_CT = np.subtract(self.cog_stl, np.mean(self.marker_pos_ct,axis=0)) 
+            self.t_tracker_CT = np.subtract(np.mean(self.marker_pos_ct,axis=0), self.cog_stl) 
             self.d_tracker_CT = np.linalg.norm(self.t_tracker_CT)
 
-            self.helper_points = get_joints(metadata['joints'])
+            self.helper_points = get_joints(self.metadata['joints'])
 
             if not np.isnan(self.helper_points[0][0]):
                 self.t_proxi_CT = t_cog_trackerorigin(self.helper_points[0], np.mean(self.marker_pos_ct,axis=0))
-                self.d_proxi_CT = np.linalg.norm(self.t_tracker_CT)
+                self.d_proxi_CT = np.linalg.norm(self.t_proxi_CT)
                 self.proxi_traj_CT = [np.matmul(self.track_traj_opti[i,4:7],self.t_ct_def[:3,:3]) + \
                                   np.matmul(np.matmul(self.t_proxi_CT, self.t_ct_def[:3,:3]), Quaternion(self.track_traj_opti[i,:4]).rotation_matrix) \
                                   for i in range(len(self.track_traj_opti))]
@@ -643,7 +644,7 @@ class tracker_bone(trackers.Tracker):
             # Warum war diese Zeile eins ausgerückt? Als noch try und except drin war?
             if not np.isnan(self.helper_points[1][0]):
                 self.t_dist_CT = t_cog_trackerorigin(self.helper_points[1], np.mean(self.marker_pos_ct,axis=0))
-                self.d_dist_CT = np.linalg.norm(self.t_tracker_CT)
+                self.d_dist_CT = np.linalg.norm(self.t_dist_CT)
                 self.dist_traj_CT = [np.matmul(self.track_traj_opti[i,4:7],self.t_ct_def[:3,:3]) + \
                                     np.matmul(np.matmul(self.t_dist_CT, self.t_ct_def[:3,:3]), Quaternion(self.track_traj_opti[i,:4]).rotation_matrix) \
                                     for i in range(len(self.track_traj_opti))]
@@ -668,12 +669,27 @@ class tracker_bone(trackers.Tracker):
 class marker_bone(tracker_bone):
     '''Class for the bones with markers on top. Inherits from tracker_bone.'''
     def __init__(self, finger_name = "", test_path = './Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv', init_marker_ID = "Unlabeled ...") -> None:
-        super().__init__("ZF_midhand", test_path=test_path)
+        super().__init__(finger_name=finger_name, test_path=test_path)
 
         base_tracker = tracker_bone("ZF_midhand", test_path=test_path)
         self.testname = os.path.split(test_path)[1]
         test_metadata = get_test_metadata(self.testname)
+
+        # get marker information
+        self.marker_pos_ct = self.get_marker_pos_ct()
+        self.joints = get_joints(self.metadata['joints'])
+
+        self.t_proxi_CT = t_cog_trackerorigin(self.joints[0], self.marker_pos_ct)
+        self.d_proxi_CT = np.linalg.norm(self.t_proxi_CT)
         
+        self.t_dist_CT = t_cog_trackerorigin(self.joints[1], self.marker_pos_ct)
+        self.d_dist_CT = np.linalg.norm(self.t_dist_CT)
+
+        # get stl information
+        stl_data = stl.mesh.Mesh.from_file(self.metadata['stl'])
+        self.volume, self.cog_stl, self.inertia = stl_data.get_mass_properties()
+        self.t_cog_CT = np.subtract(self.cog_stl, np.mean(self.marker_pos_ct,axis=0)) 
+        self.d_cog_CT = np.linalg.norm(self.t_cog_CT)
         
         # Setting standard filter variables.
         fs = 120.0
@@ -693,6 +709,20 @@ class marker_bone(tracker_bone):
         self.opti_marker_trace.append(plot_tiefpass(fs, Gp, Gs, wp, ws, inter_data))
         self.ct_marker_trace.append([np.matmul(opti_pose,base_tracker.t_ct_def[:3,:3]) + base_tracker.t_ct_def[:3,3] for opti_pose in self.opti_marker_trace[-1]])
         self.ct_marker_trace = self.ct_marker_trace[0]
+
+        # overwrite cog_traj_CT from tracker_bone
+        self.cog_traj_CT = [self.ct_marker_trace \
+                                + np.matmul(np.matmul(self.t_cog_CT, base_tracker.t_ct_def[:3,:3]), Quaternion(base_tracker.track_traj_opti[i,:4]).rotation_matrix) \
+                                for i in range(len(self.ct_marker_trace))]
+    
+    def get_marker_pos_ct(self):
+        '''Returns the relative marker positions in the CT coordinate system to the bone cog.'''
+        with open(self.metadata["marker def CT"]) as jsonfile:
+            data = json.load(jsonfile)
+            # extract point infos
+            point_data = data['markups'][0]['controlPoints']
+        self.marker_pos_ct = [point['position'] for point in point_data]
+        return self.marker_pos_ct
 
 # %%
 if __name__ == '__main__':
