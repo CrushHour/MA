@@ -611,6 +611,7 @@ class tracker_bone(trackers.Tracker):
     
     def __init__(self, finger_name = "", test_path = './Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv') -> None:
         self.finger_name = finger_name
+        print("Finger:", self.finger_name)
         self.metadata = self.get_metadata()
         if self.metadata["tracking"] == "Tracker":
             super().__init__(0, self.metadata['tracker def opti'], self.metadata['tracker def CT'], self.finger_name)
@@ -629,14 +630,18 @@ class tracker_bone(trackers.Tracker):
             # np.mean(self.marker_pos_ct,axis=0) ist hier anwendbar, da das mean der maker pos im def file bei [0,0,0] liegt.
             self.t_tracker_CT = np.subtract(np.mean(self.marker_pos_ct,axis=0), self.cog_stl) 
             self.d_tracker_CT = np.linalg.norm(self.t_tracker_CT)
+            """cog_traj_CT[i] =  R_ct_opti * pos_track_opti[i] + R_ct_opti * opti_R[i] * r_rel_cog_tracker"""
+            self.cog_traj_CT = [np.matmul(self.t_ct_def[:3,:3],self.track_traj_opti[i,4:7]) + self.t_ct_def[3,:3] \
+                                + np.matmul(np.matmul(self.t_ct_def[:3,:3], Quaternion(self.track_traj_opti[i,:4]).rotation_matrix),self.t_tracker_CT) \
+                                for i in range(len(self.track_traj_opti))]
 
             self.helper_points = get_joints(self.metadata['joints'])
 
             if not np.isnan(self.helper_points[0][0]):
                 self.t_proxi_CT = t_cog_trackerorigin(self.helper_points[0], np.mean(self.marker_pos_ct,axis=0))
                 self.d_proxi_CT = np.linalg.norm(self.t_proxi_CT)
-                self.proxi_traj_CT = [np.matmul(self.track_traj_opti[i,4:7],self.t_ct_def[:3,:3]) + \
-                                  np.matmul(np.matmul(self.t_proxi_CT, self.t_ct_def[:3,:3]), Quaternion(self.track_traj_opti[i,:4]).rotation_matrix) \
+                self.proxi_traj_CT = [np.matmul(self.t_ct_def[:3,:3],self.track_traj_opti[i,4:7]) + self.t_ct_def[3,:3] \
+                                  + np.matmul(np.matmul(self.t_ct_def[:3,:3], Quaternion(self.track_traj_opti[i,:4]).rotation_matrix), self.t_proxi_CT) \
                                   for i in range(len(self.track_traj_opti))]
             else:
                 print('No proximal joint found.')
@@ -645,18 +650,12 @@ class tracker_bone(trackers.Tracker):
             if not np.isnan(self.helper_points[1][0]):
                 self.t_dist_CT = t_cog_trackerorigin(self.helper_points[1], np.mean(self.marker_pos_ct,axis=0))
                 self.d_dist_CT = np.linalg.norm(self.t_dist_CT)
-                self.dist_traj_CT = [np.matmul(self.track_traj_opti[i,4:7],self.t_ct_def[:3,:3]) + \
-                                    np.matmul(np.matmul(self.t_dist_CT, self.t_ct_def[:3,:3]), Quaternion(self.track_traj_opti[i,:4]).rotation_matrix) \
-                                    for i in range(len(self.track_traj_opti))]
+                self.dist_traj_CT = [np.matmul(self.t_ct_def[:3,:3],self.track_traj_opti[i,4:7]) + self.t_ct_def[3,:3] \
+                                  + np.matmul(np.matmul(self.t_ct_def[:3,:3], Quaternion(self.track_traj_opti[i,:4]).rotation_matrix), self.t_dist_CT) \
+                                  for i in range(len(self.track_traj_opti))]
             else:
                 print('No distal joint found.')
 
-            
-            # cog_traj_CT = pos_track_opti * R_opti_ct + r_rel_cog_track * R_opti_ct * R_ct_tracker
-            self.cog_traj_CT = [np.matmul(self.track_traj_opti[i,4:7],self.t_ct_def[:3,:3]) + self.t_ct_def[3,:3] \
-                                + np.matmul(np.matmul(self.t_tracker_CT, self.t_ct_def[:3,:3]), Quaternion(self.track_traj_opti[i,:4]).rotation_matrix) \
-                                for i in range(len(self.track_traj_opti))]
-            
 
     def get_metadata(self):
         '''Returns the metadata of the Phalanx.'''
