@@ -428,7 +428,7 @@ def plot_tiefpass(fs, Gp, Gs, wp, ws, marker_data):
     plt.xlabel('Time [120 Hz]')
     plt.title("Marker")
     fig.grid()
-    fig.legend()
+    #fig.legend()
 
     plt.subplots_adjust(hspace=0.35)
     now = datetime.now()

@@ -63,59 +63,59 @@ STL
       <site name="dau_mcp_flexor3" pos="-0.0352539 0.0441288 0.307898"/>
       {{/complete}}
 
-      <body name="pip" pos= quat="1 2 3 4">
-        <joint name="DAU_MCP_to_DAU_PIP" type="hinge" axis="{{dau.pip.axis}}"
-          pos="{{dau.pip.pos}}" limited="true" range="{{dau.pip.range}}"/>
+    <body name="pip" pos= quat="1 2 3 4">
+      <joint name="DAU_MCP_to_DAU_PIP" type="hinge" axis="{{dau.pip.axis}}"
+        pos="{{dau.pip.pos}}" limited="true" range="{{dau.pip.range}}"/>
 
-        {{#complete}}
-        <geom name="g2" type="cylinder" pos="{{dau.pip.pos}}"
-          euler="1.57 0.785 0" size="0.08 .08" rgba=".3 .9 .3 .4"/>
+      {{#complete}}
+      <geom name="g2" type="cylinder" pos="{{dau.pip.pos}}"
+        euler="1.57 0.785 0" size="0.08 .08" rgba=".3 .9 .3 .4"/>
 
-        <geom pos="{{dau.offset}}" type="mesh" mesh="DAU-PIP"/>
+      <geom pos="{{dau.offset}}" type="mesh" mesh="DAU-PIP"/>
 
-        <site name="dau_pip_extend1" pos="-0.14 -0.056 0.65"/>
-        <site name="dau_pip_extend2" pos="-0.14 -0.056 0.55"/>
-        <site name="dau_pip_extend3" pos="-0.14 -0.056 0.47"/>
-        <site name="dau_pip_flexor2" pos="-0.0925159 0.0467204 0.654203"/>
-        <site name="dau_pip_flexor1" pos="-0.0546413 0.0482011 0.532714"/>
-        {{/complete}}
+      <site name="dau_pip_extend1" pos="-0.14 -0.056 0.65"/>
+      <site name="dau_pip_extend2" pos="-0.14 -0.056 0.55"/>
+      <site name="dau_pip_extend3" pos="-0.14 -0.056 0.47"/>
+      <site name="dau_pip_flexor2" pos="-0.0925159 0.0467204 0.654203"/>
+      <site name="dau_pip_flexor1" pos="-0.0546413 0.0482011 0.532714"/>
+      {{/complete}}
 
-        <body name="fingertip">
-          <joint name="DAU_PIP_to_DAU_DP" type="hinge" axis="{{dau.dp.axis}}"
-            pos="{{dau.dp.pos}}" limited="true" range="{{dau.dp.range}}"/>
-          {{#complete}}
-          <geom name="g3" type="cylinder" pos="{{dau.dp.pos}}"
-            euler="1.57 0.785 0" size="0.06 .08" rgba=".3 .9 .3 .4"/>
+    <body name="fingertip">
+      <joint name="DAU_PIP_to_DAU_DP" type="hinge" axis="{{dau.dp.axis}}"
+        pos="{{dau.dp.pos}}" limited="true" range="{{dau.dp.range}}"/>
+      {{#complete}}
+      <geom name="g3" type="cylinder" pos="{{dau.dp.pos}}"
+        euler="1.57 0.785 0" size="0.06 .08" rgba=".3 .9 .3 .4"/>
 
-          <geom pos="{{dau.offset}}" type="mesh" mesh="DAU-DP"/>
-          <site name="endeff" size="0.05" pos="-0.0737687 0.0716634 0.920508"/>
+      <geom pos="{{dau.offset}}" type="mesh" mesh="DAU-DP"/>
+      <site name="endeff" size="0.05" pos="-0.0737687 0.0716634 0.920508"/>
 
-          <site name="dau_dp_extend" pos="-0.132 -0.02 0.92"/>
-          <site name="dau_dp_flexor" pos="-0.08 0.08 0.92"/>
-          {{/complete}}
+      <site name="dau_dp_extend" pos="-0.132 -0.02 0.92"/>
+      <site name="dau_dp_flexor" pos="-0.08 0.08 0.92"/>
+      {{/complete}}
 
-          <body name="tracker-dp" pos="-0.396663 -0.240462 0.885499">
-            <site name="tracker-dp-site" size="0.02" pos="-0.396663 -0.240462 0.885499"/>
-            {{#complete}}
-            <!-- <geom pos="{{dau.offset}}" type="mesh" mesh="TRACKER-DAU" rgba=".8 .0 .0 1" mass="0.01"/> -->  
-            {{/complete}}
-          </body>
-        </body>
+    <body name="tracker-dp" pos="-0.396663 -0.240462 0.885499">
+      <site name="tracker-dp-site" size="0.02" pos="-0.396663 -0.240462 0.885499"/>
+      {{#complete}}
+      <!-- <geom pos="{{dau.offset}}" type="mesh" mesh="TRACKER-DAU" rgba=".8 .0 .0 1" mass="0.01"/> -->  
+      {{/complete}}
+    </body>
+  </body>
 
-        <body name="tracker-pip" pos="-0.263591 -0.150647 0.594923">
-          <site name="tracker-pip-site" size="0.02" pos="-0.263591 -0.150647 0.594923"/>
-        </body>
-      </body>
+  <body name="tracker-pip" pos="-0.263591 -0.150647 0.594923">
+    <site name="tracker-pip-site" size="0.02" pos="-0.263591 -0.150647 0.594923"/>
+  </body>
+</body>
       <!-- <body name="tracker-dau-mcp"> -->
       <!--   {{#complete}} -->
       <!--   <!-1- <geom pos="{{dau.offset}}" type="mesh" mesh="TRACKER-DAU-MCP" rgba=".8 .0 .0 1" mass="0.01"/> -1-> -->
       <!--   {{/complete}} -->
       <!-- </body> -->
 
-      <body name="tracker-mcp" pos="-0.219951 -0.15101 0.197477">
-        <site name="tracker-mcp-site" size="0.02" pos="-0.219951 -0.15101 0.197477"/>
-      </body>
-    </body>
+  <body name="tracker-mcp" pos="-0.219951 -0.15101 0.197477">
+    <site name="tracker-mcp-site" size="0.02" pos="-0.219951 -0.15101 0.197477"/>
+  </body>
+</body>
 
 
     <!-- <body name="zf_mcp"> -->
