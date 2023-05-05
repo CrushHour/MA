@@ -7,6 +7,7 @@ from tqdm import tqdm
 from ipywidgets import interact, interactive, fixed, interact_manual
 import ipywidgets as widgets
 import matplotlib.pyplot as plt
+import stl
 
 # Definition der Pfade
 test_metadata = tf.get_test_metadata('Take 2023-01-31 06.11.42 PM.csv')
@@ -35,20 +36,33 @@ Tracker_ZF_DIP = tf.tracker_bone('ZF_DIP',test_path=test_metadata['path'])
 Tracker_ZF_MCP = tf.tracker_bone('ZF_midhand',test_path=test_metadata['path'])
 Tracker_DAU_DIP = tf.tracker_bone('DAU_DIP',test_path=test_metadata['path'])
 Tracker_DAU_MCP = tf.tracker_bone('DAU_MCP',test_path=test_metadata['path'])
+
+
+
+
 #Tracker_FT = tf.tracker_bone('FT',test_path=test_metadata['path'])
 Basetracker = tf.tracker_bone('ZF_midhand',test_path=test_metadata['path']) # Basis, hinten an Fixteur externe existiert nicht im CT
 
 Marker_DAU = tf.marker_bone(finger_name='DAU_PIP',test_path=test_metadata['path'], init_marker_ID=test_metadata['marker_IDs'][0])
 Marker_ZF_proximal = tf.marker_bone(finger_name="ZF_PIP",test_path=test_metadata['path'], init_marker_ID=test_metadata['marker_IDs'][1])
 
+# calculate spheres
+ZF_PIP = stl.mesh.Mesh.from_file("./Data/STL/Segmentation_ZF_PP.stl")
+minx, maxx, miny, maxy, minz, maxz = tf.get_min_max(ZF_PIP)
+d_ZF_DIP_PIP = np.linalg.norm([maxx-minx,maxy-miny,maxz-minz])
+
+d_ZF_Tracker_PIP = Marker_ZF_proximal.d_dist_CT
+d_ZF_MCP_PIP = # im slicer chekcen wo ist
 # %% Visualisierung der Marker und Tracker
 ZF_Tracker_lst = [Tracker_ZF_DIP.cog_traj_CT, Tracker_ZF_DIP.dist_traj_CT, Marker_ZF_proximal.ct_marker_trace, Tracker_ZF_MCP.proxi_traj_CT, Tracker_ZF_MCP.cog_traj_CT]
 DAU_Tracker_lst = [Tracker_DAU_DIP.cog_traj_CT, Tracker_DAU_DIP.dist_traj_CT, Marker_DAU.ct_marker_trace, Tracker_DAU_MCP.proxi_traj_CT,Tracker_DAU_MCP.cog_traj_CT]
 name_lst = ["Tracker_ZF_DIP.cog_traj_CT",'Tracker_ZF_DIP.dist_traj_CT' ,"Marker_ZF_proximal.ct_marker_trace", "Tracker_ZF_MCP.proxi_traj_CT","Tracker_ZF_MCP.cog_traj_CT",
             "Tracker_DAU_DIP.cog_traj_CT", "Tracker_DAU_DIP.dist_traj_CT", "Marker_DAU.ct_marker_trace", "Tracker_DAU_MCP.proxi_traj_CT","Tracker_DAU_MCP.cog_traj_CT"]
 
-radius_lst = [Tracker_ZF_DIP.d_dist_CT,0, Marker_ZF_proximal.d_cog_CT, Tracker_ZF_MCP.d_proxi_CT, 0, \
-              0, 0, Marker_DAU.d_cog_CT,0, 0]
+
+
+radius_lst = [0, d_ZF_DIP_PIP, , \
+              , 0]
 
 tf.plot_class(0,ZF_Tracker_lst,DAU_Tracker_lst,name_lst,radius_lst, save=False, show=True)
 

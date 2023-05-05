@@ -320,7 +320,28 @@ def plot_class(i, Trackers1: list = [], Trackers2: list = [], names: list = [], 
     if show:
         plt.show()
     plt.close()
-
+# find the max dimensions, so we can know the bounding box, getting the height,
+# width, length (because these are the step size)...
+def stl_find_mins_maxs(obj):
+    '''Gives back the max dimensions in x, y and z direction of an stl object.'''
+    minx = maxx = miny = maxy = minz = maxz = None
+    for p in obj.points:
+        # p contains (x, y, z)
+        if minx is None:
+            minx = p[stl.Dimension.X]
+            maxx = p[stl.Dimension.X]
+            miny = p[stl.Dimension.Y]
+            maxy = p[stl.Dimension.Y]
+            minz = p[stl.Dimension.Z]
+            maxz = p[stl.Dimension.Z]
+        else:
+            maxx = max(p[stl.Dimension.X], maxx)
+            minx = min(p[stl.Dimension.X], minx)
+            maxy = max(p[stl.Dimension.Y], maxy)
+            miny = min(p[stl.Dimension.Y], miny)
+            maxz = max(p[stl.Dimension.Z], maxz)
+            minz = min(p[stl.Dimension.Z], minz)
+    return minx, maxx, miny, maxy, minz, maxz
 def get_min_max_dis(points):
     n = len(points)
     d_comp_max = 0
