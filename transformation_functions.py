@@ -652,8 +652,12 @@ class tracker_bone(trackers.Tracker):
             self.t_tracker_CT = np.subtract(np.mean(self.marker_pos_ct,axis=0), self.cog_stl) 
             self.d_tracker_CT = np.linalg.norm(self.t_tracker_CT)
             """cog_traj_CT[i] =  R_ct_opti * pos_track_opti[i] + R_ct_opti * opti_R[i] * r_rel_cog_tracker"""
+            # position
             self.cog_traj_CT = [np.matmul(self.t_ct_def[:3,:3],self.track_traj_opti[i,4:7]) + self.t_ct_def[3,:3] \
                                 + np.matmul(np.matmul(self.t_ct_def[:3,:3], Quaternion(self.track_traj_opti[i,:4]).rotation_matrix),self.t_tracker_CT) \
+                                for i in range(len(self.track_traj_opti))]
+            # orientation
+            self.cog_rot_CT = [Quaternion(self.track_traj_opti[i,:4]).rotate(Quaternion(matrix=self.t_ct_def[:3,:3])) \
                                 for i in range(len(self.track_traj_opti))]
 
             self.helper_points = get_joints(self.metadata['joints'])

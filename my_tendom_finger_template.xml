@@ -1,0 +1,35 @@
+<mujoco>
+    <default>
+        <geom rgba="255 255 255 0.3"/>
+    </default>
+    <asset>
+        <mesh name="ZF-MCP" scale="1 1 1"
+        file="Data\STL\Segmentation_ZF_MCP.stl"/>
+        <mesh name="ZF-PIP" scale="1 1 1"
+        file="Data\STL\Segmentation_ZF_PIP.stl"/>
+        <mesh name="ZF-DIP" scale="1 1 1"
+        file="Data\STL\Segmentation_ZF_DIP.stl"/>
+        <mesh name="ZF-Midhand" scale="1 1 1"
+        file="Data\STL\Segmentation_ZF_Mittelhand.stl"/>
+    </asset>
+    <worldbody>
+        <light diffuse="1 1 1" pos="0 0 3" dir="1 1 -1"/>
+
+        <body name="ZF_DIP">
+        <geom pos = "0 0 0" type="mesh" mesh="ZF-DIP"/>
+        </body>
+
+        <body name="ZF_PIP">
+        <geom pos = "0 0 0" type="mesh" mesh="ZF-PIP"/>
+        </body>
+
+        <body name="ZF_MCP">
+        <geom pos = "0 0 0" type="mesh" mesh="ZF-MCP"/>
+        </body>
+
+        <body name="ZF_Midhand">
+        <geom pos = "0 0 0" type="mesh" mesh="ZF-Midhand"/>
+        </body>
+
+    </worldbody>
+</mujoco>

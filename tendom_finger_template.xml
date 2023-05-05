@@ -1,7 +1,7 @@
 <mujoco model="example">
   <compiler angle="radian" coordinate="global"/>
   <option gravity="0 0 0"/>
-STL
+{{#STL}}
   <default>
     <geom rgba=".8 .6 .4 1"/>
   </default>
@@ -48,8 +48,8 @@ STL
     <site name="endeff_extra" size="0.05" pos="-0.0737687 0.0716634 0.920508"/>
 
     <body name="mcp">
-      <joint name="BONES_to_DAU_MCP" type="hinge" axis="{{dau.mcp.axis}}"
-        pos="{{dau.mcp.pos}}" limited="true" range="{{dau.mcp.range}}"/>
+      <joint name="BONES_to_DAU_MCP" type="hinge" quat="{{dau.mcp.quat}}" axis="{{dau.mcp.axis}}"
+        pos="{{dau.mcp.pos}}" limited="true" range=""/>
 
       {{#complete}}
       <geom pos="{{dau.offset}}" type="mesh" mesh="DAU-MCP"/>
@@ -102,20 +102,20 @@ STL
     </body>
   </body>
 
-  <body name="tracker-pip" pos="-0.263591 -0.150647 0.594923">
-    <site name="tracker-pip-site" size="0.02" pos="-0.263591 -0.150647 0.594923"/>
+    <body name="tracker-pip" pos="-0.263591 -0.150647 0.594923">
+      <site name="tracker-pip-site" size="0.02" pos="-0.263591 -0.150647 0.594923"/>
+    </body>
   </body>
-</body>
-      <!-- <body name="tracker-dau-mcp"> -->
-      <!--   {{#complete}} -->
-      <!--   <!-1- <geom pos="{{dau.offset}}" type="mesh" mesh="TRACKER-DAU-MCP" rgba=".8 .0 .0 1" mass="0.01"/> -1-> -->
-      <!--   {{/complete}} -->
-      <!-- </body> -->
+  <!-- <body name="tracker-dau-mcp"> -->
+  <!--   {{#complete}} -->
+  <!--   <!-1- <geom pos="{{dau.offset}}" type="mesh" mesh="TRACKER-DAU-MCP" rgba=".8 .0 .0 1" mass="0.01"/> -1-> -->
+  <!--   {{/complete}} -->
+  <!-- </body> -->
 
-  <body name="tracker-mcp" pos="-0.219951 -0.15101 0.197477">
-    <site name="tracker-mcp-site" size="0.02" pos="-0.219951 -0.15101 0.197477"/>
+    <body name="tracker-mcp" pos="-0.219951 -0.15101 0.197477">
+      <site name="tracker-mcp-site" size="0.02" pos="-0.219951 -0.15101 0.197477"/>
+    </body>
   </body>
-</body>
 
 
     <!-- <body name="zf_mcp"> -->
