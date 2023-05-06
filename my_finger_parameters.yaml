@@ -1,0 +1,23 @@
+dau:
+  mcp:
+    quat: "1 0 0"
+    pos: "0 0 0"
+  pip:
+    quat: "1 0 0"
+    pos: "0 0 0"
+  dp:
+    quat: "1 0 0"
+    pos: "0 0 0"
+zf:
+  dip:
+    quat: "1 0 0"
+    pos: "0 0 0"
+  pip:
+    quat: "1 0 0"
+    pos: "0 0 0"
+  mcp:
+    quat: "1 0 0"
+    pos: "0 0 0"
+  midhand:
+    quat: "1 0 0"
+    pos: "0 0 0"
