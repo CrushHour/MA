@@ -8,6 +8,8 @@ from ipywidgets import interact, interactive, fixed, interact_manual
 import ipywidgets as widgets
 import matplotlib.pyplot as plt
 import stl
+import my_write_parameters as mwp
+import yaml
 
 # Definition der Pfade
 test_metadata = tf.get_test_metadata('Take 2023-01-31 06.11.42 PM.csv')
@@ -86,6 +88,21 @@ interact(tf.plot_class, i = widgets.IntSlider(min=0,max=len(Tracker_ZF_DIP.track
 # %% Check if Markers are unique
 for i in range(len(Marker_DAU.ct_marker_trace)):
     print(np.subtract(Marker_DAU.ct_marker_trace[i],Marker_ZF_proximal.ct_marker_trace[i]))
+
+
+# %% Build mujocu parameters
+i = 0
+parameters = {'zf': dict(), 'dau': dict()}
+parameters['zf']['dip'] = mwp.build_parameters([Tracker_ZF_DIP.cog_rot_CT[i], Tracker_ZF_DIP.cog_traj_CT[i]])
+parameters['zf']['pip'] = mwp.build_parameters([[1,0,0,0], Marker_ZF_proximal.ct_marker_trace[i] + Marker_ZF_proximal.t_cog_CT])
+#parameters['zf']['mcp'] = mwp.build_parameters([Tracker_ZF_MCP.cog_rot_CT[i] ,Tracker_ZF_DIP.cog_traj_CT[i]])
+parameters['zf']['midhand'] = mwp.build_parameters([Tracker_ZF_midhand.cog_rot_CT[i] ,Tracker_ZF_DIP.cog_traj_CT[i]])
+
+parameters['dau']['dip'] = mwp.build_parameters([Tracker_DAU_DIP.cog_rot_CT[i], Tracker_DAU_DIP.cog_traj_CT[i]])
+parameters['dau']['pip'] = mwp.build_parameters([Marker_DAU.ct_marker_trace[i] + Marker_DAU.t_cog_CT - Marker_DAU.cog_stl, [1,0,0,0]])
+parameters['dau']['mcp'] = mwp.build_parameters([Tracker_DAU_MCP.cog_rot_CT[i], Tracker_DAU_DIP.cog_traj_CT[i] - Tracker_DAU_MCP.cog_stl ])
+with open("generated_parameters.yaml", "w") as outfile:
+    yaml.dump(parameters, outfile)
 
 # %% Berechnung der Winkel zwischen den Markern und den Trackern
 # angle ZF joints

@@ -13,14 +13,14 @@
         file="Data\STL\Segmentation_ZF_Mittelhand.stl"/>
     </asset>
     <worldbody>
-        <light diffuse="1 1 1" pos="0 0 3" dir="1 1 -1"/>
+        <light name="Light" diffuse="1 1 1" pos="0 0 3" dir="0 0 -1"/>
 
         <body name="ZF_DIP">
         <geom pos = "0 0 0" type="mesh" mesh="ZF-DIP"/>
         </body>
 
         <body name="ZF_PIP">
-        <geom pos = "0 0 0" type="mesh" mesh="ZF-PIP"/>
+        <geom pos = "{{zf.pip.pos}}" type="mesh" mesh="ZF-PIP"/>
         </body>
 
         <body name="ZF_MCP">
@@ -28,7 +28,7 @@
         </body>
 
         <body name="ZF_Midhand">
-        <geom pos = "0 0 0" type="mesh" mesh="ZF-Midhand"/>
+        <geom pos = "{{zf.midhand.pos}}" type="mesh" mesh="ZF-Midhand"/>
         </body>
 
     </worldbody>

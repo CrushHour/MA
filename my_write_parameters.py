@@ -38,55 +38,14 @@ def vec_to_string(vec):
     return " ".join(vec)
 
 
-def build_parameters(data, trackers):
-    # root = get_vec(data, 2) / 100.0
-    # pip_vec = (get_vec(data, 1) - get_vec(data, 2)) / 100.0
-    # dp_vec = (get_vec(data, 0) - get_vec(data, 2)) / 100.0
-
-    parameters = {
-        "offset": "0 0 0",
-        "mcp": {
-            "range": "-2 1",
-        },
-        "pip": {
-            "range": "0 2.5",
-        },
-        "dp": {
-            "range": "0 1",
-        },
-    }
-    for file in data:
-        print(data, file)
-        json_data = json.load(open(data[file]))
-        center = (
-            np.array(json_data["markups"][0]["controlPoints"][0]["position"])
-            + np.array(json_data["markups"][0]["controlPoints"][1]["position"])
-        ) / 2
-        parameters[file]["axis"] = "1 0.1 0.1"
-        parameters[file]["pos"] = center
-
-    parameters["offset"] = parameters["mcp"]["pos"]
-    parameters["pip"]["pos"] = vec_to_string(parameters["pip"]["pos"] - parameters["offset"])
-    parameters["dp"]["pos"] = vec_to_string(parameters["dp"]["pos"] - parameters["offset"])
-    parameters["offset"] = vec_to_string(parameters["offset"])
-    parameters["mcp"]["pos"] = "0 0 0"
+def build_parameters(data = [[1,0,0,0],[0,0,0]]):
+    parameters = dict()
+    parameters['quat'] = vec_to_string(data[0])
+    parameters['pos'] = vec_to_string(data[1])
     return parameters
 
 
-files = {
-    "dau": {
-        "dp": "Data/Slicer3D/Joints/DAU_A_DIP.mrk.json",
-        "pip": "Data/Slicer3D/Joints/DAU_A_PIP.mrk.json",
-        "mcp": "Data/Slicer3D/Joints/DAU_A_MCP.mrk.json",
 
-    },
-    "zf": {
-        "dip": "Data/Slicer3D/Joints/ZF_A_DIP.mrk.json",
-        "pip": "Data/Slicer3D/Joints/ZF_A_PIP.mrk.json",
-        "mcp": "Data/Slicer3D/Joints/ZF_A_MCP.mrk.json",
-
-    },
-}
 
 # tracker_files = {
 #     "dau": {
@@ -99,19 +58,6 @@ files = {
 #     },
 # }
 
-parameters = dict()
-for name in files:
-    trackers = dict()
-    # for tracker_name in tracker_files[name]:
-    #     tracker_data = load_fcsv(tracker_files[name][tracker_name])
-    #     trackers[tracker_name] = [
-    #         get_vec(tracker_data, 0) / 100.0,
-    #         get_vec(tracker_data, 1) / 100.0,
-    #         get_vec(tracker_data, 2) / 100.0,
-    #     ]
-    # data = load_json(files[name])
-    parameters[name] = build_parameters(files[name], trackers)
 
 
-#with open("generated_parameters.yaml", "w") as outfile:
-#    yaml.dump(parameters, outfile)
+

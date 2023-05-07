@@ -17,17 +17,17 @@ DENSITY_BONE = 1850  # kg / m**3
 POS = [0, 0, 1.6]
 POS = [p * SCALE * 1000 for p in POS]
 REGENERATE_SUB_MESHES = False
-MODIFY_TEMPLATE = False
+MODIFY_TEMPLATE = True
 CHANGE_SITE_POS = True
 
 DAMPING = 200
 STIFFNESS = 2000
 
 
-names = ['femur', 'tibia', 'fibula', 'patella']
+names = ['zf', 'dau']
 
-FILENAME = '../knee_model.xml'
-TEMPLATE_NAME = '../knee_model_template.xml'
+FILENAME = './finger_model.xml'
+TEMPLATE_NAME = './my_tendom_finger_template.xml'
 
 # root names
 WORLDBODY = 'worldbody'
@@ -55,10 +55,10 @@ def update_all_pos(root):
 
 def update_all_pos_quat(root, name, pos, quat):
     """Updates the position and quaternion of an element with the specified name."""
-    for elem in root[3]:
+    for elem in root[2]:
         if elem.attrib['name'] == name:
-            elem.attrib['pos'] = write_arr_xml(pos)
-            elem.attrib['quat'] = write_arr_xml(quat)
+            elem.attrib['pos'] = pos
+            elem.attrib['quat'] = quat
 
 
 def get_cog_femur(name='femur'):
@@ -347,24 +347,34 @@ def update_from_dict(dict):
 def prepare_all():
     tree = ET.parse(FILENAME)
     root = tree.getroot()
-    load_tendons(root)
-    add_zylinders(root)
-    update_all_pos(root)
-    update_inertias(root)
-
-    if REGENERATE_SUB_MESHES:
-        generate_convex_sub_meshes(root)
+    update_all_pos_quat(root)
 
     update_scale(root)
     tree.write(FILENAME)
 
+def create_finger_control(TEMPLATE_NAME='./my_tendom_finger_template.xml'):
+    # read in the template
+    tree = ET.parse(TEMPLATE_NAME)
+    root = tree.getroot()
+    # read in the parameters
+    with open('./generated_parameters.yaml') as f:
+        parameters = yaml.load(f, Loader=yaml.FullLoader)
+        f.close()
+    update_all_pos_quat(root, 'ZF_DIP', parameters['zf']['dip']['pos'], parameters['zf']['dip']['quat'])
+    update_all_pos_quat(root, 'ZF_PIP', parameters['zf']['pip']['pos'], parameters['zf']['pip']['quat'])
+    #update_all_pos_quat(root, 'ZF_MCP', parameters['zf']['mcp']['pos'], parameters['zf']['mcp']['quat'])
+    update_all_pos_quat(root, 'ZF_Midhand', parameters['zf']['midhand']['pos'], parameters['zf']['midhand']['quat'])
+    update_all_pos_quat(root, 'DAU_DIP', parameters['dau']['dip']['pos'], parameters['dau']['dip']['quat'])
+    update_all_pos_quat(root, 'DAU_PIP', parameters['dau']['pip']['pos'], parameters['dau']['pip']['quat'])
+    update_all_pos_quat(root, 'DAU_MCP', parameters['dau']['mcp']['pos'], parameters['dau']['mcp']['quat'])
+    
+    # update the variables in template with the values from the parameters
+    tree.write(FILENAME)
+
 
 # %%
+create_finger_control()
 if __name__ == '_main_':
-    prepare_all()
-    MODIFY_TEMPLATE = True
-    if MODIFY_TEMPLATE:
-        FILENAME = './tendom_finger_template.xml'
-    prepare_all()
+    create_finger_control()
 
 # %%

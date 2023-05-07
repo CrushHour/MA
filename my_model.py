@@ -6,7 +6,6 @@ import yaml
 import math
 import collections
 import pytorch_kinematics as pk
-import quaternion
 
 class FingerModel:
     def __init__(self, template_file, parameters_file):
@@ -46,11 +45,11 @@ class MujocoFingerModel(FingerModel):
 
         self.control_model = mujoco.MjModel.from_xml_string(self.model)
         self.control_data = mujoco.MjData(self.control_model)
+    
+    def run(self):
+        return
 
 if __name__ == "__main__":
-    model = MujocoFingerModel("./my_tendom_finger_template.xml", "./my_finger_parameters.yaml")
-    #model.run()
-    viewer = mujoco_viewer.MjViewer()
-    viewer.start()
-    viewer.set_model(model.mjc_model)
-    viewer.loop_once()
+    model = MujocoFingerModel("./my_tendom_finger_template.xml", "./generated_parameters.yaml")
+    model.run()
+
