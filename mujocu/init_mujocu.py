@@ -347,8 +347,6 @@ def update_from_dict(dict):
 def prepare_all():
     tree = ET.parse(FILENAME)
     root = tree.getroot()
-    update_all_pos_quat(root)
-
     update_scale(root)
     tree.write(FILENAME)
 

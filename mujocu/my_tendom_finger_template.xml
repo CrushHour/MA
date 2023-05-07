@@ -1,0 +1,49 @@
+<mujoco>
+    <default>
+        <geom rgba="255 255 255 0.3"/>
+    </default>
+    <asset>
+        <mesh name="ZF-MCP" scale="1 1 1"
+        file="Data\STL\Segmentation_ZF_MCP.stl"/>
+        <mesh name="ZF-PIP" scale="1 1 1"
+        file="Data\STL\Segmentation_ZF_PIP.stl"/>
+        <mesh name="ZF-DIP" scale="1 1 1"
+        file="Data\STL\Segmentation_ZF_DIP.stl"/>
+        <mesh name="ZF-Midhand" scale="1 1 1"
+        file="Data\STL\Segmentation_ZF_Mittelhand.stl"/>
+        <mesh name="DAU-MCP" scale="1 1 1"
+        file="Data\STL\Segmentation_DAU_Osmetacarpale_1.stl"/>
+        <mesh name="DAU-PIP" scale="1 1 1"
+        file="Data\STL\Segmentation_DAU_Phalax_proximalis.stl"/>
+        <mesh name="DAU-DIP" scale="1 1 1"
+        file="Data\STL\Segmentation_DAU_DIP.stl"/>
+    </asset>
+    <worldbody>
+        <light name="Light" diffuse="1 1 1" pos="0 0 3" dir="0 0 -1"/>
+
+        <body name="ZF_DIP">
+        <geom pos = "{{zf.dip.pos}}" quat = "{{zf.dip.quat}}" type="mesh" mesh="ZF-DIP"/>
+        </body>
+
+        <body name="ZF_PIP">
+        <geom pos = "{{zf.pip.pos}}" quat = "{{zf.pip.quat}}" type="mesh" mesh="ZF-PIP"/>
+        </body>
+
+        <body name="ZF_Midhand">
+        <geom pos = "{{zf.midhand.pos}}" quat = "{{zf.midhand.quat}}" type="mesh" mesh="ZF-Midhand"/>
+        </body>
+
+        <body name="DAU_DIP">
+        <geom pos = "{{dau.dip.pos}}" quat = "{{dau.dip.quat}}" type="mesh" mesh="DAU-DIP"/>
+        </body>
+
+        <body name="DAU_PIP">
+        <geom pos = "{{dau.pip.pos}}" quat = "{{dau.pip.quat}}" type="mesh" mesh="DAU-PIP"/>
+        </body>
+
+        <body name="DAU_MCP">
+        <geom pos = "{{dau.mcp.pos}}" quat = "{{dau.mcp.quat}}" type="mesh" mesh="DAU-Midhand"/>
+        </body>
+
+    </worldbody>
+</mujoco>

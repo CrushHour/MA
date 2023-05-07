@@ -50,6 +50,6 @@ class MujocoFingerModel(FingerModel):
         return
 
 if __name__ == "__main__":
-    model = MujocoFingerModel("./my_tendom_finger_template.xml", "./generated_parameters.yaml")
+    model = MujocoFingerModel("./mujocu/my_tendom_finger_template.xml", "./mujocu/generated_parameters.yaml")
     model.run()
 
