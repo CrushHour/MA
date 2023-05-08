@@ -40,7 +40,7 @@ class MujocoFingerModel(FingerModel):
         self.mjc_model = mujoco.MjModel.from_xml_string(self.model) # type: ignore
         self.data = mujoco.MjData(self.mjc_model) # type: ignore
 
-        with open("./finger_control.xml", "w") as text_file:
+        with open("./mujoco/finger_control.xml", "w") as text_file:
             text_file.write(self.model)
 
         self.control_model = mujoco.MjModel.from_xml_string(self.model) # type: ignore
@@ -50,6 +50,6 @@ class MujocoFingerModel(FingerModel):
         return
 
 if __name__ == "__main__":
-    model = MujocoFingerModel("./mujocu/my_tendom_finger_template_simple.xml", "./mujocu/generated_parameters.yaml")
+    model = MujocoFingerModel("./mujoco/my_tendom_finger_template_simple.xml", "./mujocu/generated_parameters.yaml")
     model.run()
 

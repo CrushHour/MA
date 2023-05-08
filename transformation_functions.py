@@ -652,7 +652,7 @@ class tracker_bone(trackers.Tracker):
             self.track_traj_CT = [np.matmul(self.t_ct_def[:3,:3],self.track_traj_opti[i,4:7]) + self.t_ct_def[3,:3] \
                                   for i in range(len(self.track_traj_opti))] #checked
             
-            self.track_rot_CT = [Quaternion(self.track_traj_opti[i,:4]).rotate(Quaternion(self.t_ct_def[:3,:3])) \
+            self.track_rot_CT = [Quaternion(self.track_traj_opti[i,:4]).rotate(Quaternion(matrix=self.t_ct_def[:3,:3])) \
                                     for i in range(len(self.track_traj_opti))] #checked
 
             # np.mean(self.marker_pos_ct,axis=0) ist hier anwendbar, da das mean der maker pos im def file bei [0,0,0] liegt.
@@ -678,7 +678,7 @@ class tracker_bone(trackers.Tracker):
 
             # Warum war diese Zeile eins ausgerückt? Als noch try und except drin war?
             if not np.isnan(self.helper_points[1][0]):
-                self.t_dist_CT = t_cog_trackerorigin(self.helper_points[1], np.mean(self.marker_pos_ct,axis=0))
+                self.t_dist_CT = np.subtract(self.helper_points[1], np.mean(self.marker_pos_ct,axis=0))
                 self.d_dist_CT = np.linalg.norm(self.t_dist_CT)
                 self.dist_traj_CT = [np.matmul(self.t_ct_def[:3,:3],self.track_traj_opti[i,4:7]) + self.t_ct_def[3,:3] \
                                   + np.matmul(np.matmul(self.t_ct_def[:3,:3], Quaternion(self.track_traj_opti[i,:4]).rotation_matrix), self.t_dist_CT) \
@@ -708,10 +708,10 @@ class marker_bone(tracker_bone):
         self.marker_pos_ct = self.get_marker_pos_ct()
         self.joints = get_joints(self.metadata['joints'])
 
-        self.t_proxi_CT = t_cog_trackerorigin(self.joints[0], self.marker_pos_ct)
+        self.t_proxi_CT = np.subtract(self.joints[0], self.marker_pos_ct)
         self.d_proxi_CT = np.linalg.norm(self.t_proxi_CT)
         
-        self.t_dist_CT = t_cog_trackerorigin(self.joints[1], self.marker_pos_ct)
+        self.t_dist_CT = np.subtract(self.joints[1], self.marker_pos_ct)
         self.d_dist_CT = np.linalg.norm(self.t_dist_CT)
 
         # get stl information
