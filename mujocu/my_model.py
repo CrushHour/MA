@@ -37,19 +37,19 @@ class MujocoFingerModel(FingerModel):
         self.parameters_file = parameters_file
         self.render_template(override={"complete": True})
 
-        self.mjc_model = mujoco.MjModel.from_xml_string(self.model)
-        self.data = mujoco.MjData(self.mjc_model)
+        self.mjc_model = mujoco.MjModel.from_xml_string(self.model) # type: ignore
+        self.data = mujoco.MjData(self.mjc_model) # type: ignore
 
         with open("./finger_control.xml", "w") as text_file:
             text_file.write(self.model)
 
-        self.control_model = mujoco.MjModel.from_xml_string(self.model)
-        self.control_data = mujoco.MjData(self.control_model)
+        self.control_model = mujoco.MjModel.from_xml_string(self.model) # type: ignore
+        self.control_data = mujoco.MjData(self.control_model) # type: ignore
     
     def run(self):
         return
 
 if __name__ == "__main__":
-    model = MujocoFingerModel("./mujocu/my_tendom_finger_template.xml", "./mujocu/generated_parameters.yaml")
+    model = MujocoFingerModel("./mujocu/my_tendom_finger_template_simple.xml", "./mujocu/generated_parameters.yaml")
     model.run()
 

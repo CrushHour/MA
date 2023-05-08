@@ -11,21 +11,26 @@
         file="Data\STL\Segmentation_ZF_DIP.stl"/>
         <mesh name="ZF-Midhand" scale="1 1 1"
         file="Data\STL\Segmentation_ZF_Mittelhand.stl"/>
-        
+        <mesh name="DAU-MCP" scale="1 1 1"
+        file="Data\STL\Segmentation_DAU_Osmetacarpale_1.stl"/>
+        <mesh name="DAU-PIP" scale="1 1 1"
+        file="Data\STL\Segmentation_DAU_Phalax_proximalis.stl"/>
+        <mesh name="DAU-DIP" scale="1 1 1"
+        file="Data\STL\Segmentation_DAU_DIP.stl"/>
     </asset>
     <worldbody>
         <light name="Light" diffuse="1 1 1" pos="0 0 3" dir="0 0 -1"/>
 
-        <body name="ZF_DIP">
-        <geom pos = "193.1287334265411 4.016678622573174 75.77534366235116" quat = "0.6896550753454758 -0.14915626189636846 0.1750426577393927 -0.6866500961616903" type="mesh" mesh="ZF-DIP"/>
-        </body>
-
-        <body name="ZF_PIP">
-        <geom pos = "-109.48714532002197 -186.93936721285147 -5.075806824980006" quat = "1 0 0 0" type="mesh" mesh="ZF-PIP"/>
-        </body>
-
         <body name="ZF_Midhand">
         <geom pos = "193.1287334265411 4.016678622573174 75.77534366235116" quat = "0.18248962159192395 -0.2860694984288795 0.056918711728785876 0.9389473043440835" type="mesh" mesh="ZF-Midhand"/>
+        </body>
+
+        <body name="DAU_DIP">
+        <geom pos = "145.7711020542029 -204.8943981309311 37.546771465549725" quat = "0.836792475818138 -0.5277801750393628 0.1363560501733454 0.05131731511579529" type="mesh" mesh="DAU-DIP"/>
+        </body>
+
+        <body name="DAU_MCP">
+        <geom pos = "145.7711020542029 -204.8943981309311 37.546771465549725" quat = "-0.11872216838489957 -0.21949485063010113 0.5788367557851575 -0.7763214974692969" type="mesh" mesh="DAU-MCP"/>
         </body>
 
     </worldbody>

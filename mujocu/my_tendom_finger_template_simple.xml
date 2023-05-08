@@ -21,24 +21,12 @@
     <worldbody>
         <light name="Light" diffuse="1 1 1" pos="0 0 3" dir="0 0 -1"/>
 
-        <body name="ZF_DIP">
-        <geom pos = "{{zf.dip.pos}}" quat = "{{zf.dip.quat}}" type="mesh" mesh="ZF-DIP"/>
-        </body>
-
-        <body name="ZF_PIP">
-        <geom pos = "{{zf.pip.pos}}" quat = "{{zf.pip.quat}}" type="mesh" mesh="ZF-PIP"/>
-        </body>
-
         <body name="ZF_Midhand">
         <geom pos = "{{zf.midhand.pos}}" quat = "{{zf.midhand.quat}}" type="mesh" mesh="ZF-Midhand"/>
         </body>
 
         <body name="DAU_DIP">
         <geom pos = "{{dau.dip.pos}}" quat = "{{dau.dip.quat}}" type="mesh" mesh="DAU-DIP"/>
-        </body>
-        
-        <body name="DAU_PIP">
-        <geom pos = "{{dau.pip.pos}}" quat = "{{dau.pip.quat}}" type="mesh" mesh="DAU-PIP"/>
         </body>
 
         <body name="DAU_MCP">

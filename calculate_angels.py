@@ -1,4 +1,6 @@
 #%%
+import sys
+sys.path.append('./mujocu')
 import trackers
 import transformation_functions as tf
 import numpy as np
@@ -99,9 +101,9 @@ parameters['zf']['pip'] = mwp.build_parameters([[1,0,0,0], Marker_ZF_proximal.ct
 parameters['zf']['midhand'] = mwp.build_parameters([Tracker_ZF_midhand.cog_rot_CT[i] ,Tracker_ZF_DIP.cog_traj_CT[i]])
 
 parameters['dau']['dip'] = mwp.build_parameters([Tracker_DAU_DIP.cog_rot_CT[i], Tracker_DAU_DIP.cog_traj_CT[i]])
-parameters['dau']['pip'] = mwp.build_parameters([Marker_DAU.ct_marker_trace[i] + Marker_DAU.t_cog_CT - Marker_DAU.cog_stl, [1,0,0,0]])
-parameters['dau']['mcp'] = mwp.build_parameters([Tracker_DAU_MCP.cog_rot_CT[i], Tracker_DAU_DIP.cog_traj_CT[i] - Tracker_DAU_MCP.cog_stl ])
-with open("generated_parameters.yaml", "w") as outfile:
+parameters['dau']['pip'] = mwp.build_parameters([Marker_DAU.ct_marker_trace[i] + Marker_DAU.t_cog_CT, [1,0,0,0]])
+parameters['dau']['mcp'] = mwp.build_parameters([Tracker_DAU_MCP.cog_rot_CT[i], Tracker_DAU_DIP.cog_traj_CT[i]])
+with open("./mujocu/generated_parameters.yaml", "w") as outfile:
     yaml.dump(parameters, outfile)
 
 # %% Berechnung der Winkel zwischen den Markern und den Trackern
