@@ -1,0 +1,53 @@
+{
+    "@schema": "https://raw.githubusercontent.com/slicer/slicer/master/Modules/Loadable/Markups/Resources/Schema/markups-schema-v1.0.3.json#",
+    "markups": [
+        {
+            "type": "Fiducial",
+            "coordinateSystem": "LPS",
+            "coordinateUnits": "mm",
+            "locked": false,
+            "fixedNumberOfControlPoints": false,
+            "labelFormat": "%N-%d",
+            "lastUsedControlPointNumber": 3,
+            "controlPoints": [
+                {
+                    "id": "1",
+                    "label": "DAU_COG-1",
+                    "description": "",
+                    "associatedNodeID": "vtkMRMLScalarVolumeNode2466",
+                    "position": [81.71728249999996, -218.93162118211266, -136.71513322745393],
+                    "orientation": [-1.0, -0.0, -0.0, -0.0, -1.0, -0.0, 0.0, 0.0, 1.0],
+                    "selected": true,
+                    "locked": false,
+                    "visibility": true,
+                    "positionStatus": "defined"
+                },
+                {
+                    "id": "2",
+                    "label": "DAU_COG-2",
+                    "description": "",
+                    "associatedNodeID": "vtkMRMLScalarVolumeNode2466",
+                    "position": [76.36688901133859, -209.025, -162.56337173119557],
+                    "orientation": [-1.0, -0.0, -0.0, -0.0, -1.0, -0.0, 0.0, 0.0, 1.0],
+                    "selected": true,
+                    "locked": false,
+                    "visibility": true,
+                    "positionStatus": "defined"
+                },
+                {
+                    "id": "3",
+                    "label": "DAU_COG-3",
+                    "description": "",
+                    "associatedNodeID": "vtkMRMLScalarVolumeNode2466",
+                    "position": [65.96594089999995, -200.19161871906105, -203.42732246376927],
+                    "orientation": [-1.0, -0.0, -0.0, -0.0, -1.0, -0.0, 0.0, 0.0, 1.0],
+                    "selected": true,
+                    "locked": false,
+                    "visibility": true,
+                    "positionStatus": "defined"
+                }
+            ],
+            "measurements": []
+        }
+    ]
+}

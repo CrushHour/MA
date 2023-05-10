@@ -14,7 +14,7 @@ import ipywidgets as widgets
 from mpl_toolkits import mplot3d
 from pyquaternion import Quaternion
 import csv
-import json
+import codecs, json 
 from mpl_toolkits.mplot3d import Axes3D
 from scipy import interpolate
 from scipy.spatial.transform import Rotation as Rot
@@ -593,6 +593,16 @@ def get_helper_points(finger_name: str, path = './Slicer3D/Joints/'):
         helper_points[key].append(np.mean(helper_points[key], axis=0))
     return helper_points[finger_name]
 
+def get_signle_joint_file(file_path = ['./Slicer3D/DAU_COG.mrk.json']):
+    '''Returns the joint points for the finger_name.'''
+    with open(file_path) as jsonfile:
+        data = json.load(jsonfile)
+
+    # extract point infos
+    point_data = data['markups'][0]['controlPoints']
+    helper_points = [point['position'] for point in point_data]
+    return np.array(helper_points)
+
 def get_joints(path = ['./Slicer3D/Joints/']):
     '''Returns the joint points for the finger_name.'''
     joint_pos = []
@@ -642,17 +652,22 @@ class tracker_bone(trackers.Tracker):
         if self.metadata["tracking"] == "Tracker":
             # Get the trajectory of the tracker from the test data
             self.track_traj_opti = csv_test_load(test_path, self.metadata['tracker name'])
-
+            self.T_i_opti = np.zeros((len(self.track_traj_opti),4,4))
+            for i in range(len(self.track_traj_opti)):
+                R = Quaternion(self.track_traj_opti[i,:4]).rotation_matrix
+                t = self.track_traj_opti[i,4:7]
+                self.T_i_opti[i,:3,:3] = R
+                self.T_i_opti[i,:3,3] = t
             
             # calculate the trajectory of the tracker in the CT coordinate system
             self.track_traj_CT = np.zeros((len(self.track_traj_opti),3))
 
             self.track_rot_CT = np.zeros((len(self.track_traj_opti),4))
 
-            self.track_traj_CT = [np.matmul(self.t_ct_def[:3,:3],self.track_traj_opti[i,4:7]) + self.t_ct_def[3,:3] \
+            self.track_traj_CT = [np.matmul(self.T_ct_def[:3,:3],self.track_traj_opti[i,4:7]) + self.T_ct_def[3,:3] \
                                   for i in range(len(self.track_traj_opti))] #checked
             
-            self.track_rot_CT = [Quaternion(self.track_traj_opti[i,:4]).rotate(Quaternion(matrix=self.t_ct_def[:3,:3])) \
+            self.track_rot_CT = [Quaternion(self.track_traj_opti[i,:4]).rotate(Quaternion(matrix=self.T_ct_def[:3,:3])) \
                                     for i in range(len(self.track_traj_opti))] #checked
 
             # np.mean(self.marker_pos_ct,axis=0) ist hier anwendbar, da das mean der maker pos im def file bei [0,0,0] liegt.
@@ -670,8 +685,8 @@ class tracker_bone(trackers.Tracker):
             if not np.isnan(self.helper_points[0][0]):
                 self.t_proxi_CT = np.subtract(self.helper_points[0], np.mean(self.marker_pos_ct,axis=0))
                 self.d_proxi_CT = np.linalg.norm(self.t_proxi_CT)
-                self.proxi_traj_CT = [np.matmul(self.t_ct_def[:3,:3],self.track_traj_opti[i,4:7]) + self.t_ct_def[3,:3] \
-                                  + np.matmul(np.matmul(self.t_ct_def[:3,:3], Quaternion(self.track_traj_opti[i,:4]).rotation_matrix), self.t_proxi_CT) \
+                self.proxi_traj_CT = [np.matmul(self.T_ct_def[:3,:3],self.track_traj_opti[i,4:7]) + self.T_ct_def[3,:3] \
+                                  + np.matmul(np.matmul(self.T_ct_def[:3,:3], Quaternion(self.track_traj_opti[i,:4]).rotation_matrix), self.t_proxi_CT) \
                                   for i in range(len(self.track_traj_opti))]
             else:
                 print('No proximal joint found.')
@@ -680,8 +695,8 @@ class tracker_bone(trackers.Tracker):
             if not np.isnan(self.helper_points[1][0]):
                 self.t_dist_CT = np.subtract(self.helper_points[1], np.mean(self.marker_pos_ct,axis=0))
                 self.d_dist_CT = np.linalg.norm(self.t_dist_CT)
-                self.dist_traj_CT = [np.matmul(self.t_ct_def[:3,:3],self.track_traj_opti[i,4:7]) + self.t_ct_def[3,:3] \
-                                  + np.matmul(np.matmul(self.t_ct_def[:3,:3], Quaternion(self.track_traj_opti[i,:4]).rotation_matrix), self.t_dist_CT) \
+                self.dist_traj_CT = [np.matmul(self.T_ct_def[:3,:3],self.track_traj_opti[i,4:7]) + self.T_ct_def[3,:3] \
+                                  + np.matmul(np.matmul(self.T_ct_def[:3,:3], Quaternion(self.track_traj_opti[i,:4]).rotation_matrix), self.t_dist_CT) \
                                   for i in range(len(self.track_traj_opti))]
             else:
                 print('No distal joint found.')
@@ -727,21 +742,25 @@ class marker_bone(tracker_bone):
         wp = 0.8
         ws = 1.1
 
-        self.opti_marker_trace = []
-        self.ct_marker_trace = []
+        # load marker trace from file
+        save_name = './Data/' + init_marker_ID + '_opti_marker_trace.npy'
 
+        try:
+           self.opti_marker_trace = np.load(save_name)
         
         # build marker trace from csv file
-        marker_trace = marker_variable_id_linewise(test_path, init_marker_ID, test_metadata["type"], 40)
-        inter_data = nan_helper(marker_trace)
+        except:
+            marker_trace = marker_variable_id_linewise(test_path, init_marker_ID, test_metadata["type"], 40)
+            inter_data = nan_helper(marker_trace)
+            self.opti_marker_trace = plot_tiefpass(fs, Gp, Gs, wp, ws, inter_data)
+            np.save(save_name, self.opti_marker_trace)
+        
         # marker trace in different coordinate systems
-        self.opti_marker_trace.append(plot_tiefpass(fs, Gp, Gs, wp, ws, inter_data))
-        self.ct_marker_trace.append([np.matmul(opti_pose,base_tracker.t_ct_def[:3,:3]) + base_tracker.t_ct_def[:3,3] for opti_pose in self.opti_marker_trace[-1]])
-        self.ct_marker_trace = self.ct_marker_trace[0]
+        self.ct_marker_trace = [np.matmul(opti_pose,base_tracker.T_ct_def[:3,:3]) + base_tracker.T_ct_def[:3,3] for opti_pose in self.opti_marker_trace]
 
         # overwrite cog_traj_CT from tracker_bone
         self.cog_traj_CT = [self.ct_marker_trace \
-                                + np.matmul(np.matmul(self.t_cog_CT, base_tracker.t_ct_def[:3,:3]), Quaternion(base_tracker.track_traj_opti[i,:4]).rotation_matrix) \
+                                + np.matmul(np.matmul(self.t_cog_CT, base_tracker.T_ct_def[:3,:3]), Quaternion(base_tracker.track_traj_opti[i,:4]).rotation_matrix) \
                                 for i in range(len(self.ct_marker_trace))]
     
     def get_marker_pos_ct(self):

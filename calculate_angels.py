@@ -11,6 +11,7 @@ import ipywidgets as widgets
 import matplotlib.pyplot as plt
 import stl
 import my_write_parameters as mwp
+import my_model as mwj
 import yaml
 
 # Definition der Pfade
@@ -25,12 +26,12 @@ opti_data = './Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv'
 # Tracker
 #Rotation	Rotation	Rotation	Rotation	Position	Position	Position	Mean Marker Error
 #[X	        Y	        Z	        W]	        [X	        Y	        Z]	
-opti_traj_55 = tf.csv_test_load(opti_data,"55")
-opti_traj_Tracker_52 = tf.csv_test_load(opti_data,"Tracker_52")
-opti_traj_Tracker_53 = tf.csv_test_load(opti_data,"Tracker 53")
-opti_traj_FTTracker = tf.csv_test_load(opti_data,"FT-Tracker-4")
-opti_traj_M4_gross = tf.csv_test_load(opti_data,"M4_gross")
-opti_traj_M4_klein = tf.csv_test_load(opti_data,"M4_klein")
+#opti_traj_55 = tf.csv_test_load(opti_data,"55")
+#opti_traj_Tracker_52 = tf.csv_test_load(opti_data,"Tracker_52")
+#opti_traj_Tracker_53 = tf.csv_test_load(opti_data,"Tracker 53")
+#opti_traj_FTTracker = tf.csv_test_load(opti_data,"FT-Tracker-4")
+#opti_traj_M4_gross = tf.csv_test_load(opti_data,"M4_gross")
+#opti_traj_M4_klein = tf.csv_test_load(opti_data,"M4_klein")
 
 # opti_traj_Marker_ZF_proximal = tf.marker_variable_id_linewise(opti_data,"Unlabeled 2403")
 # opti_traj_Marker_DAU = tf.marker_variable_id_linewise(opti_data,"Unlabeled 2016")
@@ -94,17 +95,44 @@ for i in range(len(Marker_DAU.ct_marker_trace)):
 
 # %% Build mujoco parameters
 i = 0
-parameters = {'zf': dict(), 'dau': dict()}
-parameters['zf']['dip'] = mwp.build_parameters([Tracker_ZF_DIP.cog_rot_CT[i], Tracker_ZF_DIP.cog_traj_CT[i]])
-parameters['zf']['pip'] = mwp.build_parameters([[1,0,0,0], Marker_ZF_proximal.ct_marker_trace[i] + Marker_ZF_proximal.t_cog_CT])
-#parameters['zf']['mcp'] = mwp.build_parameters([Tracker_ZF_MCP.cog_rot_CT[i] ,Tracker_ZF_DIP.cog_traj_CT[i]])
-parameters['zf']['midhand'] = mwp.build_parameters([Tracker_ZF_midhand.cog_rot_CT[i] ,Tracker_ZF_DIP.cog_traj_CT[i]])
+system = 'opti'
 
-parameters['dau']['dip'] = mwp.build_parameters([Tracker_DAU_DIP.cog_rot_CT[i], Tracker_DAU_DIP.cog_traj_CT[i]])
-parameters['dau']['pip'] = mwp.build_parameters([Marker_DAU.ct_marker_trace[i] + Marker_DAU.t_cog_CT, [1,0,0,0]])
-parameters['dau']['mcp'] = mwp.build_parameters([Tracker_DAU_MCP.cog_rot_CT[i], Tracker_DAU_DIP.cog_traj_CT[i]])
-with open("./mujoco/generated_parameters.yaml", "w") as outfile:
-    yaml.dump(parameters, outfile)
+parameters = {'zf': dict(), 'dau': dict()}
+
+if system == 'CT':
+    parameters['zf']['dip'] = mwp.build_parameters([Tracker_ZF_DIP.cog_rot_CT[i], Tracker_ZF_DIP.cog_traj_CT[i]])
+    parameters['zf']['pip'] = mwp.build_parameters([[1,0,0,0], Marker_ZF_proximal.ct_marker_trace[i] + Marker_ZF_proximal.t_cog_CT])
+    #parameters['zf']['mcp'] = mwp.build_parameters([Tracker_ZF_MCP.cog_rot_CT[i] ,Tracker_ZF_DIP.cog_traj_CT[i]])
+    parameters['zf']['midhand'] = mwp.build_parameters([Tracker_ZF_midhand.cog_rot_CT[i], Tracker_ZF_midhand.cog_traj_CT[i]])
+
+    parameters['dau']['dip'] = mwp.build_parameters([Tracker_DAU_DIP.cog_rot_CT[i], Tracker_DAU_DIP.cog_traj_CT[i]])
+    parameters['dau']['pip'] = mwp.build_parameters([Marker_DAU.ct_marker_trace[i] + Marker_DAU.t_cog_CT, [1,0,0,0]])
+    parameters['dau']['mcp'] = mwp.build_parameters([Tracker_DAU_MCP.cog_rot_CT[i], Tracker_DAU_MCP.cog_traj_CT[i]])
+    with open("./mujoco/generated_parameters.yaml", "w") as outfile:
+        yaml.dump(parameters, outfile)
+
+elif system == 'opti':
+    # Test für Opti system.
+    parameters['zf']['midhand'] = mwp.build_parameters([Tracker_ZF_midhand.track_traj_opti[i][:4] ,Tracker_ZF_midhand.track_traj_opti[i][4:7]])
+
+    parameters['dau']['dip'] = mwp.build_parameters([Tracker_DAU_DIP.track_traj_opti[i][:4], Tracker_DAU_DIP.track_traj_opti[i][4:7]])
+    parameters['dau']['pip'] = mwp.build_parameters([[1,0,0,0], Marker_DAU.opti_marker_trace[i] + Marker_DAU.t_cog_CT])
+    parameters['dau']['mcp'] = mwp.build_parameters([Tracker_DAU_MCP.track_traj_opti[i][:4], Tracker_DAU_MCP.track_traj_opti[i][4:7]])
+    with open("./mujoco/generated_parameters.yaml", "w") as outfile:
+        yaml.dump(parameters, outfile)
+
+else:
+    print('invalid System.')
+
+    model = mwj.MujocoFingerModel("./mujoco/my_tendom_finger_template_simple.xml", "./mujoco/generated_parameters.yaml")
+    print("Model updated!")
+
+# %% Make checks for plauability
+
+DAU_COGs = tf.get_signle_joint_file("./Data/Slicer3D/DAU_COG.mrk.json")
+
+print('Diff DAU DIP:', DAU_COGs[0]-Tracker_DAU_DIP.cog_stl)
+print('Diff DAU MCP:', DAU_COGs[2]-Tracker_DAU_MCP.cog_stl)
 
 # %% Berechnung der Winkel zwischen den Markern und den Trackern
 # angle ZF joints

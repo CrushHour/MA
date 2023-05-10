@@ -186,7 +186,7 @@ class Tracker(object):
                 self.calculate_transformation_matrix()
                 # this assumes that the tracker definition file has coordinates in the same
                 # system as the recording file? - Julian
-                self.t_ct_tr = self.t_ct_def
+                self.t_ct_tr = self.T_ct_def
         else:
             # define a test scenario
             self.perform_test()
@@ -224,7 +224,7 @@ class Tracker(object):
             self.marker_pos_def, self.marker_pos_ct)
         if len(self.marker_pos_ct) == len(self.marker_pos_def):
             _ = self.calculate_transformation_matrix()
-            print(np.round(self.t_ct_def, decimals=4))
+            print(np.round(self.T_ct_def, decimals=4))
             print(np.round(self.t_def_ct, decimals=4))
 
     def read_ctdata(self):
@@ -312,7 +312,7 @@ class Tracker(object):
         This matrix points FROM def TO ct
         I checked and can cofirm.
         """
-        self.t_ct_def = transformation_matrix
+        self.T_ct_def = transformation_matrix
         self.get_inverse()
         return transformation_matrix
 
