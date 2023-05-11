@@ -652,12 +652,23 @@ class tracker_bone(trackers.Tracker):
         if self.metadata["tracking"] == "Tracker":
             # Get the trajectory of the tracker from the test data
             self.track_traj_opti = csv_test_load(test_path, self.metadata['tracker name'])
+            self.T_opti_i = np.zeros((len(self.track_traj_opti),4,4))
             self.T_i_opti = np.zeros((len(self.track_traj_opti),4,4))
+            
+            # T from timestamp i to opti coordinate system
             for i in range(len(self.track_traj_opti)):
                 R = Quaternion(self.track_traj_opti[i,:4]).rotation_matrix
                 t = self.track_traj_opti[i,4:7]
-                self.T_i_opti[i,:3,:3] = R
-                self.T_i_opti[i,:3,3] = t
+                self.T_opti_i[i,:3,:3] = R
+                self.T_opti_i[i,:3,3] = t
+                self.T_opti_i[i,3,3] = 1
+                #inverse T
+                self.T_i_opti[i,:,:] = invert_T(self.T_opti_i[i,:,:])
+            print(self.T_opti_i[0,:,:])
+
+            # Transformation claculation
+
+            self.T_ct_opti = np.matmul(self.T_opti_i[0,:,:],self.T_ct_opti)
             
             # calculate the trajectory of the tracker in the CT coordinate system
             self.track_traj_CT = np.zeros((len(self.track_traj_opti),3))
@@ -709,6 +720,13 @@ class tracker_bone(trackers.Tracker):
             metadata = d[self.finger_name]
             json_data.close()
         return metadata
+    
+    def invert_T(self, T = np.array([[1,0,0,1],[0,1,0,1],[0,0,1,1],[0,0,0,1]])):
+        ''' gives back the inversese of a 4x4 transformation matrix'''
+        transformation_matrix = np.eye(4)
+        transformation_matrix[:3, :3] = T[:3,:3].T
+        transformation_matrix[:3, 3] = - T[:3,:3].T @ T[:3,3]
+        return transformation_matrix
     
 class marker_bone(tracker_bone):
     '''Class for the bones with markers on top. Inherits from tracker_bone.'''
