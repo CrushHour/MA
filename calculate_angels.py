@@ -18,21 +18,21 @@ test_metadata = tf.get_test_metadata('Take 2023-01-31 06.11.42 PM.csv')
 hand_metadata = tf.get_json('hand_metadata.json')
 data_path = 'Data/test_01_31/'
 test_file = '2023_01_31_18_12_48.json'
-opti_data = './Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv'
+opt_data = './Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv'
 
-''' Laden des Testfiles als csv, Optitrack Rohdaten '''
+''' Laden des Testfiles als csv, opttrack Rohdaten '''
 # Tracker
 #Rotation	Rotation	Rotation	Rotation	Position	Position	Position	Mean Marker Error
 #[X	        Y	        Z	        W]	        [X	        Y	        Z]	
-#opti_traj_55 = tf.csv_test_load(opti_data,"55")
-#opti_traj_Tracker_52 = tf.csv_test_load(opti_data,"Tracker_52")
-#opti_traj_Tracker_53 = tf.csv_test_load(opti_data,"Tracker 53")
-#opti_traj_FTTracker = tf.csv_test_load(opti_data,"FT-Tracker-4")
-#opti_traj_M4_gross = tf.csv_test_load(opti_data,"M4_gross")
-#opti_traj_M4_klein = tf.csv_test_load(opti_data,"M4_klein")
+#opt_traj_55 = tf.csv_test_load(opt_data,"55")
+#opt_traj_Tracker_52 = tf.csv_test_load(opt_data,"Tracker_52")
+#opt_traj_Tracker_53 = tf.csv_test_load(opt_data,"Tracker 53")
+#opt_traj_FTTracker = tf.csv_test_load(opt_data,"FT-Tracker-4")
+#opt_traj_M4_gross = tf.csv_test_load(opt_data,"M4_gross")
+#opt_traj_M4_klein = tf.csv_test_load(opt_data,"M4_klein")
 
-# opti_traj_Marker_ZF_proximal = tf.marker_variable_id_linewise(opti_data,"Unlabeled 2403")
-# opti_traj_Marker_DAU = tf.marker_variable_id_linewise(opti_data,"Unlabeled 2016")
+# opt_traj_Marker_ZF_proximal = tf.marker_variable_id_linewise(opt_data,"Unlabeled 2403")
+# opt_traj_Marker_DAU = tf.marker_variable_id_linewise(opt_data,"Unlabeled 2016")
 
 # Definieren der Tracker und Marker als jeweils eine Tracker Klasse
 Tracker_ZF_DIP = tf.tracker_bone('ZF_DIP',test_path=test_metadata['path'])
@@ -71,7 +71,7 @@ radius_lst = [0, d_ZF_DIP_PIP, d_ZF_Tracker_PIP, d_ZF_MCP_PIP, 0, \
 
 tf.plot_class(0,ZF_Tracker_lst,DAU_Tracker_lst,name_lst,radius_lst, save=False, show=True)
 
-interact(tf.plot_class, i = widgets.IntSlider(min=0,max=len(Tracker_ZF_DIP.track_traj_opti)-1,step=1,value=0),
+interact(tf.plot_class, i = widgets.IntSlider(min=0,max=len(Tracker_ZF_DIP.track_traj_opt)-1,step=1,value=0),
          Trackers1 = widgets.fixed(ZF_Tracker_lst), 
          Trackers2 = widgets.fixed(DAU_Tracker_lst),
          names = widgets.fixed(name_lst),
@@ -103,13 +103,13 @@ if system == 'CT':
     with open("./mujoco/generated_parameters.yaml", "w") as outfile:
         yaml.dump(parameters, outfile)
 
-elif system == 'opti':
-    # Test für Opti system.
-    parameters['zf']['midhand'] = mwp.build_parameters([Tracker_ZF_midhand.track_traj_opti[i][:4] ,Tracker_ZF_midhand.track_traj_opti[i][4:7]])
+elif system == 'opt':
+    # Test für opt system.
+    parameters['zf']['midhand'] = mwp.build_parameters([Tracker_ZF_midhand.track_traj_opt[i][:4] ,Tracker_ZF_midhand.track_traj_opt[i][4:7]])
 
-    parameters['dau']['dip'] = mwp.build_parameters([Tracker_DAU_DIP.track_traj_opti[i][:4], Tracker_DAU_DIP.track_traj_opti[i][4:7]])
-    parameters['dau']['pip'] = mwp.build_parameters([[1,0,0,0], Marker_DAU.opti_marker_trace[i] + Marker_DAU.t_cog_CT])
-    parameters['dau']['mcp'] = mwp.build_parameters([Tracker_DAU_MCP.track_traj_opti[i][:4], Tracker_DAU_MCP.track_traj_opti[i][4:7]])
+    parameters['dau']['dip'] = mwp.build_parameters([Tracker_DAU_DIP.track_traj_opt[i][:4], Tracker_DAU_DIP.track_traj_opt[i][4:7]])
+    parameters['dau']['pip'] = mwp.build_parameters([[1,0,0,0], Marker_DAU.opt_marker_trace[i] + Marker_DAU.t_cog_CT])
+    parameters['dau']['mcp'] = mwp.build_parameters([Tracker_DAU_MCP.track_traj_opt[i][:4], Tracker_DAU_MCP.track_traj_opt[i][4:7]])
     with open("./mujoco/generated_parameters.yaml", "w") as outfile:
         yaml.dump(parameters, outfile)
 
@@ -119,6 +119,28 @@ else:
 model = mwj.MujocoFingerModel("./mujoco/my_tendom_finger_template_simple.xml", "./mujoco/generated_parameters.yaml")
 print("Model updated!")
 
+# %% Tests
+markers55 = [[116.838463, -106.912125, -5.724374],[111.952942, -142.248764, -17.220221],[121.998627, -124.245445, 11.670587],[148.879791, -143.25061, -2.70425],[143.807617, -113.712471, 0.872637]] # [x,y,z], Zeitpunkt 0
+p_mess, p_def = trackers.return_sorted_points(markers55, Tracker_ZF_DIP.marker_pos_def)
+s = Tracker_ZF_DIP.track_traj_opt[0,3]
+v = Tracker_ZF_DIP.track_traj_opt[0,:3]
+q = Quaternion(scalar=s, vector=v)
+q1 = q.inverse
+t = Tracker_ZF_DIP.track_traj_opt[0,4:7]
+T_i_k = np.eye(4)
+T_i_k[:3,:3] = q.rotation_matrix
+T_i_k[:3,3] = -t
+T_k_i = tf.tracker_bone.invert_T(T_i_k) # funktioniert irgendwie nicht
+T_i_markers55 = np.zeros((5,4,4))
+out = []
+for markerx in p_mess:
+    T_i_marker = np.eye(4)
+    T_i_marker[:3,3] = markerx
+    inter = T_k_i @ T_i_marker
+    out.append(inter[:3,3])
+    print(out[-1])
+
+print(np.mean(out, axis=0))
 # %% Make checks for plauability
 
 DAU_COGs = tf.get_signle_joint_file("./Data/Slicer3D/DAU_COG.mrk.json")

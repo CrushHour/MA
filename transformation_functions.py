@@ -22,26 +22,26 @@ from scipy.spatial import distance
 from scipy.signal import butter, lfilter, freqz, buttord, filtfilt
 from tqdm import tqdm
 
-#%% transformation optitrack tracker to real tracker
+#%% transformation opttrack tracker to real tracker
 path_csv = "Data"
 ct_folder = "Slicer3D"
 
-def get_opti_positions(filename):
+def get_opt_positions(filename):
     '''Loads tracker information of a given tracker export file.'''
     path = path_csv + "/" + filename
-    opti_positions = []
+    opt_positions = []
     with open(path, newline='') as csvfile:
         spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
         for row in spamreader:
             if row[0] == 'Name':
                 name = row[1]
             if row[0] == 'Point':
-                opti_positions.append([])
+                opt_positions.append([])
                 for i in range(2,5):
-                    opti_positions[-1].append(float(row[i]))
+                    opt_positions[-1].append(float(row[i]))
 
-    #return name, opti_positions
-    return opti_positions
+    #return name, opt_positions
+    return opt_positions
 
 def csv_test_load(testrun_path, tracker_designation_motive):
     '''This function is suppose to read in the trakcing data of a single tracker
@@ -240,7 +240,7 @@ def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv", d_max
     print("len added_data for marker %s:" % initialID, len(added_data))
     return added_data
 	
-def plot_ply(tracker_points, opti_points, line_1, line_2, line_3, line_4):
+def plot_ply(tracker_points, opt_points, line_1, line_2, line_3, line_4):
     n = len(tracker_points)
     fig = plt.figure()
     ax = fig.add_subplot(projection = '3d')
@@ -254,9 +254,9 @@ def plot_ply(tracker_points, opti_points, line_1, line_2, line_3, line_4):
     #print('x:')
     #print(x)
     for i in range(0,n):
-            x2.append(opti_points[i][0])
-            y2.append(opti_points[i][1])
-            z2.append(opti_points[i][2])
+            x2.append(opt_points[i][0])
+            y2.append(opt_points[i][1])
+            z2.append(opt_points[i][2])
     #print('x2:')
     #print(x2)
     ax.scatter(x2,y2,z2, c='r', marker='o')
@@ -394,7 +394,7 @@ def compare_point_lists(pairs1, points1, pairs2, points2):
     print(distance_value_in_points1)
     print(distance_value_in_points2)
 
-    '''An dieser Stelle soll die Liste der Punkte aus dem CT (2) anhand der Punkte aus dem Opti-Export (1)
+    '''An dieser Stelle soll die Liste der Punkte aus dem CT (2) anhand der Punkte aus dem opt-Export (1)
     sortiert werden. Dafür wird der Index einer Distanz Index Kombi von (2) in (1) gesucht und der Index gepseichert.
     Anhand der entstehenden Liste von Indexen werden die Punkte von (2) umsortiert.'''''
     index_list = []
@@ -640,7 +640,7 @@ class tracker_bone(trackers.Tracker):
         print("Finger:", self.finger_name)
         self.metadata = self.get_metadata()
         if self.metadata["tracking"] == "Tracker":
-            super().__init__(0, self.metadata['tracker def opti'], self.metadata['tracker def CT'], self.finger_name)
+            super().__init__(0, self.metadata['tracker def opt'], self.metadata['tracker def CT'], self.finger_name)
         else:
             print("No tracker data available.", self.metadata["tracking"])
         
@@ -651,50 +651,50 @@ class tracker_bone(trackers.Tracker):
         '''This Part is only for full trackers.'''
         if self.metadata["tracking"] == "Tracker":
             # Get the trajectory of the tracker from the test data
-            self.track_traj_opti = csv_test_load(test_path, self.metadata['tracker name'])
+            self.track_traj_opt = csv_test_load(test_path, self.metadata['tracker name'])
             
             # initialize the transformation matrix
-            self.T_opti_i = np.zeros((len(self.track_traj_opti),4,4))
-            self.T_i_opti = np.zeros((len(self.track_traj_opti),4,4))
-            self.T_ct_i = np.zeros((len(self.track_traj_opti),4,4))
-            self.T_i_ct = np.zeros((len(self.track_traj_opti),4,4))
+            self.T_opt_i = np.zeros((len(self.track_traj_opt),4,4))
+            self.T_i_opt = np.zeros((len(self.track_traj_opt),4,4))
+            self.T_ct_i = np.zeros((len(self.track_traj_opt),4,4))
+            self.T_i_ct = np.zeros((len(self.track_traj_opt),4,4))
 
             
-            # T from timestamp i to opti coordinate system
-            for i in range(len(self.track_traj_opti)):
-                R = Quaternion(self.track_traj_opti[i,:4]).rotation_matrix
-                t = self.track_traj_opti[i,4:7]
-                self.T_opti_i[i,:3,:3] = R
-                self.T_opti_i[i,:3,3] = t
-                self.T_opti_i[i,3,3] = 1
+            # T from timestamp i to opt coordinate system
+            for i in range(len(self.track_traj_opt)):
+                R = Quaternion(self.track_traj_opt[i,:4]).rotation_matrix
+                t = self.track_traj_opt[i,4:7]
+                self.T_opt_i[i,:3,:3] = R
+                self.T_opt_i[i,:3,3] = t
+                self.T_opt_i[i,3,3] = 1
                 #inverse T
-                self.T_i_opti[i,:,:] = self.invert_T(self.T_opti_i[i,:,:])
+                self.T_i_opt[i,:,:] = self.invert_T(self.T_opt_i[i,:,:]) # checked
                 
                 
                 # calculate the trajectory of the tracker in the CT coordinate system
-                self.T_ct_i[i,:,:] = self.T_ct_def @ self.T_opti_i[i,:,:]
+                self.T_ct_i[i,:,:] = self.T_ct_def @ self.T_opt_i[i,:,:]
                 self.T_i_ct[i,:,:] = self.invert_T(self.T_ct_i[i,:,:])
-            print(self.T_opti_i[0,:,:])
+            print(self.T_opt_i[0,:,:])
 
             
             # calculate the trajectory of the tracker in the CT coordinate system
-            self.track_traj_CT = np.zeros((len(self.track_traj_opti),3))
+            self.track_traj_CT = np.zeros((len(self.track_traj_opt),3))
 
-            self.track_rot_CT = np.zeros((len(self.track_traj_opti),4))
+            self.track_rot_CT = np.zeros((len(self.track_traj_opt),4))
 
-            self.track_traj_CT = [np.matmul(self.T_ct_def[:3,:3],self.track_traj_opti[i,4:7]) + self.T_ct_def[3,:3] \
-                                  for i in range(len(self.track_traj_opti))] #checked
+            self.track_traj_CT = [np.matmul(self.T_ct_def[:3,:3],self.track_traj_opt[i,4:7]) + self.T_ct_def[3,:3] \
+                                  for i in range(len(self.track_traj_opt))] #checked
             
-            self.track_rot_CT = [Quaternion(self.track_traj_opti[i,:4]).rotate(Quaternion(matrix=self.T_ct_def[:3,:3])) \
-                                    for i in range(len(self.track_traj_opti))] #checked
+            self.track_rot_CT = [Quaternion(self.track_traj_opt[i,:4]).rotate(Quaternion(matrix=self.T_ct_def[:3,:3])) \
+                                    for i in range(len(self.track_traj_opt))] #checked
 
             # np.mean(self.marker_pos_ct,axis=0) ist hier anwendbar, da das mean der maker pos im def file bei [0,0,0] liegt.
             self.t_tracker_CT = np.subtract(np.mean(self.marker_pos_ct,axis=0), self.cog_stl)
             self.r_tracker_CT = self.t_tracker_CT
             self.d_tracker_CT = np.linalg.norm(self.t_tracker_CT)
-            """cog_traj_CT[i] =  R_ct_opti * pos_track_opti[i] + R_ct_opti * opti_R[i] * r_rel_cog_tracker"""
+            """cog_traj_CT[i] =  R_ct_opt * pos_track_opt[i] + R_ct_opt * opt_R[i] * r_rel_cog_tracker"""
             # position
-            self.cog_traj_CT = [self.track_traj_CT[i] + self.track_rot_CT[i].rotate(self.t_tracker_CT) for i in range(len(self.track_traj_opti))] # checked
+            self.cog_traj_CT = [self.track_traj_CT[i] + self.track_rot_CT[i].rotate(self.t_tracker_CT) for i in range(len(self.track_traj_opt))] # checked
             # orientation
             self.cog_rot_CT = self.track_rot_CT # checked
 
@@ -703,9 +703,9 @@ class tracker_bone(trackers.Tracker):
             if not np.isnan(self.helper_points[0][0]):
                 self.t_proxi_CT = np.subtract(self.helper_points[0], np.mean(self.marker_pos_ct,axis=0))
                 self.d_proxi_CT = np.linalg.norm(self.t_proxi_CT)
-                self.proxi_traj_CT = [np.matmul(self.T_ct_def[:3,:3],self.track_traj_opti[i,4:7]) + self.T_ct_def[3,:3] \
-                                  + np.matmul(np.matmul(self.T_ct_def[:3,:3], Quaternion(self.track_traj_opti[i,:4]).rotation_matrix), self.t_proxi_CT) \
-                                  for i in range(len(self.track_traj_opti))]
+                self.proxi_traj_CT = [np.matmul(self.T_ct_def[:3,:3],self.track_traj_opt[i,4:7]) + self.T_ct_def[3,:3] \
+                                  + np.matmul(np.matmul(self.T_ct_def[:3,:3], Quaternion(self.track_traj_opt[i,:4]).rotation_matrix), self.t_proxi_CT) \
+                                  for i in range(len(self.track_traj_opt))]
             else:
                 print('No proximal joint found.')
 
@@ -713,9 +713,9 @@ class tracker_bone(trackers.Tracker):
             if not np.isnan(self.helper_points[1][0]):
                 self.t_dist_CT = np.subtract(self.helper_points[1], np.mean(self.marker_pos_ct,axis=0))
                 self.d_dist_CT = np.linalg.norm(self.t_dist_CT)
-                self.dist_traj_CT = [np.matmul(self.T_ct_def[:3,:3],self.track_traj_opti[i,4:7]) + self.T_ct_def[3,:3] \
-                                  + np.matmul(np.matmul(self.T_ct_def[:3,:3], Quaternion(self.track_traj_opti[i,:4]).rotation_matrix), self.t_dist_CT) \
-                                  for i in range(len(self.track_traj_opti))]
+                self.dist_traj_CT = [np.matmul(self.T_ct_def[:3,:3],self.track_traj_opt[i,4:7]) + self.T_ct_def[3,:3] \
+                                  + np.matmul(np.matmul(self.T_ct_def[:3,:3], Quaternion(self.track_traj_opt[i,:4]).rotation_matrix), self.t_dist_CT) \
+                                  for i in range(len(self.track_traj_opt))]
             else:
                 print('No distal joint found.')
 
@@ -768,24 +768,24 @@ class marker_bone(tracker_bone):
         ws = 1.1
 
         # load marker trace from file
-        save_name = './Data/' + init_marker_ID + '_opti_marker_trace.npy'
+        save_name = './Data/' + init_marker_ID + '_opt_marker_trace.npy'
 
         try:
-           self.opti_marker_trace = np.load(save_name)
+           self.opt_marker_trace = np.load(save_name)
         
         # build marker trace from csv file
         except:
             marker_trace = marker_variable_id_linewise(test_path, init_marker_ID, test_metadata["type"], 40)
             inter_data = nan_helper(marker_trace)
-            self.opti_marker_trace = plot_tiefpass(fs, Gp, Gs, wp, ws, inter_data)
-            np.save(save_name, self.opti_marker_trace)
+            self.opt_marker_trace = plot_tiefpass(fs, Gp, Gs, wp, ws, inter_data)
+            np.save(save_name, self.opt_marker_trace)
         
         # marker trace in different coordinate systems
-        self.ct_marker_trace = [np.matmul(opti_pose,base_tracker.T_ct_def[:3,:3]) + base_tracker.T_ct_def[:3,3] for opti_pose in self.opti_marker_trace]
+        self.ct_marker_trace = [np.matmul(opt_pose,base_tracker.T_ct_def[:3,:3]) + base_tracker.T_ct_def[:3,3] for opt_pose in self.opt_marker_trace]
 
         # overwrite cog_traj_CT from tracker_bone
         self.cog_traj_CT = [self.ct_marker_trace \
-                                + np.matmul(np.matmul(self.t_cog_CT, base_tracker.T_ct_def[:3,:3]), Quaternion(base_tracker.track_traj_opti[i,:4]).rotation_matrix) \
+                                + np.matmul(np.matmul(self.t_cog_CT, base_tracker.T_ct_def[:3,:3]), Quaternion(base_tracker.track_traj_opt[i,:4]).rotation_matrix) \
                                 for i in range(len(self.ct_marker_trace))]
     
     def get_marker_pos_ct(self):
@@ -828,9 +828,9 @@ if __name__ == '__main__':
 #   Tracker_3dicke:
 #       numTrackers = 5
 #       positions = [[0, 0, 75], [-42, 0, 46], [25, 0, 46], [0, 37, 41.5], [0, -44, 41.5]] # [[x,y,z],[x2,y2,z2],...]
-#       name, opti_positions = get_opti_positions('MakerJS_3dicke.csv')
+#       name, opt_positions = get_opt_positions('MakerJS_3dicke.csv')
 #
 #    Tracker_Nico:
 #        numTrackers = 5
 #        positions = [[0, 0, 61], [-41, 0, 35], [20, 0, 35], [-10, 31, 35], [-10, -14, 35]] # [[x,y,z],[x2,y2,z2],...]
-#        name, opti_positions = get_opti_positions('Tracker Nico.csv')
+#        name, opt_positions = get_opt_positions('Tracker Nico.csv')

@@ -1,11 +1,11 @@
 File Type,Rigid Body Asset
 Version,1
-Name,M4_groß
+Name,M4_gross
 ID,10460405045512901101
 Color,0,235,255
-Units,m
-Point,Point 1,0.002444,-0.016079,-0.030583,None
-Point,Point 2,0.021001,0.011649,-0.000718,None
-Point,Point 3,0.017549,-0.013457,0.012235,None
-Point,Point 4,-0.029103,0.009069,-0.005898,None
-Point,Point 5,-0.011891,0.008819,0.024964,None
+Units,mm
+Point,Point 1,2.444220,-16.079201,-30.583300,None
+Point,Point 2,21.001200,11.648700,-0.717700,None
+Point,Point 3,17.548901,-13.457199,12.235400,None
+Point,Point 4,-29.103001,9.068610,-5.897790,None
+Point,Point 5,-11.891300,8.818980,24.963600,None

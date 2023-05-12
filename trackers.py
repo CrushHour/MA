@@ -45,15 +45,7 @@ def compare_point_lists(pairs1, points1, pairs2, points2):
     for i in range(len(pairs1)):
         for j in range(len(points1)):
 
-            print('points1:')
-            print(points1[j])
-            print('pairs1:')
-            print(pairs1[i])
-
-
-            # Ich habe hier fast eine Woche verschwendet. 
-            # Tut mir leid, aber ich konnte den Value Error nicht beheben, obwohl die scheiß if clause nur ein einfaches True oder False zurück gegben hat.
-            # Ich hasse alles.
+            # Tut mir leid, aber ich konnte den Value Error nicht beheben, obwohl die if case nur ein einfaches True oder False zurück gegben hat.
             #if (points1[j] in pairs1[i]).bit_length() > 0:
             try: 
                 pairs1[i].index(points1[j])
@@ -203,7 +195,6 @@ class Tracker(object):
     
     def perform_test(self):
         """function to perform the test
-        # take the 
         """
         q_init_f = Quaternion(np.random.randn(4))
         p_init_f = np.array(np.random.randn(3))
@@ -283,7 +274,6 @@ class Tracker(object):
         # https://igl.ethz.ch/projects/ARAP/svd_rot.pdf
         # https://en.wikipedia.org/wiki/Kabsch_algorithm
         d = np.sign(np.linalg.det(np.dot(V_T.T, U.T)))
-        print('d: ', d)
 
         D = np.eye(3)
         D[2, 2] = d
