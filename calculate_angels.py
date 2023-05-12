@@ -1,10 +1,8 @@
 #%%
 import sys
 sys.path.append('./mujoco')
-import trackers
 import transformation_functions as tf
 import numpy as np
-import scipy
 from tqdm import tqdm
 from ipywidgets import interact, interactive, fixed, interact_manual
 import ipywidgets as widgets
@@ -13,6 +11,7 @@ import stl
 import my_write_parameters as mwp
 import my_model as mwj
 import yaml
+from pyquaternion import Quaternion
 
 # Definition der Pfade
 test_metadata = tf.get_test_metadata('Take 2023-01-31 06.11.42 PM.csv')
@@ -20,7 +19,6 @@ hand_metadata = tf.get_json('hand_metadata.json')
 data_path = 'Data/test_01_31/'
 test_file = '2023_01_31_18_12_48.json'
 opti_data = './Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv'
-#opti_data = r'C:\\GitHub\\MA\\Data\test_01_31\\Take 2023-01-31 06.11.42 PM.csv'
 
 ''' Laden des Testfiles als csv, Optitrack Rohdaten '''
 # Tracker
@@ -41,10 +39,6 @@ Tracker_ZF_DIP = tf.tracker_bone('ZF_DIP',test_path=test_metadata['path'])
 Tracker_ZF_midhand = tf.tracker_bone('ZF_midhand',test_path=test_metadata['path'])
 Tracker_DAU_DIP = tf.tracker_bone('DAU_DIP',test_path=test_metadata['path'])
 Tracker_DAU_MCP = tf.tracker_bone('DAU_MCP',test_path=test_metadata['path'])
-
-
-
-
 #Tracker_FT = tf.tracker_bone('FT',test_path=test_metadata['path'])
 Basetracker = tf.tracker_bone('ZF_midhand',test_path=test_metadata['path']) # Basis, hinten an Fixteur externe existiert nicht im CT
 
@@ -52,15 +46,18 @@ Marker_DAU = tf.marker_bone(finger_name='DAU_PIP',test_path=test_metadata['path'
 Marker_ZF_proximal = tf.marker_bone(finger_name="ZF_PIP",test_path=test_metadata['path'], init_marker_ID=test_metadata['marker_IDs'][1])
 
 # calculate spheres
+# diese Berechnung gibt die Länge eines Fingers zurück.
+# es würde aber viel mehr sinn machen den Abstand zwischen den Joints
+# aus den mkr.json files zu nehmen.
 ZF_PIP = stl.mesh.Mesh.from_file("./Data/STL/Segmentation_ZF_PIP.stl")
 minx, maxx, miny, maxy, minz, maxz = tf.stl_find_mins_maxs(ZF_PIP)
-d_ZF_DIP_PIP = np.linalg.norm([maxx-minx,maxy-miny,maxz-minz])
+d_ZF_DIP_PIP = np.linalg.norm([maxx-minx, maxy-miny, maxz-minz])
 
 d_ZF_Tracker_PIP = Marker_ZF_proximal.d_dist_CT
 
 ZF_MCP = stl.mesh.Mesh.from_file("./Data/STL/Segmentation_ZF_MCP.stl")
 minx, maxx, miny, maxy, minz, maxz = tf.stl_find_mins_maxs(ZF_MCP)
-d_ZF_MCP_PIP = np.linalg.norm([maxx-minx,maxy-miny,maxz-minz])
+d_ZF_MCP_PIP = np.linalg.norm([maxx-minx, maxy-miny, maxz-minz])
 # %% Visualisierung der Marker und Tracker
 ZF_Tracker_lst = [Tracker_ZF_DIP.cog_traj_CT, Tracker_ZF_DIP.dist_traj_CT, Marker_ZF_proximal.ct_marker_trace, Tracker_ZF_midhand.proxi_traj_CT, Tracker_ZF_midhand.cog_traj_CT]
 DAU_Tracker_lst = [Tracker_DAU_DIP.cog_traj_CT, Tracker_DAU_DIP.dist_traj_CT, Marker_DAU.ct_marker_trace, Tracker_DAU_MCP.proxi_traj_CT,Tracker_DAU_MCP.cog_traj_CT]
@@ -86,28 +83,23 @@ interact(tf.plot_class, i = widgets.IntSlider(min=0,max=len(Tracker_ZF_DIP.track
 # On the ZF points of the distal joint are not known.
 # Therefore the points of the distal joint are calculated with the help of the proximal joint.
 
-# calculate points of distal jointk
-
-# %% Check if Markers are unique
-for i in range(len(Marker_DAU.ct_marker_trace)):
-    print(np.subtract(Marker_DAU.ct_marker_trace[i],Marker_ZF_proximal.ct_marker_trace[i]))
-
+# calculate points of distal joint
 
 # %% Build mujoco parameters
 i = 0
-system = 'opti'
+system = 'CT'
 
 parameters = {'zf': dict(), 'dau': dict()}
 
 if system == 'CT':
-    parameters['zf']['dip'] = mwp.build_parameters([Tracker_ZF_DIP.cog_rot_CT[i], Tracker_ZF_DIP.cog_traj_CT[i]])
+    parameters['zf']['dip'] = mwp.build_parameters([Quaternion(matrix=Tracker_ZF_DIP.T_i_ct[i,:3,:3]), Tracker_ZF_DIP.T_i_ct[i,:3,3]])
     parameters['zf']['pip'] = mwp.build_parameters([[1,0,0,0], Marker_ZF_proximal.ct_marker_trace[i] + Marker_ZF_proximal.t_cog_CT])
     #parameters['zf']['mcp'] = mwp.build_parameters([Tracker_ZF_MCP.cog_rot_CT[i] ,Tracker_ZF_DIP.cog_traj_CT[i]])
-    parameters['zf']['midhand'] = mwp.build_parameters([Tracker_ZF_midhand.cog_rot_CT[i], Tracker_ZF_midhand.cog_traj_CT[i]])
+    parameters['zf']['midhand'] = mwp.build_parameters([Quaternion(matrix=Tracker_ZF_midhand.T_i_ct[i,:3,:3]), Tracker_ZF_midhand.T_i_ct[i,:3,3]])
 
-    parameters['dau']['dip'] = mwp.build_parameters([Tracker_DAU_DIP.cog_rot_CT[i], Tracker_DAU_DIP.cog_traj_CT[i]])
+    parameters['dau']['dip'] = mwp.build_parameters([Quaternion(matrix=Tracker_DAU_DIP.T_i_ct[i,:3,:3]), Tracker_DAU_DIP.T_i_ct[i,:3,3]])
     parameters['dau']['pip'] = mwp.build_parameters([Marker_DAU.ct_marker_trace[i] + Marker_DAU.t_cog_CT, [1,0,0,0]])
-    parameters['dau']['mcp'] = mwp.build_parameters([Tracker_DAU_MCP.cog_rot_CT[i], Tracker_DAU_MCP.cog_traj_CT[i]])
+    parameters['dau']['mcp'] = mwp.build_parameters([Quaternion(matrix=Tracker_DAU_MCP.T_i_ct[i,:3,:3]), Tracker_DAU_MCP.T_i_ct[i,:3,3]])
     with open("./mujoco/generated_parameters.yaml", "w") as outfile:
         yaml.dump(parameters, outfile)
 
@@ -124,8 +116,8 @@ elif system == 'opti':
 else:
     print('invalid System.')
 
-    model = mwj.MujocoFingerModel("./mujoco/my_tendom_finger_template_simple.xml", "./mujoco/generated_parameters.yaml")
-    print("Model updated!")
+model = mwj.MujocoFingerModel("./mujoco/my_tendom_finger_template_simple.xml", "./mujoco/generated_parameters.yaml")
+print("Model updated!")
 
 # %% Make checks for plauability
 

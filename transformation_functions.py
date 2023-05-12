@@ -652,8 +652,13 @@ class tracker_bone(trackers.Tracker):
         if self.metadata["tracking"] == "Tracker":
             # Get the trajectory of the tracker from the test data
             self.track_traj_opti = csv_test_load(test_path, self.metadata['tracker name'])
+            
+            # initialize the transformation matrix
             self.T_opti_i = np.zeros((len(self.track_traj_opti),4,4))
             self.T_i_opti = np.zeros((len(self.track_traj_opti),4,4))
+            self.T_ct_i = np.zeros((len(self.track_traj_opti),4,4))
+            self.T_i_ct = np.zeros((len(self.track_traj_opti),4,4))
+
             
             # T from timestamp i to opti coordinate system
             for i in range(len(self.track_traj_opti)):
@@ -663,12 +668,14 @@ class tracker_bone(trackers.Tracker):
                 self.T_opti_i[i,:3,3] = t
                 self.T_opti_i[i,3,3] = 1
                 #inverse T
-                self.T_i_opti[i,:,:] = invert_T(self.T_opti_i[i,:,:])
+                self.T_i_opti[i,:,:] = self.invert_T(self.T_opti_i[i,:,:])
+                
+                
+                # calculate the trajectory of the tracker in the CT coordinate system
+                self.T_ct_i[i,:,:] = self.T_ct_def @ self.T_opti_i[i,:,:]
+                self.T_i_ct[i,:,:] = self.invert_T(self.T_ct_i[i,:,:])
             print(self.T_opti_i[0,:,:])
 
-            # Transformation claculation
-
-            self.T_ct_opti = np.matmul(self.T_opti_i[0,:,:],self.T_ct_opti)
             
             # calculate the trajectory of the tracker in the CT coordinate system
             self.track_traj_CT = np.zeros((len(self.track_traj_opti),3))
