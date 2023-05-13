@@ -93,14 +93,14 @@ system = 'CT'
 parameters = {'zf': dict(), 'dau': dict()}
 
 if system == 'CT':
-    parameters['zf']['dip'] = mwp.build_parameters([Quaternion(matrix=Tracker_ZF_DIP.T_i_ct[i,:3,:3]), Tracker_ZF_DIP.T_i_ct[i,:3,3]])
+    parameters['zf']['dip'] = mwp.build_parameters([Quaternion(matrix=Tracker_ZF_DIP.T_opt_ct[i,:3,:3]), Tracker_ZF_DIP.T_opt_ct[i,:3,3]])
     parameters['zf']['pip'] = mwp.build_parameters([[1,0,0,0], Marker_ZF_proximal.ct_marker_trace[i] + Marker_ZF_proximal.t_cog_CT])
     #parameters['zf']['mcp'] = mwp.build_parameters([Tracker_ZF_MCP.cog_rot_CT[i] ,Tracker_ZF_DIP.cog_traj_CT[i]])
-    parameters['zf']['midhand'] = mwp.build_parameters([Quaternion(matrix=Tracker_ZF_midhand.T_i_ct[i,:3,:3]), Tracker_ZF_midhand.T_i_ct[i,:3,3]])
+    parameters['zf']['midhand'] = mwp.build_parameters([Quaternion(matrix=Tracker_ZF_midhand.T_opt_ct[i,:3,:3]), Tracker_ZF_midhand.T_opt_ct[i,:3,3]])
 
-    parameters['dau']['dip'] = mwp.build_parameters([Quaternion(matrix=Tracker_DAU_DIP.T_i_ct[i,:3,:3]), Tracker_DAU_DIP.T_i_ct[i,:3,3]])
+    parameters['dau']['dip'] = mwp.build_parameters([Quaternion(matrix=Tracker_DAU_DIP.T_opt_ct[i,:3,:3]), Tracker_DAU_DIP.T_opt_ct[i,:3,3]])
     parameters['dau']['pip'] = mwp.build_parameters([Marker_DAU.ct_marker_trace[i] + Marker_DAU.t_cog_CT, [1,0,0,0]])
-    parameters['dau']['mcp'] = mwp.build_parameters([Quaternion(matrix=Tracker_DAU_MCP.T_i_ct[i,:3,:3]), Tracker_DAU_MCP.T_i_ct[i,:3,3]])
+    parameters['dau']['mcp'] = mwp.build_parameters([Quaternion(matrix=Tracker_DAU_MCP.T_opt_ct[i,:3,:3]), Tracker_DAU_MCP.T_opt_ct[i,:3,3]])
     with open("./mujoco/generated_parameters.yaml", "w") as outfile:
         yaml.dump(parameters, outfile)
 
@@ -121,30 +121,7 @@ model = mwj.MujocoFingerModel("./mujoco/my_tendom_finger_template_simple.xml", "
 print("Model updated!")
 
 # %% Tests
-markers55 = [[116.838463, -106.912125, -5.724374],[111.952942, -142.248764, -17.220221],[121.998627, -124.245445, 11.670587],[148.879791, -143.25061, -2.70425],[143.807617, -113.712471, 0.872637]] # [x,y,z], Zeitpunkt 0
-p_mess, p_def = trackers.return_sorted_points(markers55, Tracker_ZF_DIP.marker_pos_def)
-s = Tracker_ZF_DIP.track_traj_opt[0,3]
-v = Tracker_ZF_DIP.track_traj_opt[0,:3]
-q = Quaternion(scalar=s, vector=v)
-q1 = q.inverse
-t = Tracker_ZF_DIP.track_traj_opt[0,4:7]
-T_i_k = np.eye(4)
-T_i_k[:3,:3] = q.rotation_matrix
-T_i_k[:3,3] = t
-T_k_i = tf.tracker_bone.invert_T(_,T=T_i_k)
-T_i_markers55 = np.zeros((5,4,4))
-out = []
-for marker in p_mess:
-    T_i_marker = np.eye(4)
-    T_i_marker[:3,3] = marker
-    inter = T_k_i @ T_i_marker
-    out.append(inter[:3,3])
-    print(out[-1])
-print('-------------')
-print([str(pos) + '\n' for pos in Tracker_ZF_DIP.marker_pos_def])
-print('-------------')
-print(np.mean(out, axis=0))
-'''Test bestanden :)'''
+
 # %% Make checks for plauability
 
 DAU_COGs = tf.get_signle_joint_file("./Data/Slicer3D/DAU_COG.mrk.json")

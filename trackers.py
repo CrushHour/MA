@@ -310,7 +310,7 @@ class Tracker(object):
         transformation_matrix = np.eye(4)
         transformation_matrix[:3, :3] = self.R.T
         transformation_matrix[:3, 3] = - self.R.T @ self.t
-        self.t_def_ct = transformation_matrix
+        self.T_def_ct = transformation_matrix
 
 
 # %%

@@ -658,6 +658,7 @@ class tracker_bone(trackers.Tracker):
             self.T_i_opt = np.zeros((len(self.track_traj_opt),4,4))
             self.T_ct_i = np.zeros((len(self.track_traj_opt),4,4))
             self.T_i_ct = np.zeros((len(self.track_traj_opt),4,4))
+            self.T_opt_ct = np.zeros((len(self.track_traj_opt),4,4))
 
             
             # T from timestamp i to opt coordinate system
@@ -665,9 +666,8 @@ class tracker_bone(trackers.Tracker):
                 s = self.track_traj_opt[i,3]
                 v = self.track_traj_opt[i,:3]
                 q = Quaternion(scalar=s, vector=v)
-                R = q.rotation_matrix
                 t = self.track_traj_opt[i,4:7]
-                self.T_opt_i[i,:3,:3] = R
+                self.T_opt_i[i,:3,:3] = q.rotation_matrix
                 self.T_opt_i[i,:3,3] = t
                 self.T_opt_i[i,3,3] = 1
                 #inverse T
@@ -677,6 +677,9 @@ class tracker_bone(trackers.Tracker):
                 # calculate the trajectory of the tracker in the CT coordinate system
                 self.T_ct_i[i,:,:] = self.T_ct_def @ self.T_opt_i[i,:,:]
                 self.T_i_ct[i,:,:] = self.invert_T(self.T_ct_i[i,:,:])
+
+                self.T_opt_ct[i,:,:] = self.T_opt_i[i,:,:] @ self.T_def_ct
+
             print(self.T_opt_i[0,:,:])
 
             
@@ -824,8 +827,33 @@ if __name__ == '__main__':
                                       wp = widgets.FloatSlider(value=wp, min=0,max=2,step=0.05), 
                                       ws = widgets.FloatSlider(value=ws, min=0,max=2,step=0.05),
                                         marker_data = fixed(inter_data))
-    
-
+    # %% Test
+    test_metadata = get_test_metadata('Take 2023-01-31 06.11.42 PM.csv')
+    Tracker_ZF_DIP = tracker_bone('ZF_DIP',test_path=test_metadata['path'])
+    markers55 = [[116.838463, -106.912125, -5.724374],[111.952942, -142.248764, -17.220221],[121.998627, -124.245445, 11.670587],[148.879791, -143.25061, -2.70425],[143.807617, -113.712471, 0.872637]] # [x,y,z], Zeitpunkt 0
+    p_mess, p_def = trackers.return_sorted_points(markers55, Tracker_ZF_DIP.marker_pos_def)
+    s = Tracker_ZF_DIP.track_traj_opt[0,3]
+    v = Tracker_ZF_DIP.track_traj_opt[0,:3]
+    q = Quaternion(scalar=s, vector=v)
+    q1 = q.inverse
+    t = Tracker_ZF_DIP.track_traj_opt[0,4:7]
+    T_i_k = np.eye(4)
+    T_i_k[:3,:3] = q.rotation_matrix
+    T_i_k[:3,3] = t
+    T_k_i = tracker_bone.invert_T(_,T=T_i_k)
+    T_i_markers55 = np.zeros((5,4,4))
+    out = []
+    for marker in markers55:
+        T_i_marker = np.eye(4)
+        T_i_marker[:3,3] = marker
+        inter = T_k_i @ T_i_marker
+        out.append(inter[:3,3])
+        print(out[-1])
+    print('-------------')
+    print([str(pos) for pos in Tracker_ZF_DIP.marker_pos_def])
+    print('-------------')
+    print(np.mean(out, axis=0))
+    '''Test bestanden :)'''
 # %%
 #   Tracker_3dicke:
 #       numTrackers = 5
