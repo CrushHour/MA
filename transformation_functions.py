@@ -662,13 +662,16 @@ class tracker_bone(trackers.Tracker):
             
             # T from timestamp i to opt coordinate system
             for i in range(len(self.track_traj_opt)):
-                R = Quaternion(self.track_traj_opt[i,:4]).rotation_matrix
+                s = self.track_traj_opt[i,3]
+                v = self.track_traj_opt[i,:3]
+                q = Quaternion(scalar=s, vector=v)
+                R = q.rotation_matrix
                 t = self.track_traj_opt[i,4:7]
                 self.T_opt_i[i,:3,:3] = R
                 self.T_opt_i[i,:3,3] = t
                 self.T_opt_i[i,3,3] = 1
                 #inverse T
-                self.T_i_opt[i,:,:] = self.invert_T(self.T_opt_i[i,:,:]) # checked
+                self.T_i_opt[i,:,:] = self.invert_T(T=self.T_opt_i[i,:,:]) # checked
                 
                 
                 # calculate the trajectory of the tracker in the CT coordinate system
@@ -679,7 +682,6 @@ class tracker_bone(trackers.Tracker):
             
             # calculate the trajectory of the tracker in the CT coordinate system
             self.track_traj_CT = np.zeros((len(self.track_traj_opt),3))
-
             self.track_rot_CT = np.zeros((len(self.track_traj_opt),4))
 
             self.track_traj_CT = [np.matmul(self.T_ct_def[:3,:3],self.track_traj_opt[i,4:7]) + self.T_ct_def[3,:3] \

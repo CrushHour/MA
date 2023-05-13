@@ -1,6 +1,6 @@
 <mujoco>
     <default>
-        <geom rgba="209 188 138 0.9"/>
+        <geom rgba="1 0 0 0.9"/>
     </default>
     <asset>
         <mesh name="ZF-MCP" scale="1 1 1"
@@ -20,30 +20,30 @@
     </asset>
     <worldbody>
         <light name="Light" diffuse="1 1 1" pos="0 0 1000" dir="0 0 -1"/>
-        <geom type="plane" size="10000 10000 0.01" pos = "0 0 -400" rgba=".3 0.3 0.3 1"/>
+        <geom type="plane" size="1000 1000 0.01" pos = "0 0 -400" rgba=".3 0.3 0.3 1"/>
 
-        <body pos="50 0 0">
+        <body pos="90 0 0">
             <geom type="box" size="100 .2 .2" rgba=".9 0 0 1"/>
         </body>
 
-        <body pos="0 50 0">
+        <body pos="0 90 0">
             <geom type="box" size="0.2 100 .2" rgba="0 .9 0 1"/>
         </body>
 
-        <body pos="0 0 50">
+        <body pos="0 0 90">
             <geom type="box" size="0.2 0.2 100" rgba="0 0 .9 1"/>
         </body>
 
         <body name="ZF_Midhand">
-        <geom pos = "{{zf.midhand.pos}}" quat = "{{zf.midhand.quat}}" type="mesh" mesh="ZF-Midhand"/>
+        <geom pos = "{{zf.midhand.pos}}" quat = "{{zf.midhand.quat}}" type="mesh" mesh="ZF-Midhand" rgba="0 0 1 0.9"/>
         </body>
 
         <body name="DAU_DIP">
-        <geom pos = "{{dau.dip.pos}}" quat = "{{dau.dip.quat}}" type="mesh" mesh="DAU-DIP"/>
+        <geom pos = "{{dau.dip.pos}}" quat = "{{dau.dip.quat}}" type="mesh" mesh="DAU-DIP" rgba="1 0 0 0.9"/>
         </body>
 
         <body name="DAU_MCP">
-        <geom pos = "{{dau.mcp.pos}}" quat = "{{dau.mcp.quat}}" type="mesh" mesh="DAU-MCP"/>
+        <geom pos = "{{dau.mcp.pos}}" quat = "{{dau.mcp.quat}}" type="mesh" mesh="DAU-MCP" rgba="1 0 0 0.9" />
         </body>
 
     </worldbody>

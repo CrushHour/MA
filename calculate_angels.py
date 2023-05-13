@@ -2,6 +2,7 @@
 import sys
 sys.path.append('./mujoco')
 import transformation_functions as tf
+import trackers
 import numpy as np
 from tqdm import tqdm
 from ipywidgets import interact, interactive, fixed, interact_manual
@@ -129,18 +130,21 @@ q1 = q.inverse
 t = Tracker_ZF_DIP.track_traj_opt[0,4:7]
 T_i_k = np.eye(4)
 T_i_k[:3,:3] = q.rotation_matrix
-T_i_k[:3,3] = -t
-T_k_i = tf.tracker_bone.invert_T(T_i_k) # funktioniert irgendwie nicht
+T_i_k[:3,3] = t
+T_k_i = tf.tracker_bone.invert_T(_,T=T_i_k)
 T_i_markers55 = np.zeros((5,4,4))
 out = []
-for markerx in p_mess:
+for marker in p_mess:
     T_i_marker = np.eye(4)
-    T_i_marker[:3,3] = markerx
+    T_i_marker[:3,3] = marker
     inter = T_k_i @ T_i_marker
     out.append(inter[:3,3])
     print(out[-1])
-
+print('-------------')
+print([str(pos) + '\n' for pos in Tracker_ZF_DIP.marker_pos_def])
+print('-------------')
 print(np.mean(out, axis=0))
+'''Test bestanden :)'''
 # %% Make checks for plauability
 
 DAU_COGs = tf.get_signle_joint_file("./Data/Slicer3D/DAU_COG.mrk.json")
