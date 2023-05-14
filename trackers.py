@@ -216,7 +216,12 @@ class Tracker(object):
         if len(self.marker_pos_ct) == len(self.marker_pos_def):
             _ = self.calculate_transformation_matrix()
             print(np.round(self.T_ct_def, decimals=4))
-            print(np.round(self.t_def_ct, decimals=4))
+            print(np.round(self.T_def_ct, decimals=4))
+
+        # Transform ct points to ct init.
+        self.T_init_ct = np.eye(4)
+        self.T_init_ct[:3, 3] = np.negative(np.mean(self.marker_pos_ct, axis=0))
+
 
     def read_ctdata(self):
         """read the data of the marker points from the ct scan"""
@@ -286,12 +291,12 @@ class Tracker(object):
         # Check for reflection
         if np.linalg.det(R) < 0:
             V_T[2, :] *= -1
-            R = np.dot(U, V_T)
+            #R = np.dot(U, V_T)
             R = V_T.T @ U.T # Julian
 
         # Calculate the translation vector
-        #t = markers1_mean - np.dot(markers2_mean, R)
-        t = -R @ markers2_mean.T + markers1_mean.T
+        #t = markers1_mean - np.dot(markers2_mean, R) # ergibt nicht das gleiche wie unten
+        t = -R @ markers2_mean.T + markers1_mean.T # = - pos(def)_ct + pos(ct)_ct = r(def-->ct)
         self.t = t
 
         # Concatenate the rotation and translation matrices

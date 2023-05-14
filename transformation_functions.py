@@ -677,8 +677,12 @@ class tracker_bone(trackers.Tracker):
                 # calculate the trajectory of the tracker in the CT coordinate system
                 self.T_ct_i[i,:,:] = self.T_ct_def @ self.T_opt_i[i,:,:]
                 self.T_i_ct[i,:,:] = self.invert_T(self.T_ct_i[i,:,:])
-
+                
+                # ergibt nah bei einander liegende Positionen, aber nicht nachvollziehbare Rotationen
                 self.T_opt_ct[i,:,:] = self.T_opt_i[i,:,:] @ self.T_def_ct
+
+                # deshalb hier noch die Multiplikation mit T_init_ct
+                T_init_ct =   self.T_opt_ct[i,:,:]
 
             print(self.T_opt_i[0,:,:])
 
