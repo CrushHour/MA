@@ -1,4 +1,6 @@
 #%%
+%reload_ext autoreload
+%autoreload 2
 import sys
 sys.path.append('./mujoco')
 import transformation_functions as tf
@@ -13,6 +15,9 @@ import my_write_parameters as mwp
 import my_model as mwj
 import yaml
 from pyquaternion import Quaternion
+import importlib
+importlib.reload(tf)
+importlib.reload(trackers)
 
 # Definition der Pfade
 test_metadata = tf.get_test_metadata('Take 2023-01-31 06.11.42 PM.csv')
@@ -93,14 +98,14 @@ system = 'CT'
 parameters = {'zf': dict(), 'dau': dict()}
 
 if system == 'CT':
-    parameters['zf']['dip'] = mwp.build_parameters([Quaternion(matrix=Tracker_ZF_DIP.T_i_ct[i,:3,:3]), Tracker_ZF_DIP.T_i_ct[i,:3,3]])
+    parameters['zf']['dip'] = mwp.build_parameters([Quaternion(matrix=Tracker_ZF_DIP.T_opt_ct[i,:3,:3]), Tracker_ZF_DIP.T_opt_ct[i,:3,3]])
     parameters['zf']['pip'] = mwp.build_parameters([[1,0,0,0], Marker_ZF_proximal.ct_marker_trace[i] + Marker_ZF_proximal.t_cog_CT])
     #parameters['zf']['mcp'] = mwp.build_parameters([Tracker_ZF_MCP.cog_rot_CT[i] ,Tracker_ZF_DIP.cog_traj_CT[i]])
-    parameters['zf']['midhand'] = mwp.build_parameters([Quaternion(matrix=Tracker_ZF_midhand.T_i_ct[i,:3,:3]), Tracker_ZF_midhand.T_i_ct[i,:3,3]])
+    parameters['zf']['midhand'] = mwp.build_parameters([Quaternion(matrix=Tracker_ZF_midhand.T_opt_ct[i,:3,:3]), Tracker_ZF_midhand.T_opt_ct[i,:3,3]])
 
-    parameters['dau']['dip'] = mwp.build_parameters([Quaternion(matrix=Tracker_DAU_DIP.T_i_ct[i,:3,:3]), Tracker_DAU_DIP.T_i_ct[i,:3,3]])
+    parameters['dau']['dip'] = mwp.build_parameters([Quaternion(matrix=Tracker_DAU_DIP.T_opt_ct[i,:3,:3]), Tracker_DAU_DIP.T_opt_ct[i,:3,3]])
     parameters['dau']['pip'] = mwp.build_parameters([Marker_DAU.ct_marker_trace[i] + Marker_DAU.t_cog_CT, [1,0,0,0]])
-    parameters['dau']['mcp'] = mwp.build_parameters([Quaternion(matrix=Tracker_DAU_MCP.T_i_ct[i,:3,:3]), Tracker_DAU_MCP.T_i_ct[i,:3,3]])
+    parameters['dau']['mcp' ] = mwp.build_parameters([Quaternion(matrix=Tracker_DAU_MCP.T_opt_ct[i,:3,:3]), Tracker_DAU_MCP.T_opt_ct[i,:3,3]])
     with open("./mujoco/generated_parameters.yaml", "w") as outfile:
         yaml.dump(parameters, outfile)
 
