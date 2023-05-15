@@ -659,7 +659,7 @@ class tracker_bone(trackers.Tracker):
             self.T_ct_i = np.zeros((len(self.track_traj_opt),4,4))
             self.T_i_ct = np.zeros((len(self.track_traj_opt),4,4))
             self.T_opt_ct = np.zeros((len(self.track_traj_opt),4,4))
-
+            self.T_ct_opt = np.zeros((len(self.track_traj_opt),4,4))
             
             # T from timestamp i to opt coordinate system
             for i in range(len(self.track_traj_opt)):
@@ -676,13 +676,11 @@ class tracker_bone(trackers.Tracker):
                 
                 # calculate the trajectory of the tracker in the CT coordinate system
                 self.T_ct_i[i,:,:] = self.T_ct_def @ self.T_opt_i[i,:,:]
-                self.T_i_ct[i,:,:] = self.T_i_opt[i,:,:] @ self.invert_T(T=self.T_ct_def)
+                self.T_i_ct[i,:,:] = self.T_i_opt[i,:,:] @ self.T_def_ct
                 
                 # ergibt nah bei einander liegende Positionen, aber nicht nachvollziehbare Rotationen
                 self.T_opt_ct[i,:,:] = self.T_opt_i[i,:,:] @ self.T_def_ct
-
-                # deshalb hier noch die Multiplikation mit T_init_ct
-                T_init_ct =   self.T_opt_ct[i,:,:]
+                self.T_ct_opt[i,:,:] = self.invert_T(self.T_opt_ct[i,:,:])
 
             print(self.T_opt_i[0,:,:])
 

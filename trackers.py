@@ -6,7 +6,7 @@ import numpy as np
 import torch
 from pyquaternion.quaternion import Quaternion
 from datasplit import ObservationHandler
-
+import kabsch
 
 def return_sorted_points(points1, points2):
     """summarize the functions"""
