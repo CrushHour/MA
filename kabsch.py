@@ -1,7 +1,7 @@
 import numpy as np
 from math import sqrt
 
-scaling = False
+scaling = True
 
 # Implements Kabsch algorithm - best fit.
 # Supports scaling (umeyama)
@@ -27,27 +27,27 @@ def rigid_transform_3D(A, B, scale):
 
     # dot is matrix multiplication for array
     if scale:
-        H = np.transpose(BB) * AA / N
+        H = np.transpose(BB) @ AA / N
     else:
-        H = np.transpose(BB) * AA
+        H = np.transpose(BB) @ AA
 
     U, S, Vt = np.linalg.svd(H)
 
-    R = Vt.T * U.T
+    R = Vt.T @ U.T
 
     # special reflection case
     if np.linalg.det(R) < 0:
         print("Reflection detected")
         np.negative(Vt[2, :])
-        R = Vt.T * U.T
+        R = Vt.T @ U.T
 
     if scale:
         varA = np.var(A, axis=0).sum()
         c = 1 / (1 / varA * np.sum(S))  # scale factor
-        t = -R * (centroid_B.T * c) + centroid_A.T
+        t = -R @ (centroid_B.T * c) + centroid_A.T
     else:
         c = 1
-        t = -R * centroid_B.T + centroid_A.T
+        t = -R @ centroid_B.T + centroid_A.T
 
     return c, R, t
 
@@ -78,7 +78,7 @@ if __name__ == "__main__":
     #s, ret_R, ret_t = umeyama(A, B)
 
     # Find the error
-    B2 = (ret_R * B.T) + np.tile(ret_t, (1, n))
+    B2 = (ret_R @ B.T) + np.tile(ret_t, (1, n))
     B2 = B2.T
     err = A - B2
     err = np.multiply(err, err)
