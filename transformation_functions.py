@@ -663,6 +663,7 @@ class tracker_bone(trackers.Tracker):
             
             # T from timestamp i to opt coordinate system
             for i in range(len(self.track_traj_opt)):
+                # T from timestamp i to opt coordinate system
                 s = self.track_traj_opt[i,3]
                 v = self.track_traj_opt[i,:3]
                 q = Quaternion(scalar=s, vector=v)
@@ -670,30 +671,19 @@ class tracker_bone(trackers.Tracker):
                 self.T_opt_i[i,:3,:3] = q.rotation_matrix
                 self.T_opt_i[i,:3,3] = t
                 self.T_opt_i[i,3,3] = 1
-                #inverse T
-                self.T_i_opt[i,:,:] = self.invert_T(T=self.T_opt_i[i,:,:]) # checked
-                
-                
-                # calculate the trajectory of the tracker in the CT coordinate system
-                self.T_ct_i[i,:,:] = self.T_ct_def @ self.T_opt_i[i,:,:]
-                self.T_i_ct[i,:,:] = self.T_i_opt[i,:,:] @ self.T_def_ct
-                
-                # ergibt nah bei einander liegende Positionen, aber nicht nachvollziehbare Rotationen
+
+                # T from CT coordinate system to timestamp i
                 self.T_opt_ct[i,:,:] = self.T_opt_i[i,:,:] @ self.T_def_ct
-                self.T_ct_opt[i,:,:] = self.invert_T(self.T_opt_ct[i,:,:])
-
-            print(self.T_opt_i[0,:,:])
-
-            
-            # calculate the trajectory of the tracker in the CT coordinate system
+                            
+            # calculate the trajectory of the tracker and cog in the CT coordinate system
             self.track_traj_CT = np.zeros((len(self.track_traj_opt),3))
             self.track_rot_CT = np.zeros((len(self.track_traj_opt),4))
 
             self.track_traj_CT = [np.matmul(self.T_ct_def[:3,:3],self.track_traj_opt[i,4:7]) + self.T_ct_def[3,:3] \
-                                  for i in range(len(self.track_traj_opt))] #checked
+                                  for i in range(len(self.track_traj_opt))]
             
             self.track_rot_CT = [Quaternion(self.track_traj_opt[i,:4]).rotate(Quaternion(matrix=self.T_ct_def[:3,:3])) \
-                                    for i in range(len(self.track_traj_opt))] #checked
+                                    for i in range(len(self.track_traj_opt))]
 
             # np.mean(self.marker_pos_ct,axis=0) ist hier anwendbar, da das mean der maker pos im def file bei [0,0,0] liegt.
             self.t_tracker_CT = np.subtract(np.mean(self.marker_pos_ct,axis=0), self.cog_stl)

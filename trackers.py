@@ -8,12 +8,35 @@ from pyquaternion.quaternion import Quaternion
 from datasplit import ObservationHandler
 import kabsch
 
+def sort_itself_by_dis(points):
+    n = len(points)
+    pairs = []
+    for i in range(n):
+        for j in range(n - 1, -1 + i, -1):
+            if j != i:
+                print("i: ", i, "j: ", j)
+                #dx = points[j][0] - points[i][0]
+                #dy = points[j][1] - points[i][1]
+                #dz = points[j][2] - points[i][2]
+                #d_diff = math.sqrt(dx ** 2 + dy ** 2 + dz ** 2)
+                d_diff = np.linalg.norm(np.array(points[j])-np.array(points[i]))
+                # erstelle Liste die alle Punkte distanzen, plus euklidische Distanz enthält
+                pairs.append([points[j], points[i], d_diff])
+    # Sortiere Punktepaare nach euklidischer Distanz. Aufsteigend von kurz nach lang.
+    pairs.sort(key=lambda x: x[2])
+    points_out = []
+    for pair in pairs:
+        points_out.append(pair[0][:2])
+
+    return np.array(points_out)
+
 def return_sorted_points(points1, points2):
     """summarize the functions"""
     pairs1 = sort_points_by_dis(points1)
+    print('_____________________________')
     pairs2 = sort_points_by_dis(points2)
+    print(pairs2)
     return compare_point_lists(pairs1, points1, pairs2, points2)
-
 
 def sort_points_by_dis(points):
     n = len(points)
@@ -21,6 +44,7 @@ def sort_points_by_dis(points):
     for i in range(n):
         for j in range(n - 1, -1 + i, -1):
             if j != i:
+                print("i: ", i, "j: ", j)
                 #dx = points[j][0] - points[i][0]
                 #dy = points[j][1] - points[i][1]
                 #dz = points[j][2] - points[i][2]
@@ -37,7 +61,7 @@ def sort_points_by_dis(points):
 def compare_point_lists(pairs1, points1, pairs2, points2):
     '''Lese Punktepaare, und Punktewolken ein. Vergleiche Positionen der Punkte anhand 
     der Stellen in den Punktepaaren, in denen sie
-    vorkommen.'''
+    vorkommen. Der Algortihmus versagt, falls zwei Punktepaare die gleiche Distanz zueinander haben.'''
     distance_value_in_points1 = [[], [], [], [], []]
     distance_value_in_points2 = [[], [], [], [], []]
 
@@ -169,13 +193,17 @@ class Tracker(object):
         # read definition file into memory
         self.read_markerdata()
 
+
         
         if ctname is not None: 
             # read jsonfile from ct into memory
             self.read_ctdata()
             # catch the case where the ct file is about a marker instead of a tracker
             if self.metadata["tracking"] == "Tracker":
-                self.calculate_transformation_matrix()
+                #self.calculate_transformation_matrix()
+                _, self.marker_pos_ct = return_sorted_points(self.marker_pos_def, self.marker_pos_ct)
+                self.T_ct_def = self.kabsch(np.array(self.marker_pos_ct), np.array(self.marker_pos_def))
+                self.T_def_ct = self.get_inverse(self.T_ct_def)
                 # this assumes that the tracker definition file has coordinates in the same
                 # system as the recording file? - Julian
                 self.t_ct_tr = self.T_ct_def
@@ -218,10 +246,6 @@ class Tracker(object):
             print(np.round(self.T_ct_def, decimals=4))
             print(np.round(self.T_def_ct, decimals=4))
 
-        # Transform ct points to ct init.
-        self.T_init_ct = np.eye(4)
-        self.T_init_ct[:3, 3] = np.negative(np.mean(self.marker_pos_ct, axis=0))
-
 
     def read_ctdata(self):
         """read the data of the marker points from the ct scan"""
@@ -250,11 +274,27 @@ class Tracker(object):
         # reader schließen?
         file.close()
 
+    def kabsch(self, P, Q):
+        """Calculate the optimal rigid transformation matrix from Q to P using Kabsch algorithm"""
+        centroid_P = np.mean(P, axis=0)
+        centroid_Q = np.mean(Q, axis=0)
+        P_centered = P - centroid_P
+        Q_centered = Q - centroid_Q
+        H = np.dot(P_centered.T, Q_centered)
+        U, _, Vt = np.linalg.svd(H)
+        R = np.dot(Vt.T, U.T)
+        if np.linalg.det(R) < 0:
+            Vt[-1, :] *= -1
+            R = np.dot(Vt.T, U.T)
+        t = centroid_Q - np.dot(centroid_P, R.T)
+        T = np.eye(4)
+        T[:3, :3] = R
+        T[:3, 3] = t
+        return T
+
     # von def in CT, also von 2 nach 1
-    def calculate_transformation_matrix(self):
+    def calculate_transformation_matrix(self, markers1=None, markers2=None):
         """the required tranformation matrix between system 1 and 2"""
-        markers2 = self.marker_pos_def
-        markers1 = self.marker_pos_ct
 
         # Convert lists of markers to arrays
         markers1 = np.array(markers1)
@@ -268,9 +308,6 @@ class Tracker(object):
 
         # Calculate the cross-covariance matrix (H= P^T * Q)
         cross_cov = np.dot(markers1.T, markers2)
-        #  folgend nur testweise, wahrscheinlich falsch, da wir ja von 1 nach 2 wollen:
-        # hier widersprechen sich Wikipedia und GitHub
-        cross_cov = np.dot(markers2.T, markers1)
 
         # Calculate the singular value decomposition
         U, S, V_T = np.linalg.svd(cross_cov)
@@ -284,20 +321,15 @@ class Tracker(object):
         D[2, 2] = d
 
         # Calculate the rotation matrix
-        #R = np.dot(U, V_T) # Bist du dir hier sicher Niko? - Julian
         R = V_T.T @ D @ U.T
-        self.R = R
 
         # Check for reflection
         if np.linalg.det(R) < 0:
             V_T[2, :] *= -1
-            #R = np.dot(U, V_T)
             R = V_T.T @ U.T # Julian
 
         # Calculate the translation vector
-        #t = markers1_mean - np.dot(markers2_mean, R) # ergibt nicht das gleiche wie unten
-        t = -R @ markers2_mean.T + markers1_mean.T # = - pos(def)_ct + pos(ct)_ct = r(def-->ct)
-        self.t = t
+        t = markers2_mean - np.dot(markers1_mean, R.T)
 
         # Concatenate the rotation and translation matrices
         transformation_matrix = np.eye(4)
@@ -307,15 +339,15 @@ class Tracker(object):
         This matrix points FROM def TO ct
         I checked and can cofirm.
         """
-        self.T_ct_def = transformation_matrix
-        self.get_inverse()
         return transformation_matrix
 
-    def get_inverse(self):
+    def get_inverse(self, T_matrix):
         transformation_matrix = np.eye(4)
-        transformation_matrix[:3, :3] = self.R.T
-        transformation_matrix[:3, 3] = - self.R.T @ self.t
-        self.T_def_ct = transformation_matrix
+        R = T_matrix[:3, :3]
+        t = T_matrix[:3, 3]
+        transformation_matrix[:3, :3] = R.T
+        transformation_matrix[:3, 3] = - R.T @ t
+        return transformation_matrix
 
 
 # %%
@@ -452,5 +484,15 @@ def read_markerdata(path='/home/robotlab/Documents/GitHub/MA_Schote/MA/Data/test
                 result['pos'].append(cur_res)
 
         return result
+
+# %%
+if __name__ == '__main__':
+    # Test retunr_sorted_points
+    points1 = [[1,1,1], [2.5, 2.5, 2.5], [3, 3, 3]]
+    points2 = [[3, 3, 3], [2.5, 2.5, 2.5], [1, 1, 1]]
+    points1, points2 = return_sorted_points(points1, points2)
+    print(points1)
+    print(points2)
+    
 
 # %%
