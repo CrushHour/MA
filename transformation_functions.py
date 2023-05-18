@@ -715,14 +715,16 @@ class tracker_bone():
         """
         return transformation_matrix
     
-class marker_bone(tracker_bone):
+class marker_bone():
     '''Class for the bones with markers on top. Inherits from tracker_bone.'''
     def __init__(self, finger_name = "", test_path = './Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv', init_marker_ID = "Unlabeled ...") -> None:
-        super().__init__(finger_name=finger_name, test_path=test_path)
-
+        
+        self.finger_name = finger_name
+        print("Marker on", self.finger_name)
         base_tracker = tracker_bone("ZF_midhand", test_path=test_path)
         self.testname = os.path.split(test_path)[1]
         test_metadata = get_test_metadata(self.testname)
+        self.metadata = self.get_metadata()
 
         # get marker information
         self.marker_pos_ct = self.get_marker_pos_ct()
@@ -761,7 +763,7 @@ class marker_bone(tracker_bone):
             np.save(save_name, self.opt_marker_trace)
         
         # marker trace in different coordinate systems
-        self.ct_marker_trace = [np.matmul(opt_pose,base_tracker.T_ct_def[:3,:3]) + base_tracker.T_ct_def[:3,3] for opt_pose in self.opt_marker_trace]
+        self.ct_marker_trace = [np.matmul(opt_pose,base_tracker.T_def_ct[:3,:3]) + base_tracker.T_def_ct[:3,3] for opt_pose in self.opt_marker_trace]
 
         # overwrite cog_traj_CT from tracker_bone
         self.cog_traj_CT = [self.ct_marker_trace \
@@ -776,6 +778,14 @@ class marker_bone(tracker_bone):
             point_data = data['markups'][0]['controlPoints']
         self.marker_pos_ct = [point['position'] for point in point_data]
         return self.marker_pos_ct
+    
+    def get_metadata(self):
+        '''Returns the metadata of the Phalanx.'''
+        with open('hand_metadata.json') as json_data:
+            d = json.load(json_data)
+            metadata = d[self.finger_name]
+            json_data.close()
+        return metadata
 
 # %%
 if __name__ == '__main__':

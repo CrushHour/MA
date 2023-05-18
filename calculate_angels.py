@@ -108,8 +108,6 @@ with open("./mujoco/generated_parameters.yaml", "w") as outfile:
 model = mwj.MujocoFingerModel("./mujoco/my_tendom_finger_template.xml", "./mujoco/generated_parameters.yaml")
 print("Model updated!")
 
-# %% Tests
-
 # %% Make checks for plauability
 
 DAU_COGs = tf.get_signle_joint_file("./Data/Slicer3D/DAU_COG.mrk.json")
