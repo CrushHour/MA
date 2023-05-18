@@ -1,7 +1,7 @@
 #%% import
 import os
 from datetime import datetime
-import trackers
+import Konzepte.trackers as trackers
 import pandas as pd
 import numpy as np
 import stl
@@ -9,17 +9,18 @@ import math
 from PIL import Image
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
-from ipywidgets import interact, interactive, fixed, interact_manual
+from ipywidgets import interact, fixed
 import ipywidgets as widgets
 from mpl_toolkits import mplot3d
 from pyquaternion import Quaternion
 import csv
-import codecs, json 
+import json 
 from mpl_toolkits.mplot3d import Axes3D
 from scipy import interpolate
+from scipy.spatial.distance import pdist, squareform
 from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial import distance
-from scipy.signal import butter, lfilter, freqz, buttord, filtfilt
+from scipy.signal import butter, buttord, filtfilt
 from tqdm import tqdm
 
 #%% transformation opttrack tracker to real tracker
@@ -51,114 +52,6 @@ def csv_test_load(testrun_path, tracker_designation_motive):
     data = df.values[3:,start_coloum:start_coloum+8]
     data = np.array([list(map(float, i)) for i in data])
     return data
-
-def marker_variable_id(testrun_path, initialID=None, dtype="csv"):
-    if dtype == "json":
-        print("unable to load from json yet.")
-        #df = load_marker_from_json(testrun_path, initalID)
-        current_tracker_data = 0
-        next_col = 0
-        df = pd.DataFrame()
-
-    else:
-        initialID = str(initialID)
-        df = pd.read_csv(testrun_path, header=2, low_memory=False)
-        next_col = df.columns.get_loc(initialID)
-
-        """Man will nur rechts des intialen Markers, nach Folgemarkern suchen, 
-        da die ID der Marker in Motive immer steigend ist für neue Marker"""
-        #df = df[:,start_coloum:]
-        
-    # initialize variables
-    j_safe = 0
-    i_safe = 0
-    next_line = 3
-    
-    next_line_old = 3
-    dif = []
-    current_tracker_data = df.iloc[next_line_old:,next_col:next_col+3]
-    added_data = np.zeros((current_tracker_data.shape))
-
-    filled_cells = np.where(pd.notna(current_tracker_data.iloc[next_line:,:]))
-    next_line = int(filled_cells[0].max())
-    
-    for k in tqdm(range(df.index.stop)):
-    #while ID_end <= df.index.stop-3:
-        if next_line == df.index.stop:
-            break
-
-        #empty_cells = np.where(pd.isnull(df.iloc[next_line:,next_col:next_col+3]))
-        filled_cells = np.where(pd.notna(current_tracker_data.iloc[next_line:,:]))
-        # was wenn der nächste Marker mit ein paar Nans beginnt?
-        #next_line = int(filled_cells[0].max())
-
-        if next_line < next_line_old:
-            print("next line < old next line")
-            break
-
-        dif.append(next_line-next_line_old)
-        search_data = df.values[next_line+1:,next_col+3:]
-
-        # step one: follow initialID until signal ends
-        # save data in added_data for output
-        added_data[next_line_old:next_line,:] = current_tracker_data.iloc[next_line_old:next_line,:]
-        print('writing in:', next_line_old, 'to', next_line)
-
-        # find next signal from last timestemp, which is closest to 
-        last_signal = current_tracker_data.iloc[next_line-2, 0:3]
-        last_signal = np.array(list(map(float, last_signal)))
-
-        if last_signal[0] == np.nan:
-            print("last signal:", last_signal, last_signal.shape)
-            break
-
-        min_dis = np.inf
-        current_dis = np.inf
-        
-        # in search data eins runter und eins rein, 
-        # wegen zeilennummerierung, und da letztes value aus nan besteht
-        # Zeilen
-        for i, value in enumerate(search_data,start=0):
-            # nur die nächsten x Zeitschritte 
-            # nach nahe gelegenem Wert durchsuchen
-            if i >= 4000:
-                break
-
-            value = np.array(list(map(float, value)))
-
-            # Spalten
-            for j in range(0,len(value),3):
-
-                if np.isnan(value[j]) or np.isnan(value[j+1]) or np.isnan(value[j+2]):
-                    continue
-                
-                #print("value:", value[j:j+3])
-                #print("i:", i)
-                else:
-                    current_dis = np.absolute(np.linalg.norm(last_signal) - np.linalg.norm(value[j:j+3]))
-                    
-                    if current_dis < min_dis:
-                        j_safe = j
-                        min_dis = current_dis
-                        i_safe = i
-                        #print("next line:", next_line)
-        
-        next_col += j_safe
-        next_line_old = next_line + 1
-        next_line += i_safe
-
-        if current_dis == np.inf:
-            print("no marker nearby!")
-            break
-        if next_col > df.shape[1] or next_line > df.shape[0]:
-            print("end of dataframe reached!")
-            break
-
-        current_tracker_data = df.iloc[3:,next_col:next_col+3]
-        
-        #ID_end = ID_end + int(empty_cells[0][0]) + 1
-
-    return added_data
 
 def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv", d_max = 56):
     if dtype == "json":
@@ -225,7 +118,7 @@ def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv", d_max
         if values_to_add[0] == np.nan:
             continue
         else:
-            last_signal == values_to_add
+            last_signal = values_to_add
         
         # falls die Minimale Distanz zum nächsten Punkt den Grenzwert überschreitet,
         # wird der Punkt nicht in die Ausgabeliste eingetragen.
@@ -272,13 +165,13 @@ def plot_class(i, Trackers1: list = [], Trackers2: list = [], names: list = [], 
     colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
     morecolors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan']
     longcolors = ['blue', 'orange', 'green', 'red', 'purple', 'brown', 'pink', 'gray', 'olive', 'cyan']
-    css4colors = list(mcolors.CSS4_COLORS.values())
     customcolors = longcolors + morecolors + ['darkblue', 'darkgreen', 'darkred', 'darkcyan', 'darkmagenta', 'darkyellow', 'darkgray', 'darkolive', 'darkcyan']
     markers = ['o', 'v', '^', '<', '>', 's', 'p', '*', 'h', 'H', 'D', 'd', 'P', 'X']
     fig = plt.figure()
     ax = fig.add_subplot(projection = '3d')
 
     # Plot known tracker points
+    j = len(Trackers1)
     for j in range(len(Trackers1)):
         ax.scatter(Trackers1[j][i][0],Trackers1[j][i][1],Trackers1[j][i][2], c=customcolors[j], marker=markers[0], label=names[j])
     for k in range(len(Trackers2)):
@@ -324,10 +217,10 @@ def plot_class(i, Trackers1: list = [], Trackers2: list = [], names: list = [], 
 # width, length (because these are the step size)...
 def stl_find_mins_maxs(obj):
     '''Gives back the max dimensions in x, y and z direction of an stl object.'''
-    minx = maxx = miny = maxy = minz = maxz = None
-    for p in obj.points:
+    minx = maxx = miny = maxy = minz = maxz = float('nan')
+    for i, p in enumerate(obj.points):
         # p contains (x, y, z)
-        if minx is None:
+        if i== 0:
             minx = p[stl.Dimension.X]
             maxx = p[stl.Dimension.X]
             miny = p[stl.Dimension.Y]
@@ -342,10 +235,14 @@ def stl_find_mins_maxs(obj):
             maxz = max(p[stl.Dimension.Z], maxz)
             minz = min(p[stl.Dimension.Z], minz)
     return minx, maxx, miny, maxy, minz, maxz
+
 def get_min_max_dis(points):
     n = len(points)
     d_comp_max = 0
     d_comp_min = math.inf
+    v_max = []
+    v_min = []
+
     for i in range(n):
         print('i:', i)
         for j in range(n-1,-1+i,-1):
@@ -366,6 +263,24 @@ def get_min_max_dis(points):
                     d_comp_min = d_diff
                     print('v_min:', v_min, 'mit d =', d_comp_min)
     return v_max, v_min
+
+def sort_points_relative(list_points_1, list_points_2):
+    # Convert lists to numpy arrays
+    list_points_1 = np.array(list_points_1)
+    list_points_2 = np.array(list_points_2)
+    # Compute pairwise distances for each list
+    distances_1 = squareform(pdist(list_points_1))
+    distances_2 = squareform(pdist(list_points_2))
+    # Sum the distances for each point
+    sum_distances_1 = np.sum(distances_1, axis=1)
+    sum_distances_2 = np.sum(distances_2, axis=1)
+    # Get the sorted indices based on the sum of distances
+    sorted_indices_1 = np.argsort(sum_distances_1)
+    sorted_indices_2 = np.argsort(sum_distances_2)
+    # Sort the points based on the computed indices
+    sorted_list_points_1 = list_points_1[sorted_indices_1]
+    sorted_list_points_2 = list_points_2[sorted_indices_2]
+    return sorted_list_points_1.tolist(), sorted_list_points_2.tolist()
 
 def sort_points_by_dis(points):
     n = len(points)
@@ -435,24 +350,7 @@ def plot_tiefpass(fs, Gp, Gs, wp, ws, marker_data):
     plot_file_title = "marker_" + now.strftime("%d_%m_%Y_%H_%M_%S")
     # plt.savefig(plot_file_title + ".pdf", format="pdf")
     return y
-# %% 
-def calculate_transformation_matrix(markers1, markers2):
-    '''Setzt vorraus, dass die Punktelisten korrekt sortiert sind.'''
-    # Convert lists of markers to arrays
-    markers1 = np.array(markers1, dtype=float)
-    markers2 = np.array(markers2, dtype=float)
 
-    # Calculate the rotation matrix, R transforms b to a.
-    R = Rot.align_vectors(markers2,markers1)
-
-    # Calculate the translation vector
-    t = np.mean(markers2, axis=0) - np.dot(np.mean(markers1, axis=0), R)
-    
-    # Concatenate the rotation and translation matrices
-    transformation_matrix = np.eye(4)
-    transformation_matrix[:3, :3] = R
-    transformation_matrix[:3, 3] = t
-    return transformation_matrix
 # %%
 # calculate angle beween two vectors
 def angle_between(v1, v2):
@@ -633,16 +531,22 @@ def get_json(path):
         d = json.load(json_data)
         json_data.close()
     return d
-class tracker_bone(trackers.Tracker):
+class tracker_bone():
     
     def __init__(self, finger_name = "", test_path = './Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv') -> None:
         self.finger_name = finger_name
         print("Finger:", self.finger_name)
         self.metadata = self.get_metadata()
-        if self.metadata["tracking"] == "Tracker":
-            super().__init__(0, self.metadata['tracker def opt'], self.metadata['tracker def CT'], self.finger_name)
-        else:
-            print("No tracker data available.", self.metadata["tracking"])
+        self.finger_name = finger_name
+        self.defname = self.metadata['tracker def opt']
+        self.ctname = self.metadata['tracker def CT']
+        
+        # read definition file into memory
+        self.read_markerdata()
+
+        # read jsonfile from ct into memory
+        self.read_ctdata()
+        # catch the case where the ct file is about a marker instead of a tracker
         
         # get the information of the stl file
         stl_data = stl.mesh.Mesh.from_file(self.metadata['stl'])
@@ -650,6 +554,10 @@ class tracker_bone(trackers.Tracker):
         
         '''This Part is only for full trackers.'''
         if self.metadata["tracking"] == "Tracker":
+            self.marker_pos_def, self.marker_pos_ct = sort_points_relative(self.marker_pos_def, self.marker_pos_ct)
+            self.T_ct_def = self.calculate_transformation_matrix(np.array(self.marker_pos_def), np.array(self.marker_pos_ct)) # P nach Q
+            self.T_def_ct = self.invert_T(self.T_ct_def)
+            self.t_ct_tr = self.T_ct_def
             # Get the trajectory of the tracker from the test data
             self.track_traj_opt = csv_test_load(test_path, self.metadata['tracker name'])
             
@@ -674,7 +582,7 @@ class tracker_bone(trackers.Tracker):
 
                 # T from CT coordinate system to timestamp i
                 self.T_opt_ct[i,:,:] = self.T_opt_i[i,:,:] @ self.T_def_ct
-                            
+
             # calculate the trajectory of the tracker and cog in the CT coordinate system
             self.track_traj_CT = np.zeros((len(self.track_traj_opt),3))
             self.track_rot_CT = np.zeros((len(self.track_traj_opt),4))
@@ -691,7 +599,7 @@ class tracker_bone(trackers.Tracker):
             self.d_tracker_CT = np.linalg.norm(self.t_tracker_CT)
             """cog_traj_CT[i] =  R_ct_opt * pos_track_opt[i] + R_ct_opt * opt_R[i] * r_rel_cog_tracker"""
             # position
-            self.cog_traj_CT = [self.track_traj_CT[i] + self.track_rot_CT[i].rotate(self.t_tracker_CT) for i in range(len(self.track_traj_opt))] # checked
+            self.cog_traj_CT = [self.track_traj_CT[i] + Quaternion(self.track_rot_CT[i]).rotate(self.t_tracker_CT) for i in range(len(self.track_traj_opt))] # checked
             # orientation
             self.cog_rot_CT = self.track_rot_CT # checked
 
@@ -730,6 +638,81 @@ class tracker_bone(trackers.Tracker):
         transformation_matrix = np.eye(4)
         transformation_matrix[:3, :3] = T[:3,:3].T
         transformation_matrix[:3, 3] = - T[:3,:3].T @ T[:3,3]
+        return transformation_matrix
+    
+    def read_ctdata(self):
+        """read the data of the marker points from the ct scan"""
+        # 1. load mounting points
+        with open(self.ctname) as jsonfile:
+            data = json.load(jsonfile)
+        # extract point infos
+        point_data = data['markups'][0]['controlPoints']
+        self.marker_pos_ct = [point['position'] for point in point_data]
+
+    def read_markerdata(self):
+        """read the data from the csv file"""
+        coordinates = []
+        with open(self.defname, 'r') as file:
+            reader = csv.reader(file)
+            next(reader)  # Skip the first row (header)
+            next(reader)  # Skip the second row (version)
+            next(reader)  # Skip the third row (name)
+            next(reader)  # Skip the fourth row (ID)
+            next(reader)  # Skip the fifth row (color)
+            next(reader)  # Skip the sixth row (units)
+            for row in reader:
+                coordinates.append(
+                    [float(row[2]), float(row[3]), float(row[4])])
+        self.marker_pos_def = coordinates
+        # reader schließen?
+        file.close()
+    
+    def calculate_transformation_matrix(self, markers1=None, markers2=None):
+        """uses Kabsch algorithm to calculate transformation matrix between system 1 and 2"""
+
+        # Convert lists of markers to arrays
+        markers1 = np.array(markers1)
+        markers2 = np.array(markers2)
+
+        # Center the markers at the origin
+        markers1_mean = np.mean(markers1, axis=0)
+        markers2_mean = np.mean(markers2, axis=0)
+        markers1 -= markers1_mean
+        markers2 -= markers2_mean
+
+        # Calculate the cross-covariance matrix (H= P^T * Q)
+        cross_cov = np.dot(markers1.T, markers2)
+
+        # Calculate the singular value decomposition
+        U, S, V_T = np.linalg.svd(cross_cov)
+
+        # decide whether we need to correct our rotation matrix to ensure a right-handed coordinate system
+        # https://igl.ethz.ch/projects/ARAP/svd_rot.pdf
+        # https://en.wikipedia.org/wiki/Kabsch_algorithm
+        d = np.sign(np.linalg.det(np.dot(V_T.T, U.T)))
+
+        D = np.eye(3)
+        D[2, 2] = d
+
+        # Calculate the rotation matrix
+        R = V_T.T @ D @ U.T
+
+        # Check for reflection
+        if np.linalg.det(R) < 0:
+            V_T[2, :] *= -1
+            R = V_T.T @ U.T # Julian
+
+        # Calculate the translation vector
+        t = markers2_mean - np.dot(markers1_mean, R.T)
+
+        # Concatenate the rotation and translation matrices
+        transformation_matrix = np.eye(4)
+        transformation_matrix[:3, :3] = R
+        transformation_matrix[:3, 3] = t
+        """
+        This matrix points FROM def TO ct
+        I checked and can cofirm.
+        """
         return transformation_matrix
     
 class marker_bone(tracker_bone):
@@ -832,7 +815,7 @@ if __name__ == '__main__':
     T_i_k = np.eye(4)
     T_i_k[:3,:3] = q.rotation_matrix
     T_i_k[:3,3] = t
-    T_k_i = tracker_bone.invert_T(_,T=T_i_k)
+    T_k_i = Tracker_ZF_DIP.invert_T(T=T_i_k)
     T_i_markers55 = np.zeros((5,4,4))
     out = []
     for marker in markers55:

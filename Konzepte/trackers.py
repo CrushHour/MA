@@ -1,34 +1,13 @@
 # %% File for handling the conversion between optitrack stream and Tracker positions
-import math
+import sys
+sys.path.append('./')
 import csv
 import json
 import numpy as np
 import torch
 from pyquaternion.quaternion import Quaternion
 from datasplit import ObservationHandler
-import kabsch
-
-def sort_itself_by_dis(points):
-    n = len(points)
-    pairs = []
-    for i in range(n):
-        for j in range(n - 1, -1 + i, -1):
-            if j != i:
-                print("i: ", i, "j: ", j)
-                #dx = points[j][0] - points[i][0]
-                #dy = points[j][1] - points[i][1]
-                #dz = points[j][2] - points[i][2]
-                #d_diff = math.sqrt(dx ** 2 + dy ** 2 + dz ** 2)
-                d_diff = np.linalg.norm(np.array(points[j])-np.array(points[i]))
-                # erstelle Liste die alle Punkte distanzen, plus euklidische Distanz enthält
-                pairs.append([points[j], points[i], d_diff])
-    # Sortiere Punktepaare nach euklidischer Distanz. Aufsteigend von kurz nach lang.
-    pairs.sort(key=lambda x: x[2])
-    points_out = []
-    for pair in pairs:
-        points_out.append(pair[0][:2])
-
-    return np.array(points_out)
+import transformation_functions as tf
 
 def return_sorted_points(points1, points2):
     """summarize the functions"""
@@ -71,18 +50,14 @@ def compare_point_lists(pairs1, points1, pairs2, points2):
 
             # Tut mir leid, aber ich konnte den Value Error nicht beheben, obwohl die if case nur ein einfaches True oder False zurück gegben hat.
             #if (points1[j] in pairs1[i]).bit_length() > 0:
-            try: 
+            if (points1[j] in pairs1[i]):
                 pairs1[i].index(points1[j])
                 distance_value_in_points1[j].append(i + 1)
-            except:
-                pass
 
             # if (points2[j] in pairs2[i]).bit_length() > 0:
-            try: 
+            if points2[j] in pairs2[i]:
                 pairs2[i].index(points2[j])
                 distance_value_in_points2[j].append(i + 1)
-            except:
-                pass
 
     '''An dieser Stelle soll die Liste der Punkte aus dem CT (2) anhand der Punkte aus dem Opti-Export (1)
     sortiert werden. Dafür wird der Index einer Distanz Index Kombi von (2) in (1) gesucht und der Index gepseichert.
@@ -180,7 +155,7 @@ class TMatrix(object):
 class Tracker(object):
     """class to handle the"""
 
-    def __init__(self, id_num: int, defname: str, ctname=None, finger_name=None):
+    def __init__(self, id_num: int, defname: str, ctname="None", finger_name=None):
         """init the tracker
         1. read files from pointlist
         """
@@ -195,18 +170,14 @@ class Tracker(object):
 
 
         
-        if ctname is not None: 
+        if ctname is not "None": 
             # read jsonfile from ct into memory
             self.read_ctdata()
             # catch the case where the ct file is about a marker instead of a tracker
-            if self.metadata["tracking"] == "Tracker":
-                #self.calculate_transformation_matrix()
-                _, self.marker_pos_ct = return_sorted_points(self.marker_pos_def, self.marker_pos_ct)
-                self.T_ct_def = self.kabsch(np.array(self.marker_pos_ct), np.array(self.marker_pos_def))
-                self.T_def_ct = self.get_inverse(self.T_ct_def)
-                # this assumes that the tracker definition file has coordinates in the same
-                # system as the recording file? - Julian
-                self.t_ct_tr = self.T_ct_def
+            self.marker_pos_def, self.marker_pos_ct = tf.sort_points_relative(self.marker_pos_def, self.marker_pos_ct)
+            self.T_ct_def = self.kabsch(np.array(self.marker_pos_ct), np.array(self.marker_pos_def))
+            self.T_def_ct = self.get_inverse(self.T_ct_def)
+            self.t_ct_tr = self.T_ct_def
         else:
             # define a test scenario
             self.perform_test()
@@ -378,19 +349,19 @@ class TrackerHandler(object):
 
         # initialise all trackers
         # index
-        self.zf_mcp = Tracker(f'{def_path}/zf_mcp.csv',
+        self.zf_mcp = Tracker(0,f'{def_path}/zf_mcp.csv',
                               f'{ct_path}/zf_mcp.mrk.json')
-        self.zf_dip = Tracker(f'{def_path}/zf_dip.csv',
+        self.zf_dip = Tracker(0,f'{def_path}/zf_dip.csv',
                               f'{ct_path}/zf_dip.mrk.json')
 
         # thumb
-        self.dau_mcp = Tracker(
+        self.dau_mcp = Tracker(0,
             f'{def_path}/dau_mcp.csv', f'{ct_path}/dau_mcp.mrk.json')
-        self.dau_dip = Tracker(
+        self.dau_dip = Tracker(0,
             f'{def_path}/dau_dip.csv', f'{ct_path}/dau_dip.mrk.json')
 
         # ft
-        self.ft = Tracker(f'{def_path}/ft.csv', f'{ct_path}/ft.mrk.json')
+        self.ft = Tracker(0, f'{def_path}/ft.csv', f'{ct_path}/ft.mrk.json')
 
         self.t_ct_zfmcp = self.zf_mcp.t_ct_tr
         self.t_ct_zfdip = self.zf_dip.t_ct_tr
@@ -461,7 +432,7 @@ def read_markerdata(path='/home/robotlab/Documents/GitHub/MA_Schote/MA/Data/test
             return
 
         if bodyt_markerf == False and body_name in id_names: # durch bodyt_maerkerf wird eine der beiden if-Bedingungen immer falsch sein.
-            body_id = body_names.index(id_names)
+            body_id = body_names.index(id_names) # type: ignore
         else:
             print('ID not found!')
             #return # Diese Zeile verhindert, dass man bei nutzunge eines Rigid Bodies weiter kommt.

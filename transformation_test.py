@@ -3,7 +3,7 @@ import sys
 import numpy as np
 sys.path.append('./mujoco')
 import transformation_functions as tf
-import trackers
+import Konzepte.trackers as trackers
 import my_write_parameters as mwp
 import my_model as mwj
 import yaml
@@ -47,51 +47,55 @@ print(marker_pos_new)
 print(Tracker_DAU_DIP.marker_pos_def)
 
 # %%
-def kabsch_iter(self,points1,points2,iterations=5):
+def kabsch_iter(points1,points2,iterations=5):
         '''marker_pos_def = points2'''
         rssd = np.inf
-        T = trackers.Tracker.calculate_transformation_matrix(_,points1, points2)
+        T = Tracker_DAU_DIP.calculate_transformation_matrix(points1, points2)
         marker_pos_new = [np.append(pos,1) for pos in points2]
         for k in range(len(points2)):
             marker_pos_new[k] = np.matmul(T, np.array(marker_pos_new[k]))
             marker_pos_new[k] = marker_pos_new[k][:3]
         
         for i in range(iterations):
+            T_next = scipyR.from_matrix(np.eye(3))
             T_next = scipyR.align_vectors(points1, marker_pos_new)
             for j in range(len(marker_pos_new)):
-                marker_pos_new[j] = T_next.as_matrix() @ np.array(marker_pos_new[j])
-            R = np.matmul(T_next.as_matrix(), T[:3,:3])
+                marker_pos_new[j] = T_next.as_matrix() @ np.array(marker_pos_new[j]) # type: ignore
+            R = np.matmul(T_next.as_matrix(), T[:3,:3]) # type: ignore
             T[:3,:3] = R
             print(rssd)
         return T
 
-T5 = kabsch_iter(_,Tracker_DAU_DIP.marker_pos_ct, Tracker_DAU_DIP.marker_pos_def)
+T5 = kabsch_iter(Tracker_DAU_DIP.marker_pos_ct, Tracker_DAU_DIP.marker_pos_def)
 # %% Test des Translationsvektors t mit Kabsch von tracker.Tracker.transformation_matrix
 importlib.reload(trackers)
 sys.path.append('./Konzepte')
 
+alpha = 0.5
+R = np.array([[np.cos(alpha), -np.sin(alpha), 0, 1],
+                [np.sin(alpha), np.cos(alpha), 0, 2],
+                [0, 0, 1, 3],
+                [0, 0, 0, 1]])
 
-T_def = np.eye(4)
-angle = np.radians(30)
-R = np.array([[np.cos(angle), -np.sin(angle), 0],
-                [np.sin(angle), np.cos(angle), 0],
-                [0, 0, 1]])
-t = np.array([10, 20, 30])
-T_def[:3,:3] = R
-T_def[:3,3] = t
+P = Tracker_DAU_DIP.marker_pos_def
+Q = np.array(Tracker_DAU_DIP.marker_pos_ct)
 
-P = Tracker_DAU_DIP.marker_pos_ct
-Q = np.array(Tracker_DAU_DIP.marker_pos_def)
+#Q = np.zeros((5,3))
+#for i in range(5):
+#    Q[i,:] = np.matmul(R, np.append(P[i],1))[:3]
 
-T_def_ct = trackers.Tracker.calculate_transformation_matrix(_,P,Q)
+T_ct_def = Tracker_DAU_DIP.calculate_transformation_matrix(P,Q) # P nach Q
+T_def_ct = Tracker_DAU_DIP.invert_T(T_ct_def) # Q nach P
 
 P_recover = np.zeros((5,3))
 for i in range(5):
-    P_recover[i,:] = np.matmul(T_def_ct,np.append(Q[i,:],1))[:3]
+    P_recover[i,:] = np.matmul(T_def_ct, np.append(Q[i,:],1))[:3]
+    print(np.round(P_recover[i,:],4))
+    print(np.round(P[i],4))
+    print('---')
 
-print(P_recover)
-print(P)
-
+print(np.round(T_def_ct,3))
+#print(np.round(R,3))
 
 # %%
 def kabsch(P, Q):
@@ -141,4 +145,17 @@ def test_kabsch():
     print(np.round(T, 3))
 
 test_kabsch()
+# %% Test der Funktion trackers.sort_points_relative(points1, points2)
+
+importlib.reload(trackers)
+
+points1 = [[12,12,12],[4,4,4],[5,5,5], [7,7,7]]
+points2 = [[0,0,0],[4,4,4], [6,6,6], [11,11,11]]
+
+points1, points2 = tf.sort_points_relative(points1, points2)
+
+print(points1)
+print(points2)
+
+
 # %%
