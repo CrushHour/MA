@@ -761,14 +761,15 @@ class marker_bone():
             inter_data = nan_helper(marker_trace)
             self.opt_marker_trace = plot_tiefpass(fs, Gp, Gs, wp, ws, inter_data)
             np.save(save_name, self.opt_marker_trace)
+
+        self.T_opt_i = np.zeros((len(self.opt_marker_trace),4,4))
+        self.T_opt_ct = np.zeros((len(self.opt_marker_trace),4,4))
+        for i in range(len(self.opt_marker_trace)):
+            self.T_opt_i[i,:,:] = np.eye(4)
+            self.T_opt_i[i,:3,3] = self.opt_marker_trace[i]
         
         # marker trace in different coordinate systems
-        self.ct_marker_trace = [np.matmul(opt_pose,base_tracker.T_def_ct[:3,:3]) + base_tracker.T_def_ct[:3,3] for opt_pose in self.opt_marker_trace]
-
-        # overwrite cog_traj_CT from tracker_bone
-        self.cog_traj_CT = [self.ct_marker_trace \
-                                + np.matmul(np.matmul(self.t_cog_CT, base_tracker.T_ct_def[:3,:3]), Quaternion(base_tracker.track_traj_opt[i,:4]).rotation_matrix) \
-                                for i in range(len(self.ct_marker_trace))]
+            self.T_opt_ct[i,:,:] =  self.T_opt_i[i,:,:] @ base_tracker.T_def_ct
     
     def get_marker_pos_ct(self):
         '''Returns the relative marker positions in the CT coordinate system to the bone cog.'''

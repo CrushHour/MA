@@ -63,8 +63,8 @@ ZF_MCP = stl.mesh.Mesh.from_file("./Data/STL/Segmentation_ZF_MCP.stl")
 minx, maxx, miny, maxy, minz, maxz = tf.stl_find_mins_maxs(ZF_MCP)
 d_ZF_MCP_PIP = np.linalg.norm([maxx-minx, maxy-miny, maxz-minz])
 # %% Visualisierung der Marker und Tracker
-ZF_Tracker_lst = [Tracker_ZF_DIP.cog_traj_CT, Tracker_ZF_DIP.dist_traj_CT, Marker_ZF_proximal.ct_marker_trace, Tracker_ZF_midhand.proxi_traj_CT, Tracker_ZF_midhand.cog_traj_CT]
-DAU_Tracker_lst = [Tracker_DAU_DIP.cog_traj_CT, Tracker_DAU_DIP.dist_traj_CT, Marker_DAU.ct_marker_trace, Tracker_DAU_MCP.proxi_traj_CT,Tracker_DAU_MCP.cog_traj_CT]
+ZF_Tracker_lst = [Tracker_ZF_DIP.cog_traj_CT, Tracker_ZF_DIP.dist_traj_CT, Marker_ZF_proximal.T_opt_ct[:,:3,3], Tracker_ZF_midhand.proxi_traj_CT, Tracker_ZF_midhand.cog_traj_CT]
+DAU_Tracker_lst = [Tracker_DAU_DIP.cog_traj_CT, Tracker_DAU_DIP.dist_traj_CT, Marker_DAU.T_opt_ct[:,:3,3], Tracker_DAU_MCP.proxi_traj_CT,Tracker_DAU_MCP.cog_traj_CT]
 name_lst = ["Tracker_ZF_DIP.cog_traj_CT",'Tracker_ZF_DIP.dist_traj_CT' ,"Marker_ZF_proximal.ct_marker_trace", "Tracker_ZF_midhand.proxi_traj_CT","Tracker_ZF_midhand.cog_traj_CT",
             "Tracker_DAU_DIP.cog_traj_CT", "Tracker_DAU_DIP.dist_traj_CT", "Marker_DAU.ct_marker_trace", "Tracker_DAU_MCP.proxi_traj_CT","Tracker_DAU_MCP.cog_traj_CT"]
 
@@ -90,17 +90,17 @@ interact(tf.plot_class, i = widgets.IntSlider(min=0,max=len(Tracker_ZF_DIP.track
 # calculate points of distal joint
 
 # %% Build mujoco parameters
-i = 0
+i = 6000
 
 parameters = {'zf': dict(), 'dau': dict()}
 
 parameters['zf']['dip'] = mwp.build_parameters([Quaternion(matrix=Tracker_ZF_DIP.T_opt_ct[i,:3,:3]), Tracker_ZF_DIP.T_opt_ct[i,:3,3]])
-parameters['zf']['pip'] = mwp.build_parameters([[1,0,0,0], Marker_ZF_proximal.ct_marker_trace[i] + Marker_ZF_proximal.t_cog_CT])
+parameters['zf']['pip'] = mwp.build_parameters([[1,0,0,0], Marker_ZF_proximal.T_opt_ct[i,3,:3]])
 #parameters['zf']['mcp'] = mwp.build_parameters([Tracker_ZF_MCP.cog_rot_CT[i] ,Tracker_ZF_DIP.cog_traj_CT[i]])
 parameters['zf']['midhand'] = mwp.build_parameters([Quaternion(matrix=Tracker_ZF_midhand.T_opt_ct[i,:3,:3]), Tracker_ZF_midhand.T_opt_ct[i,:3,3]])
 
 parameters['dau']['dip'] = mwp.build_parameters([Quaternion(matrix=Tracker_DAU_DIP.T_opt_ct[i,:3,:3]), Tracker_DAU_DIP.T_opt_ct[i,:3,3]])
-parameters['dau']['pip'] = mwp.build_parameters([Marker_DAU.ct_marker_trace[i] + Marker_DAU.t_cog_CT, [1,0,0,0]])
+parameters['dau']['pip'] = mwp.build_parameters([[1,0,0,0], Marker_DAU.T_opt_ct[i,3,:3]])
 parameters['dau']['mcp' ] = mwp.build_parameters([Quaternion(matrix=Tracker_DAU_MCP.T_opt_ct[i,:3,:3]), Tracker_DAU_MCP.T_opt_ct[i,:3,3]])
 with open("./mujoco/generated_parameters.yaml", "w") as outfile:
     yaml.dump(parameters, outfile)
@@ -129,8 +129,8 @@ for i in range(len(Tracker_ZF_DIP.cog_traj_CT)):
     beta = tf.angle_between(2,3)
     gamma = tf.angle_between(3,4)
     #calculate angeles in DAU joints
-    delta[i] = tf.angle_between(np.subtract(Tracker_DAU_DIP.cog_traj_CT[i],Tracker_DAU_DIP.dist_traj_CT[i]),np.subtract(Marker_DAU.cog_traj_CT[i],Tracker_DAU_DIP.dist_traj_CT[i]))*180/np.pi
-    epsilon[i] = tf.angle_between(np.subtract(Tracker_DAU_MCP.cog_traj_CT[i],Tracker_DAU_MCP.proxi_traj_CT[i]),np.subtract(Marker_DAU.cog_traj_CT[i],Tracker_DAU_MCP.proxi_traj_CT[i]))*180/np.pi
+    delta[i] = tf.angle_between(np.subtract(Tracker_DAU_DIP.cog_traj_CT[i],Tracker_DAU_DIP.dist_traj_CT[i]),np.subtract(Marker_DAU.T_opt_ct[i,:3,3],Tracker_DAU_DIP.dist_traj_CT[i]))*180/np.pi
+    epsilon[i] = tf.angle_between(np.subtract(Tracker_DAU_MCP.cog_traj_CT[i],Tracker_DAU_MCP.proxi_traj_CT[i]),np.subtract(Marker_DAU.T_opt_ct[i,:3,3],Tracker_DAU_MCP.proxi_traj_CT[i]))*180/np.pi
 
 # plotten von delta und epsilon
 plt.plot(delta)

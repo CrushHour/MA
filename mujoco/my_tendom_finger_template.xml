@@ -35,27 +35,27 @@
         </body>
 
         <body name="ZF_DIP">
-        <geom pos = "{{zf.dip.pos}}" quat = "{{zf.dip.quat}}" type="mesh" mesh="ZF-DIP"/>
+        <geom pos = "{{zf.dip.pos}}" quat = "{{zf.dip.quat}}" type="mesh" mesh="ZF-DIP" rgba="0 0 1 0.9"/>
         </body>
 
         <body name="ZF_PIP">
-        <geom pos = "{{zf.pip.pos}}" quat = "{{zf.pip.quat}}" type="mesh" mesh="ZF-PIP"/>
+        <geom pos = "{{zf.pip.pos}}" quat = "{{zf.pip.quat}}" type="mesh" mesh="ZF-PIP" rgba="0 0 1 0.9"/>
         </body>
 
         <body name="ZF_Midhand">
-        <geom pos = "{{zf.midhand.pos}}" quat = "{{zf.midhand.quat}}" type="mesh" mesh="ZF-Midhand"/>
+        <geom pos = "{{zf.midhand.pos}}" quat = "{{zf.midhand.quat}}" type="mesh" mesh="ZF-Midhand" rgba="0 0 1 0.9"/>
         </body>
 
         <body name="DAU_DIP">
-        <geom pos = "{{dau.dip.pos}}" quat = "{{dau.dip.quat}}" type="mesh" mesh="DAU-DIP"/>
+        <geom pos = "{{dau.dip.pos}}" quat = "{{dau.dip.quat}}" type="mesh" mesh="DAU-DIP" rgba="1 0 0 0.9"/>
         </body>
         
         <body name="DAU_PIP">
-        <geom pos = "{{dau.pip.pos}}" quat = "{{dau.pip.quat}}" type="mesh" mesh="DAU-PIP"/>
+        <geom pos = "{{dau.pip.pos}}" quat = "{{dau.pip.quat}}" type="mesh" mesh="DAU-PIP" rgba="1 0 0 0.9"/>
         </body>
 
         <body name="DAU_MCP">
-        <geom pos = "{{dau.mcp.pos}}" quat = "{{dau.mcp.quat}}" type="mesh" mesh="DAU-MCP"/>
+        <geom pos = "{{dau.mcp.pos}}" quat = "{{dau.mcp.quat}}" type="mesh" mesh="DAU-MCP" rgba="1 0 0 0.9"/>
         </body>
 
     </worldbody>
