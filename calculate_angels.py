@@ -68,8 +68,6 @@ DAU_Tracker_lst = [Tracker_DAU_DIP.cog_traj_CT, Tracker_DAU_DIP.dist_traj_CT, Ma
 name_lst = ["Tracker_ZF_DIP.cog_traj_CT",'Tracker_ZF_DIP.dist_traj_CT' ,"Marker_ZF_proximal.ct_marker_trace", "Tracker_ZF_midhand.proxi_traj_CT","Tracker_ZF_midhand.cog_traj_CT",
             "Tracker_DAU_DIP.cog_traj_CT", "Tracker_DAU_DIP.dist_traj_CT", "Marker_DAU.ct_marker_trace", "Tracker_DAU_MCP.proxi_traj_CT","Tracker_DAU_MCP.cog_traj_CT"]
 
-
-
 radius_lst = [0, d_ZF_DIP_PIP, d_ZF_Tracker_PIP, d_ZF_MCP_PIP, 0, \
               0, 0, Marker_DAU.d_cog_CT, 0, 0]
 
@@ -90,7 +88,7 @@ interact(tf.plot_class, i = widgets.IntSlider(min=0,max=len(Tracker_ZF_DIP.track
 # calculate points of distal joint
 
 # %% Build mujoco parameters
-i = 6000
+i = 0
 
 parameters = {'zf': dict(), 'dau': dict()}
 

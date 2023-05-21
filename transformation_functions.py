@@ -213,6 +213,7 @@ def plot_class(i, Trackers1: list = [], Trackers2: list = [], names: list = [], 
     if show:
         plt.show()
     plt.close()
+
 # find the max dimensions, so we can know the bounding box, getting the height,
 # width, length (because these are the step size)...
 def stl_find_mins_maxs(obj):
@@ -331,7 +332,7 @@ def butter_lowpass_filter(data, cutoff, fs, order=1):
     y = filtfilt(b, a, data, axis = 0)
     return y
 
-def plot_tiefpass(fs, Gp, Gs, wp, ws, marker_data):
+def plot_tiefpass(marker_data, title: str='', fs: float =120, Gp: float = 0.1, Gs: float=3.0, wp: float=0.8, ws: float=1.1):
     order, wn = buttord(wp, ws, Gp, Gs)
     y = butter_lowpass_filter(marker_data, wn, fs, order)
     
@@ -341,7 +342,7 @@ def plot_tiefpass(fs, Gp, Gs, wp, ws, marker_data):
 
     fig.plot(y, 'r-', linewidth=0.5, label='filtered data')
     plt.xlabel('Time [120 Hz]')
-    plt.title("Marker")
+    plt.title(title)
     fig.grid()
     #fig.legend()
 
@@ -349,6 +350,8 @@ def plot_tiefpass(fs, Gp, Gs, wp, ws, marker_data):
     now = datetime.now()
     plot_file_title = "marker_" + now.strftime("%d_%m_%Y_%H_%M_%S")
     # plt.savefig(plot_file_title + ".pdf", format="pdf")
+    plt.show()
+    plt.close()
     return y
 
 # %%
@@ -450,6 +453,7 @@ def min_max_arrays_to_kosy(min_track, max_track):
 def nan_helper(a):
     x, y = np.indices(a.shape)
     interp = np.array(a)
+    print('found nan =', len(np.isnan(a)))
     interp[np.isnan(interp)] = interpolate.griddata((x[~np.isnan(a)], y[~np.isnan(a)]), a[~np.isnan(a)], (x[np.isnan(a)], y[np.isnan(a)]), method='nearest') 
     return interp
 
@@ -568,6 +572,7 @@ class tracker_bone():
             self.T_i_ct = np.zeros((len(self.track_traj_opt),4,4))
             self.T_opt_ct = np.zeros((len(self.track_traj_opt),4,4))
             self.T_ct_opt = np.zeros((len(self.track_traj_opt),4,4))
+            self.q_opt_ct = np.zeros((len(self.track_traj_opt),4))
             
             # T from timestamp i to opt coordinate system
             for i in range(len(self.track_traj_opt)):
@@ -582,6 +587,16 @@ class tracker_bone():
 
                 # T from CT coordinate system to timestamp i
                 self.T_opt_ct[i,:,:] = self.T_opt_i[i,:,:] @ self.T_def_ct
+
+            # Filter
+            inter_data = nan_helper(self.T_opt_ct[:,:3,3])
+            self.T_opt_ct[:,:3,3] = plot_tiefpass(inter_data, self.finger_name)
+            for i in range(len(self.T_opt_ct)):
+                self.q_opt_ct[i] = Quaternion(matrix=self.T_opt_ct[i,:3,:3])
+            self.q_opt_ct = plot_tiefpass(self.q_opt_ct, self.finger_name)
+            self.T_opt_ct[:,:3,:3] = [q.rotation_matrix for q in self.q_opt_ct]
+            
+            
 
             # calculate the trajectory of the tracker and cog in the CT coordinate system
             self.track_traj_CT = np.zeros((len(self.track_traj_opt),3))
@@ -719,9 +734,9 @@ class marker_bone():
     '''Class for the bones with markers on top. Inherits from tracker_bone.'''
     def __init__(self, finger_name = "", test_path = './Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv', init_marker_ID = "Unlabeled ...") -> None:
         
+        base_tracker = tracker_bone("ZF_midhand", test_path=test_path)
         self.finger_name = finger_name
         print("Marker on", self.finger_name)
-        base_tracker = tracker_bone("ZF_midhand", test_path=test_path)
         self.testname = os.path.split(test_path)[1]
         test_metadata = get_test_metadata(self.testname)
         self.metadata = self.get_metadata()
@@ -759,7 +774,7 @@ class marker_bone():
         except:
             marker_trace = marker_variable_id_linewise(test_path, init_marker_ID, test_metadata["type"], 40)
             inter_data = nan_helper(marker_trace)
-            self.opt_marker_trace = plot_tiefpass(fs, Gp, Gs, wp, ws, inter_data)
+            self.opt_marker_trace = plot_tiefpass(inter_data, self.finger_name,fs, Gp, Gs, wp, ws)
             np.save(save_name, self.opt_marker_trace)
 
         self.T_opt_i = np.zeros((len(self.opt_marker_trace),4,4))
@@ -807,12 +822,14 @@ if __name__ == '__main__':
     wp = 0.8
     ws = 1.1
 
-    pic = plot_tiefpass(fs, Gp, Gs, wp, ws, inter_data)
-    filtered_data = interact(plot_tiefpass, fs = fixed(fs), Gp = widgets.FloatSlider(value=Gp, min=0,max=2,step=0.1),
-                                      Gs = widgets.FloatSlider(value=Gs, min=0,max=120,step=1), 
-                                      wp = widgets.FloatSlider(value=wp, min=0,max=2,step=0.05), 
-                                      ws = widgets.FloatSlider(value=ws, min=0,max=2,step=0.05),
-                                        marker_data = fixed(inter_data))
+    pic = plot_tiefpass(inter_data, 'Test', fs, Gp, Gs, wp, ws, )
+    filtered_data = interact(plot_tiefpass,marker_data = fixed(inter_data), title = marker_ID,
+                                    fs = fixed(fs),
+                                    Gp = widgets.FloatSlider(value=Gp, min=0,max=2,step=0.1),
+                                    Gs = widgets.FloatSlider(value=Gs, min=0,max=120,step=1), 
+                                    wp = widgets.FloatSlider(value=wp, min=0,max=2,step=0.05), 
+                                    ws = widgets.FloatSlider(value=ws, min=0,max=2,step=0.05)
+                                        )
     # %% Test
     test_metadata = get_test_metadata('Take 2023-01-31 06.11.42 PM.csv')
     Tracker_ZF_DIP = tracker_bone('ZF_DIP',test_path=test_metadata['path'])
@@ -850,3 +867,4 @@ if __name__ == '__main__':
 #        numTrackers = 5
 #        positions = [[0, 0, 61], [-41, 0, 35], [20, 0, 35], [-10, 31, 35], [-10, -14, 35]] # [[x,y,z],[x2,y2,z2],...]
 #        name, opt_positions = get_opt_positions('Tracker Nico.csv')
+sort_points_relative([[1,1,1],[4,4,4],[10,10,10]],[[11,11,11],[7,7,7],[2,2,2]])

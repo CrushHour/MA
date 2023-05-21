@@ -68,7 +68,10 @@ def kabsch_iter(points1,points2,iterations=5):
 
 T5 = kabsch_iter(Tracker_DAU_DIP.marker_pos_ct, Tracker_DAU_DIP.marker_pos_def)
 # %% Test des Translationsvektors t mit Kabsch von tracker.Tracker.transformation_matrix
-importlib.reload(trackers)
+import numpy as np
+import importlib
+import transformation_functions as tf
+importlib.reload(tf)
 sys.path.append('./Konzepte')
 
 alpha = 0.5
@@ -77,7 +80,7 @@ R = np.array([[np.cos(alpha), -np.sin(alpha), 0, 1],
                 [0, 0, 1, 3],
                 [0, 0, 0, 1]])
 
-P = Tracker_DAU_DIP.marker_pos_def
+P = np.array(Tracker_DAU_DIP.marker_pos_def)
 Q = np.array(Tracker_DAU_DIP.marker_pos_ct)
 
 #Q = np.zeros((5,3))
@@ -94,7 +97,7 @@ for i in range(5):
     print(np.round(P[i],4))
     print('---')
 
-print(np.round(T_def_ct,3))
+#print(np.round(T_def_ct,3))
 #print(np.round(R,3))
 
 # %%
