@@ -6,7 +6,7 @@
         <mesh name="ZF-MCP" scale="1 1 1"
         file="Data\STL\Segmentation_ZF_MCP.stl"/>
         <mesh name="ZF-PIP" scale="1 1 1"
-        file="Data\STL\Segmentation_ZF_PIP.stl"/>
+        file="Data\STL\Segmentation_ZF_PIP_Tracker.stl"/>
         <mesh name="ZF-DIP" scale="1 1 1"
         file="Data\STL\Segmentation_ZF_DIP.stl"/>
         <mesh name="ZF-Midhand" scale="1 1 1"
@@ -14,7 +14,7 @@
         <mesh name="DAU-MCP" scale="1 1 1"
         file="Data\STL\Segmentation_DAU_Osmetacarpale_1.stl"/>
         <mesh name="DAU-PIP" scale="1 1 1"
-        file="Data\STL\Segmentation_DAU_Phalax_proximalis.stl"/>
+        file="Data\STL\Segmentation_DAU_Phalax_proximalis_Tracker.stl"/>
         <mesh name="DAU-DIP" scale="1 1 1"
         file="Data\STL\Segmentation_DAU_DIP.stl"/>
     </asset>
@@ -35,27 +35,27 @@
         </body>
 
         <body name="ZF_DIP">
-        <geom pos = "nan nan nan" quat = "0.9836924066708446 0.17763789718451314 -0.0038787192335521664 -0.02791025043051325" type="mesh" mesh="ZF-DIP" rgba="0 0 1 0.9"/>
+        <geom pos = "90.66476230156263 46.16992509469526 160.2957404988932" quat = "0.9836987312161022 0.17761499456019983 -0.0037592123226634386 -0.02784938480333468" type="mesh" mesh="ZF-DIP" rgba="0 0 1 0.9"/>
         </body>
 
         <body name="ZF_PIP">
-        <geom pos = "0.0 0.0 0.0" quat = "1 0 0 0" type="mesh" mesh="ZF-PIP" rgba="0 0 1 0.9"/>
+        <geom pos = "88.11121084761167 53.623032846401586 130.89088985845783" quat = "1 0 0 0" type="mesh" mesh="ZF-PIP" rgba="0 0 1 0.9"/>
         </body>
 
         <body name="ZF_Midhand">
-        <geom pos = "175.45240816437615 -5.017341033968987 162.80942834868574" quat = "0.9502669902849876 0.2577981133922195 0.14685556137976938 -0.09469014731193963" type="mesh" mesh="ZF-Midhand" rgba="0 0 1 0.9"/>
+        <geom pos = "175.4436351477011 -5.028592618573676 162.81222534362013" quat = "0.9502650404266726 0.2578165706548505 0.14685920115673462 -0.09465381066957952" type="mesh" mesh="ZF-Midhand" rgba="0 0 1 0.9"/>
         </body>
 
         <body name="DAU_DIP">
-        <geom pos = "nan nan nan" quat = "0.9291137883002117 0.19689960725990624 0.30102383090471474 0.08580656314509756" type="mesh" mesh="DAU-DIP" rgba="1 0 0 0.9"/>
+        <geom pos = "190.9247148894664 17.725841605042135 152.70401667398824" quat = "0.9290816350354304 0.19687031966505253 0.3011562135075524 0.08575737717925701" type="mesh" mesh="DAU-DIP" rgba="1 0 0 0.9"/>
         </body>
         
         <body name="DAU_PIP">
-        <geom pos = "0.0 0.0 0.0" quat = "1 0 0 0" type="mesh" mesh="DAU-PIP" rgba="1 0 0 0.9"/>
+        <geom pos = "76.28323288813661 101.72413042001843 37.78057813117263" quat = "1 0 0 0" type="mesh" mesh="DAU-PIP" rgba="1 0 0 0.9"/>
         </body>
 
         <body name="DAU_MCP">
-        <geom pos = "162.32117110147868 -14.473422132351434 165.73786644937852" quat = "0.9460424456499719 0.27345704165326146 0.17320990813072532 0.014942058901379963" type="mesh" mesh="DAU-MCP" rgba="1 0 0 0.9"/>
+        <geom pos = "162.39952064556954 -14.600338560554064 165.76940290428624" quat = "0.945991611307856 0.2736509699014091 0.17319412913430274 0.014792283143416666" type="mesh" mesh="DAU-MCP" rgba="1 0 0 0.9"/>
         </body>
 
     </worldbody>

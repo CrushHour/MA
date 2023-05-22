@@ -52,7 +52,7 @@
         "finger": "DAU",
         "tracking": "Marker",
         "marker def CT": "./Data/Slicer3D/Marker_Osmetacarpale1.mrk.json",
-        "stl": "./Data/STL/Segmentation_DAU_Osmetacarpale_1.stl",
+        "stl": "./Data/STL/Segmentation_DAU_Phalax_proximalis.stl",
         "joints": ["./Data/Slicer3D/Joints/DAU_A_DIP.mrk.json", "./Data/Slicer3D/Joints/DAU_A_MCP.mrk.json"]
     },
     "DAU_MCP":{
@@ -62,7 +62,7 @@
         "tracker def opt": "./Data/Trackers/DAU_MCP.csv",
         "tracker def CT": "./Data/Slicer3D/Tracker53.mrk.json",
         "tracker name": "Tracker 53",
-        "stl": "./Data/STL/Segmentation_DAU_Phalax_proximalis.stl",
+        "stl": "./Data/STL/Segmentation_DAU_Osmetacarpale_1.stl",
         "joints": ["./Data/Slicer3D/Joints/DAU_A_MCP.mrk.json", ""]
     },
     "base":{

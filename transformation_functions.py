@@ -65,13 +65,14 @@ def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv", d_max
         df = pd.read_csv(testrun_path, header=2, low_memory=False)
         next_col = df.columns.get_loc(initialID)
 
-    # variablen initiieren.
+    # variablen initiieren. Position values start at line 4 (counting from 1).
     start_line = 3
     dis_list = []
     start_value = df.values[start_line,next_col:next_col+3]
 
     """If condition to be able to catch trackers, that a not visiable immidiatly"""
     if np.isnan(float(start_value[0])):
+        # find cells that are not empty, so you know where to start
         filled_cells = np.where(pd.notna(df.iloc[:,next_col]))
         start_line = int(filled_cells[0][3])
         start_value = df.values[start_line,next_col:next_col+3]
@@ -80,11 +81,14 @@ def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv", d_max
 
     #added_data = np.zeros((df.shape[0]-start_line,3)) 
     added_data = np.zeros((df.shape[0]-3,3)) 
-    added_data[0,:] = start_value
-    last_signal = added_data[0,:]
+    #added_data[0,:] = start_value
+    added_data[start_line-3,:] = start_value
+    #last_signal = added_data[0,:]
+    last_signal = added_data[start_line-3,:]
 
     # Start Zeilenschleife
     #for k in tqdm(range(1,added_data.shape[0])):
+    #for k in tqdm(range(start_line,added_data.shape[0])):
     for k in tqdm(range(start_line,added_data.shape[0])):
         
         min_dis = np.inf
@@ -94,7 +98,7 @@ def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv", d_max
         value = df.values[k,:]
         value = np.array(list(map(float, value)))
 
-        # Spalten
+        # Spalten. If there is no value in any of the coloums of the line, np.nan will be added.
         values_to_add = [np.nan, np.nan, np.nan]
 
         for j in range(next_col,len(value),3):
@@ -564,6 +568,8 @@ class tracker_bone():
             self.t_ct_tr = self.T_ct_def
             # Get the trajectory of the tracker from the test data
             self.track_traj_opt = csv_test_load(test_path, self.metadata['tracker name'])
+            inter_data = nan_helper(self.track_traj_opt)
+            self.track_traj_opt = plot_tiefpass(inter_data, self.finger_name, wp = 0.8, ws = 1.1)
             
             # initialize the transformation matrix
             self.T_opt_i = np.zeros((len(self.track_traj_opt),4,4))
@@ -588,16 +594,10 @@ class tracker_bone():
                 # T from CT coordinate system to timestamp i
                 self.T_opt_ct[i,:,:] = self.T_opt_i[i,:,:] @ self.T_def_ct
 
-            # Filter
-            inter_data = nan_helper(self.T_opt_ct[:,:3,3])
-            self.T_opt_ct[:,:3,3] = plot_tiefpass(inter_data, self.finger_name)
-            for i in range(len(self.T_opt_ct)):
-                self.q_opt_ct[i] = Quaternion(matrix=self.T_opt_ct[i,:3,:3])
-            self.q_opt_ct = plot_tiefpass(self.q_opt_ct, self.finger_name)
-            self.T_opt_ct[:,:3,:3] = [q.rotation_matrix for q in self.q_opt_ct]
+            # Filter; aussortiert, da Messdaten direkt gefiltert werden
+            #inter_data = nan_helper(self.T_opt_ct[:,:3,3])
+            #self.T_opt_ct[:,:3,3] = plot_tiefpass(inter_data, self.finger_name)           
             
-            
-
             # calculate the trajectory of the tracker and cog in the CT coordinate system
             self.track_traj_CT = np.zeros((len(self.track_traj_opt),3))
             self.track_rot_CT = np.zeros((len(self.track_traj_opt),4))
@@ -629,7 +629,6 @@ class tracker_bone():
             else:
                 print('No proximal joint found.')
 
-            # Warum war diese Zeile eins ausgerückt? Als noch try und except drin war?
             if not np.isnan(self.helper_points[1][0]):
                 self.t_dist_CT = np.subtract(self.helper_points[1], np.mean(self.marker_pos_ct,axis=0))
                 self.d_dist_CT = np.linalg.norm(self.t_dist_CT)
@@ -695,11 +694,11 @@ class tracker_bone():
         markers1 -= markers1_mean
         markers2 -= markers2_mean
 
-        # Calculate the cross-covariance matrix (H= P^T * Q)
-        cross_cov = np.dot(markers1.T, markers2)
+        # Calculate the cross-covariance matrix (H = P^T * Q)
+        H = np.dot(markers1.T, markers2)
 
         # Calculate the singular value decomposition
-        U, S, V_T = np.linalg.svd(cross_cov)
+        U, S, V_T = np.linalg.svd(H)
 
         # decide whether we need to correct our rotation matrix to ensure a right-handed coordinate system
         # https://igl.ethz.ch/projects/ARAP/svd_rot.pdf
@@ -734,7 +733,7 @@ class marker_bone():
     '''Class for the bones with markers on top. Inherits from tracker_bone.'''
     def __init__(self, finger_name = "", test_path = './Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv', init_marker_ID = "Unlabeled ...") -> None:
         
-        base_tracker = tracker_bone("ZF_midhand", test_path=test_path)
+        #base_tracker = tracker_bone("ZF_midhand", test_path=test_path)
         self.finger_name = finger_name
         print("Marker on", self.finger_name)
         self.testname = os.path.split(test_path)[1]
@@ -779,12 +778,14 @@ class marker_bone():
 
         self.T_opt_i = np.zeros((len(self.opt_marker_trace),4,4))
         self.T_opt_ct = np.zeros((len(self.opt_marker_trace),4,4))
+        self.T_def_ct = np.eye(4)
+        self.T_def_ct[:3,3] = np.negative(self.marker_pos_ct[0])
         for i in range(len(self.opt_marker_trace)):
             self.T_opt_i[i,:,:] = np.eye(4)
             self.T_opt_i[i,:3,3] = self.opt_marker_trace[i]
-        
-        # marker trace in different coordinate systems
-            self.T_opt_ct[i,:,:] =  self.T_opt_i[i,:,:] @ base_tracker.T_def_ct
+
+            # marker trace in different coordinate systems
+            self.T_opt_ct[i,:,:] =  self.T_opt_i[i,:,:] @ self.T_def_ct
     
     def get_marker_pos_ct(self):
         '''Returns the relative marker positions in the CT coordinate system to the bone cog.'''

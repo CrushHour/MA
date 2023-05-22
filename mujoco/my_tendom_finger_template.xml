@@ -6,7 +6,7 @@
         <mesh name="ZF-MCP" scale="1 1 1"
         file="Data\STL\Segmentation_ZF_MCP.stl"/>
         <mesh name="ZF-PIP" scale="1 1 1"
-        file="Data\STL\Segmentation_ZF_PIP.stl"/>
+        file="Data\STL\Segmentation_ZF_PIP_Tracker.stl"/>
         <mesh name="ZF-DIP" scale="1 1 1"
         file="Data\STL\Segmentation_ZF_DIP.stl"/>
         <mesh name="ZF-Midhand" scale="1 1 1"
@@ -14,7 +14,7 @@
         <mesh name="DAU-MCP" scale="1 1 1"
         file="Data\STL\Segmentation_DAU_Osmetacarpale_1.stl"/>
         <mesh name="DAU-PIP" scale="1 1 1"
-        file="Data\STL\Segmentation_DAU_Phalax_proximalis.stl"/>
+        file="Data\STL\Segmentation_DAU_Phalax_proximalis_Tracker.stl"/>
         <mesh name="DAU-DIP" scale="1 1 1"
         file="Data\STL\Segmentation_DAU_DIP.stl"/>
     </asset>
