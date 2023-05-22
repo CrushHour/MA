@@ -81,14 +81,11 @@ def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv", d_max
 
     #added_data = np.zeros((df.shape[0]-start_line,3)) 
     added_data = np.zeros((df.shape[0]-3,3)) 
-    #added_data[0,:] = start_value
-    added_data[start_line-3,:] = start_value
-    #last_signal = added_data[0,:]
-    last_signal = added_data[start_line-3,:]
+    added_data[0,:] = start_value
+    last_signal = added_data[0,:]
 
     # Start Zeilenschleife
     #for k in tqdm(range(1,added_data.shape[0])):
-    #for k in tqdm(range(start_line,added_data.shape[0])):
     for k in tqdm(range(start_line,added_data.shape[0])):
         
         min_dis = np.inf
@@ -773,7 +770,7 @@ class marker_bone():
         except:
             marker_trace = marker_variable_id_linewise(test_path, init_marker_ID, test_metadata["type"], 40)
             inter_data = nan_helper(marker_trace)
-            self.opt_marker_trace = plot_tiefpass(inter_data, self.finger_name,fs, Gp, Gs, wp, ws)
+            self.opt_marker_trace = plot_tiefpass(inter_data, init_marker_ID, fs, Gp, Gs, wp, ws)
             np.save(save_name, self.opt_marker_trace)
 
         self.T_opt_i = np.zeros((len(self.opt_marker_trace),4,4))

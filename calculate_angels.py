@@ -88,7 +88,7 @@ interact(tf.plot_class, i = widgets.IntSlider(min=0,max=len(Tracker_ZF_DIP.track
 # calculate points of distal joint
 
 # %% Build mujoco parameters
-i = 100
+i = 99
 
 parameters = {'zf': dict(), 'dau': dict()}
 
