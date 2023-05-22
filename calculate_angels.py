@@ -35,7 +35,7 @@ opt_data = './Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv'
 #opt_traj_M4_gross = tf.csv_test_load(opt_data,"M4_gross")
 #opt_traj_M4_klein = tf.csv_test_load(opt_data,"M4_klein")
 
-# opt_traj_Marker_ZF_proximal = tf.marker_variable_id_linewise(opt_data,"Unlabeled 2403")
+# opt_traj_Marker_ZF_proximal = tf.marker_variable_id_linewise(opt_data,"Unlabeled 2023")
 # opt_traj_Marker_DAU = tf.marker_variable_id_linewise(opt_data,"Unlabeled 2016")
 
 # Definieren der Tracker und Marker als jeweils eine Tracker Klasse
@@ -46,8 +46,8 @@ Tracker_DAU_MCP = tf.tracker_bone('DAU_MCP',test_path=test_metadata['path'])
 #Tracker_FT = tf.tracker_bone('FT',test_path=test_metadata['path'])
 Basetracker = tf.tracker_bone('ZF_midhand',test_path=test_metadata['path']) # Basis, hinten an Fixteur externe existiert nicht im CT
 
-Marker_DAU = tf.marker_bone(finger_name='DAU_PIP',test_path=test_metadata['path'], init_marker_ID=test_metadata['marker_IDs'][0])
-Marker_ZF_proximal = tf.marker_bone(finger_name="ZF_PIP",test_path=test_metadata['path'], init_marker_ID=test_metadata['marker_IDs'][1])
+Marker_DAU = tf.marker_bone(finger_name='DAU_PIP',test_path=test_metadata['path'], init_marker_ID=test_metadata['marker_IDs'][1])
+Marker_ZF_proximal = tf.marker_bone(finger_name="ZF_PIP",test_path=test_metadata['path'], init_marker_ID=test_metadata['marker_IDs'][0])
 
 # calculate spheres
 # diese Berechnung gibt die Länge eines Fingers zurück.
@@ -88,17 +88,17 @@ interact(tf.plot_class, i = widgets.IntSlider(min=0,max=len(Tracker_ZF_DIP.track
 # calculate points of distal joint
 
 # %% Build mujoco parameters
-i = 0
+i = 100
 
 parameters = {'zf': dict(), 'dau': dict()}
 
 parameters['zf']['dip'] = mwp.build_parameters([Quaternion(matrix=Tracker_ZF_DIP.T_opt_ct[i,:3,:3]), Tracker_ZF_DIP.T_opt_ct[i,:3,3]])
-parameters['zf']['pip'] = mwp.build_parameters([[1,0,0,0], Marker_ZF_proximal.T_opt_ct[i,3,:3]])
+parameters['zf']['pip'] = mwp.build_parameters([[1,0,0,0], Marker_ZF_proximal.T_opt_ct[i,:3,3]])
 #parameters['zf']['mcp'] = mwp.build_parameters([Tracker_ZF_MCP.cog_rot_CT[i] ,Tracker_ZF_DIP.cog_traj_CT[i]])
 parameters['zf']['midhand'] = mwp.build_parameters([Quaternion(matrix=Tracker_ZF_midhand.T_opt_ct[i,:3,:3]), Tracker_ZF_midhand.T_opt_ct[i,:3,3]])
 
 parameters['dau']['dip'] = mwp.build_parameters([Quaternion(matrix=Tracker_DAU_DIP.T_opt_ct[i,:3,:3]), Tracker_DAU_DIP.T_opt_ct[i,:3,3]])
-parameters['dau']['pip'] = mwp.build_parameters([[1,0,0,0], Marker_DAU.T_opt_ct[i,3,:3]])
+parameters['dau']['pip'] = mwp.build_parameters([[1,0,0,0], Marker_DAU.T_opt_ct[i,:3,3]])
 parameters['dau']['mcp' ] = mwp.build_parameters([Quaternion(matrix=Tracker_DAU_MCP.T_opt_ct[i,:3,:3]), Tracker_DAU_MCP.T_opt_ct[i,:3,3]])
 with open("./mujoco/generated_parameters.yaml", "w") as outfile:
     yaml.dump(parameters, outfile)
