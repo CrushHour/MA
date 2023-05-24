@@ -565,8 +565,8 @@ class tracker_bone():
             self.t_ct_tr = self.T_ct_def
             # Get the trajectory of the tracker from the test data
             self.track_traj_opt = csv_test_load(test_path, self.metadata['tracker name'])
-            inter_data = nan_helper(self.track_traj_opt)
-            self.track_traj_opt = plot_tiefpass(inter_data, self.finger_name, wp = 0.8, ws = 1.1)
+            self.track_traj_opt = nan_helper(self.track_traj_opt)
+            #self.track_traj_opt = plot_tiefpass(inter_data, self.finger_name, wp = 0.8, ws = 1.1)
             
             # initialize the transformation matrix
             self.T_opt_i = np.zeros((len(self.track_traj_opt),4,4))
@@ -589,11 +589,7 @@ class tracker_bone():
                 self.T_opt_i[i,3,3] = 1
 
                 # T from CT coordinate system to timestamp i
-                self.T_opt_ct[i,:,:] = self.T_opt_i[i,:,:] @ self.T_def_ct
-
-            # Filter; aussortiert, da Messdaten direkt gefiltert werden
-            #inter_data = nan_helper(self.T_opt_ct[:,:3,3])
-            #self.T_opt_ct[:,:3,3] = plot_tiefpass(inter_data, self.finger_name)           
+                self.T_opt_ct[i,:,:] = self.T_opt_i[i,:,:] @ self.T_def_ct          
             
             # calculate the trajectory of the tracker and cog in the CT coordinate system
             self.track_traj_CT = np.zeros((len(self.track_traj_opt),3))
