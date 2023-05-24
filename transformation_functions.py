@@ -454,7 +454,6 @@ def min_max_arrays_to_kosy(min_track, max_track):
 def nan_helper(a):
     x, y = np.indices(a.shape)
     interp = np.array(a)
-    print('found nan =', len(np.isnan(a)))
     interp[np.isnan(interp)] = interpolate.griddata((x[~np.isnan(a)], y[~np.isnan(a)]), a[~np.isnan(a)], (x[np.isnan(a)], y[np.isnan(a)]), method='nearest') 
     return interp
 

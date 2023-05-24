@@ -20,5 +20,22 @@ print('mean + 2 std:',np.mean(dy)+2*np.std(dy))
 print('mean - 2 std:',np.mean(dy)-2*np.std(dy))
 
 
-plt.hist(dy, bins=500)
+#plt.hist(dy, bins=1000)
+#plt.show()
+#plt.close()
+
+indicies = np.where(dy > np.mean(dy)+2*np.std(dy))
+indicies2 = np.where(dy < np.mean(dy)-2*np.std(dy))
+print(indicies[0].shape)
+print(indicies2[0].shape)
+
+# overwrite values where index is in indicies
+x_new = np.copy(Tracker_DAU_DIP.track_traj_opt[:,4])
+for i in indicies:
+    x_new[i] = Tracker_DAU_DIP.track_traj_opt[i-1,4]
+for i in indicies2:
+    x_new[i] = Tracker_DAU_DIP.track_traj_opt[i-1,4]
+
+plt.plot(Tracker_DAU_DIP.track_traj_opt[:,4], label='original', alpha=0.5, color='blue')
+plt.plot(x_new, label='corrected', alpha=0.5, color='red')
 plt.show()
