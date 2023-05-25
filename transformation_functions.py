@@ -86,7 +86,7 @@ def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv", d_max
 
     # Start Zeilenschleife
     #for k in tqdm(range(1,added_data.shape[0])):
-    for k in tqdm(range(start_line,added_data.shape[0])):
+    for k in tqdm(range(1,added_data.shape[0])):
         
         min_dis = np.inf
         current_dis = np.inf
@@ -339,14 +339,18 @@ def plot_tiefpass(marker_data, title: str='', fs: float =120, Gp: float = 0.1, G
     
     # Plotting
     fig = plt.subplot(1, 1, 1)
-    fig.plot(marker_data, 'b-', linewidth=0.25, label='marker data')
+    fig.plot(marker_data, color = 'grey', linewidth=0.25, label='marker data')
 
-    fig.plot(y, 'r-', linewidth=0.5, label='filtered data')
+    fig.plot(y[:,0], 'r-', linewidth=0.5, label='filtered data x')
+    fig.plot(y[:,1], 'g-', linewidth=0.5, label='filtered data y')
+    fig.plot(y[:,2], 'b-', linewidth=0.5, label='filtered data z')
+
     plt.xlabel('Time [120 Hz]')
     plt.title(title)
     fig.grid()
-    #fig.legend()
-
+    handles, labels = plt.gca().get_legend_handles_labels()
+    by_label = dict(zip(labels, handles))
+    fig.legend(by_label.values(), by_label.keys())
     plt.subplots_adjust(hspace=0.35)
     now = datetime.now()
     plot_file_title = "marker_" + now.strftime("%d_%m_%Y_%H_%M_%S")
@@ -354,6 +358,27 @@ def plot_tiefpass(marker_data, title: str='', fs: float =120, Gp: float = 0.1, G
     plt.show()
     plt.close()
     return y
+
+def hist_filter(T_in, n_std = 3):
+    shape = T_in.shape
+    
+    if len(shape) == 3:
+        y = T_in[:,0,shape[-1]]
+    else:
+        y = T_in[:,shape[-1]]
+    
+    dy = np.gradient(y)
+    
+    indicies = np.where(dy > np.mean(dy)+n_std*np.std(dy))
+    indicies2 = np.where(dy < np.mean(dy)-n_std*np.std(dy))
+
+    x_new = np.copy(y)
+    for i in indicies:
+        x_new[i] = y[i-1]
+    for i in indicies2:
+        x_new[i] = y[i-1]
+    T_in[:,shape[-1]] = x_new
+    return T_in
 
 # %%
 # calculate angle beween two vectors
@@ -529,6 +554,7 @@ def get_test_metadata(name):
         metadata = d[name]
         json_data.close()
     return metadata
+
 def get_json(path):
     '''Returns the metadata of the test.'''
     with open(path) as json_data:
@@ -757,9 +783,10 @@ class marker_bone():
 
         # load marker trace from file
         save_name = './Data/' + init_marker_ID + '_opt_marker_trace.npy'
-
+        
         try:
-           self.opt_marker_trace = np.load(save_name)
+            os.remove(save_name)
+            self.opt_marker_trace = np.load(save_name)
         
         # build marker trace from csv file
         except:
