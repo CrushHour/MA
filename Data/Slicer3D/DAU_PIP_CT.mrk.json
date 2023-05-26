@@ -1,0 +1,53 @@
+{
+    "@schema": "https://raw.githubusercontent.com/slicer/slicer/master/Modules/Loadable/Markups/Resources/Schema/markups-schema-v1.0.3.json#",
+    "markups": [
+        {
+            "type": "Fiducial",
+            "coordinateSystem": "LPS",
+            "coordinateUnits": "mm",
+            "locked": false,
+            "fixedNumberOfControlPoints": false,
+            "labelFormat": "%N-%d",
+            "lastUsedControlPointNumber": 3,
+            "controlPoints": [
+                {
+                    "id": "1",
+                    "label": "DAU_PIP_CT-1",
+                    "description": "",
+                    "associatedNodeID": "vtkMRMLScalarVolumeNode2466",
+                    "position": [105.9253985211268, -211.025, -172.83685563380284],
+                    "orientation": [-1.0, -0.0, -0.0, -0.0, -1.0, -0.0, 0.0, 0.0, 1.0],
+                    "selected": true,
+                    "locked": false,
+                    "visibility": true,
+                    "positionStatus": "defined"
+                },
+                {
+                    "id": "2",
+                    "label": "DAU_PIP_CT-2",
+                    "description": "",
+                    "associatedNodeID": "vtkMRMLScalarVolumeNode2466",
+                    "position": [79.94367903755873, -213.025, -149.0053474178404],
+                    "orientation": [-1.0, -0.0, -0.0, -0.0, -1.0, -0.0, 0.0, 0.0, 1.0],
+                    "selected": true,
+                    "locked": false,
+                    "visibility": true,
+                    "positionStatus": "defined"
+                },
+                {
+                    "id": "3",
+                    "label": "DAU_PIP_CT-3",
+                    "description": "",
+                    "associatedNodeID": "vtkMRMLScalarVolumeNode2466",
+                    "position": [72.23875532863855, -207.025, -178.57075234741786],
+                    "orientation": [-1.0, -0.0, -0.0, -0.0, -1.0, -0.0, 0.0, 0.0, 1.0],
+                    "selected": true,
+                    "locked": false,
+                    "visibility": true,
+                    "positionStatus": "defined"
+                }
+            ],
+            "measurements": []
+        }
+    ]
+}

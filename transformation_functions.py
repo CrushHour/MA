@@ -591,6 +591,7 @@ class tracker_bone():
             # Get the trajectory of the tracker from the test data
             self.track_traj_opt = csv_test_load(test_path, self.metadata['tracker name'])
             self.track_traj_opt = nan_helper(self.track_traj_opt)
+            self.track_traj_opt = self.replace_outliers(self.track_traj_opt)
             #self.track_traj_opt = plot_tiefpass(inter_data, self.finger_name, wp = 0.8, ws = 1.1)
             
             # initialize the transformation matrix
@@ -746,6 +747,24 @@ class tracker_bone():
         I checked and can cofirm.
         """
         return transformation_matrix
+    
+    def replace_outliers(self, data, n_std = 5):
+        dis = np.array([])
+        for i in range(len(data)-1):
+            dis = np.append(dis, np.linalg.norm(np.subtract(data[i],data[i+1])))
+        threshold = np.mean(dis)+n_std*np.std(dis, axis=0)
+        clean_data = []
+        last_valid = data[0]
+
+        for i in range(len(data)):
+            dis = np.linalg.norm(data[i] - last_valid)
+            if dis <= threshold:
+                clean_data.append(data[i])
+                last_valid = data[i]
+            else:
+                clean_data.append(last_valid)
+
+        return np.array(clean_data)
     
 class marker_bone():
     '''Class for the bones with markers on top. Inherits from tracker_bone.'''
