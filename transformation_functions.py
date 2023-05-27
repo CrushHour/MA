@@ -86,7 +86,7 @@ def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv", d_max
 
     # Start Zeilenschleife
     #for k in tqdm(range(1,added_data.shape[0])):
-    for k in tqdm(range(1,added_data.shape[0])):
+    for k in tqdm(range(start_line,added_data.shape[0])):
         
         min_dis = np.inf
         current_dis = np.inf
@@ -615,45 +615,18 @@ class tracker_bone():
                 self.T_opt_i[i,3,3] = 1
 
                 # T from CT coordinate system to timestamp i
-                self.T_opt_ct[i,:,:] = self.T_opt_i[i,:,:] @ self.T_def_ct          
-            
-            # calculate the trajectory of the tracker and cog in the CT coordinate system
-            self.track_traj_CT = np.zeros((len(self.track_traj_opt),3))
-            self.track_rot_CT = np.zeros((len(self.track_traj_opt),4))
-
-            self.track_traj_CT = [np.matmul(self.T_ct_def[:3,:3],self.track_traj_opt[i,4:7]) + self.T_ct_def[3,:3] \
-                                  for i in range(len(self.track_traj_opt))]
-            
-            self.track_rot_CT = [Quaternion(self.track_traj_opt[i,:4]).rotate(Quaternion(matrix=self.T_ct_def[:3,:3])) \
-                                    for i in range(len(self.track_traj_opt))]
-
-            # np.mean(self.marker_pos_ct,axis=0) ist hier anwendbar, da das mean der maker pos im def file bei [0,0,0] liegt.
-            self.t_tracker_CT = np.subtract(np.mean(self.marker_pos_ct,axis=0), self.cog_stl)
-            self.r_tracker_CT = self.t_tracker_CT
-            self.d_tracker_CT = np.linalg.norm(self.t_tracker_CT)
-            """cog_traj_CT[i] =  R_ct_opt * pos_track_opt[i] + R_ct_opt * opt_R[i] * r_rel_cog_tracker"""
-            # position
-            self.cog_traj_CT = [self.track_traj_CT[i] + Quaternion(self.track_rot_CT[i]).rotate(self.t_tracker_CT) for i in range(len(self.track_traj_opt))] # checked
-            # orientation
-            self.cog_rot_CT = self.track_rot_CT # checked
+                self.T_opt_ct[i,:,:] = self.T_opt_i[i,:,:] @ self.T_def_ct
 
             self.helper_points = get_joints(self.metadata['joints'])
 
             if not np.isnan(self.helper_points[0][0]):
                 self.t_proxi_CT = np.subtract(self.helper_points[0], np.mean(self.marker_pos_ct,axis=0))
-                self.d_proxi_CT = np.linalg.norm(self.t_proxi_CT)
-                self.proxi_traj_CT = [np.matmul(self.T_ct_def[:3,:3],self.track_traj_opt[i,4:7]) + self.T_ct_def[3,:3] \
-                                  + np.matmul(np.matmul(self.T_ct_def[:3,:3], Quaternion(self.track_traj_opt[i,:4]).rotation_matrix), self.t_proxi_CT) \
-                                  for i in range(len(self.track_traj_opt))]
             else:
                 print('No proximal joint found.')
 
             if not np.isnan(self.helper_points[1][0]):
                 self.t_dist_CT = np.subtract(self.helper_points[1], np.mean(self.marker_pos_ct,axis=0))
-                self.d_dist_CT = np.linalg.norm(self.t_dist_CT)
-                self.dist_traj_CT = [np.matmul(self.T_ct_def[:3,:3],self.track_traj_opt[i,4:7]) + self.T_ct_def[3,:3] \
-                                  + np.matmul(np.matmul(self.T_ct_def[:3,:3], Quaternion(self.track_traj_opt[i,:4]).rotation_matrix), self.t_dist_CT) \
-                                  for i in range(len(self.track_traj_opt))]
+
             else:
                 print('No distal joint found.')
 
