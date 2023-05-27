@@ -58,5 +58,13 @@
         <geom pos = "{{dau.mcp.pos}}" quat = "{{dau.mcp.quat}}" type="mesh" mesh="DAU-MCP" rgba="1 0 0 0.9"/>
         </body>
 
+        <body pos="{{dau.pip_joint.pos}}">
+            <geom type="sphere" size="5 5 5" rgba="0.5 1 0 0.9"/>
+        </body>
+
+        <body pos="{{dau.mcp_joint.pos}}">
+            <geom type="sphere" size="5 5 5" rgba="1 1 0 0.9"/>
+        </body>
+
     </worldbody>
 </mujoco>

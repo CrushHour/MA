@@ -49,37 +49,6 @@ Basetracker = tf.tracker_bone('ZF_midhand',test_path=test_metadata['path']) # Ba
 Marker_DAU = tf.marker_bone(finger_name='DAU_PIP',test_path=test_metadata['path'], init_marker_ID=test_metadata['marker_IDs'][1])
 Marker_ZF_proximal = tf.marker_bone(finger_name="ZF_PIP",test_path=test_metadata['path'], init_marker_ID=test_metadata['marker_IDs'][0])
 
-# calculate spheres
-# diese Berechnung gibt die Länge eines Fingers zurück.
-# es würde aber viel mehr sinn machen den Abstand zwischen den Joints
-# aus den mkr.json files zu nehmen.
-ZF_PIP = stl.mesh.Mesh.from_file("./Data/STL/Segmentation_ZF_PIP.stl")
-minx, maxx, miny, maxy, minz, maxz = tf.stl_find_mins_maxs(ZF_PIP)
-d_ZF_DIP_PIP = np.linalg.norm([maxx-minx, maxy-miny, maxz-minz])
-
-d_ZF_Tracker_PIP = Marker_ZF_proximal.d_dist_CT
-
-ZF_MCP = stl.mesh.Mesh.from_file("./Data/STL/Segmentation_ZF_MCP.stl")
-minx, maxx, miny, maxy, minz, maxz = tf.stl_find_mins_maxs(ZF_MCP)
-d_ZF_MCP_PIP = np.linalg.norm([maxx-minx, maxy-miny, maxz-minz])
-# %% Visualisierung der Marker und Tracker
-ZF_Tracker_lst = [Tracker_ZF_DIP.cog_traj_CT, Tracker_ZF_DIP.dist_traj_CT, Marker_ZF_proximal.T_opt_ct[:,:3,3], Tracker_ZF_midhand.proxi_traj_CT, Tracker_ZF_midhand.cog_traj_CT]
-DAU_Tracker_lst = [Tracker_DAU_DIP.cog_traj_CT, Tracker_DAU_DIP.dist_traj_CT, Marker_DAU.T_opt_ct[:,:3,3], Tracker_DAU_MCP.proxi_traj_CT,Tracker_DAU_MCP.cog_traj_CT]
-name_lst = ["Tracker_ZF_DIP.cog_traj_CT",'Tracker_ZF_DIP.dist_traj_CT' ,"Marker_ZF_proximal.ct_marker_trace", "Tracker_ZF_midhand.proxi_traj_CT","Tracker_ZF_midhand.cog_traj_CT",
-            "Tracker_DAU_DIP.cog_traj_CT", "Tracker_DAU_DIP.dist_traj_CT", "Marker_DAU.ct_marker_trace", "Tracker_DAU_MCP.proxi_traj_CT","Tracker_DAU_MCP.cog_traj_CT"]
-
-radius_lst = [0, d_ZF_DIP_PIP, d_ZF_Tracker_PIP, d_ZF_MCP_PIP, 0, \
-              0, 0, Marker_DAU.d_cog_CT, 0, 0]
-
-tf.plot_class(0,ZF_Tracker_lst,DAU_Tracker_lst,name_lst,radius_lst, save=False, show=True)
-
-interact(tf.plot_class, i = widgets.IntSlider(min=0,max=len(Tracker_ZF_DIP.track_traj_opt)-1,step=1,value=0),
-         Trackers1 = widgets.fixed(ZF_Tracker_lst), 
-         Trackers2 = widgets.fixed(DAU_Tracker_lst),
-         names = widgets.fixed(name_lst),
-         radius = widgets.fixed(radius_lst),
-         show = widgets.fixed(True))
-
 # %% Calculate points of the joints, which are not known yet.
 # On the DAU all points are known.
 # On the ZF points of the distal joint are not known.
@@ -100,6 +69,8 @@ parameters['zf']['midhand'] = mwp.build_parameters([Quaternion(matrix=Tracker_ZF
 parameters['dau']['dip'] = mwp.build_parameters([Quaternion(matrix=Tracker_DAU_DIP.T_opt_ct[i,:3,:3]), Tracker_DAU_DIP.T_opt_ct[i,:3,3]])
 parameters['dau']['pip'] = mwp.build_parameters([[1,0,0,0], Marker_DAU.T_opt_ct[i,:3,3]])
 parameters['dau']['mcp' ] = mwp.build_parameters([Quaternion(matrix=Tracker_DAU_MCP.T_opt_ct[i,:3,:3]), Tracker_DAU_MCP.T_opt_ct[i,:3,3]])
+parameters['dau']['pip_joint' ] = mwp.build_parameters([[1,0,0,0], [10,10,10]])
+parameters['dau']['mcp_joint' ] = mwp.build_parameters([[1,0,0,0], [0,0,0]])
 with open("./mujoco/generated_parameters.yaml", "w") as outfile:
     yaml.dump(parameters, outfile)
 
@@ -136,6 +107,34 @@ plt.plot(epsilon)
 plt.legend(['delta (DAU DIP)','epsilon (DAU PIP)'])
 plt.show()
 
+# %% Visualisierung der Marker und Tracker
+# calculate spheres
+# diese Berechnung gibt die Länge eines Fingers zurück.
+# es würde aber viel mehr sinn machen den Abstand zwischen den Joints
+# aus den mkr.json files zu nehmen.
+ZF_PIP = stl.mesh.Mesh.from_file("./Data/STL/Segmentation_ZF_PIP.stl")
+minx, maxx, miny, maxy, minz, maxz = tf.stl_find_mins_maxs(ZF_PIP)
+d_ZF_DIP_PIP = np.linalg.norm([maxx-minx, maxy-miny, maxz-minz])
+
+d_ZF_Tracker_PIP = Marker_ZF_proximal.d_dist_CT
+
+ZF_MCP = stl.mesh.Mesh.from_file("./Data/STL/Segmentation_ZF_MCP.stl")
+minx, maxx, miny, maxy, minz, maxz = tf.stl_find_mins_maxs(ZF_MCP)
+d_ZF_MCP_PIP = np.linalg.norm([maxx-minx, maxy-miny, maxz-minz])
+ZF_Tracker_lst = []
+DAU_Tracker_lst = []
+name_lst = []
+
+radius_lst = []
+
+tf.plot_class(0,ZF_Tracker_lst,DAU_Tracker_lst,name_lst,radius_lst, save=False, show=True)
+
+interact(tf.plot_class, i = widgets.IntSlider(min=0,max=len(Tracker_ZF_DIP.track_traj_opt)-1,step=1,value=0),
+         Trackers1 = widgets.fixed(ZF_Tracker_lst), 
+         Trackers2 = widgets.fixed(DAU_Tracker_lst),
+         names = widgets.fixed(name_lst),
+         radius = widgets.fixed(radius_lst),
+         show = widgets.fixed(True))
 #%%
 # test_points1 = [[2,-5,4], [5,6,7], [-10,0,3], [-3,11,13], [8,5,4]]
 # test_points2 = [[-1,4,3], [8,4,-3], [12,7,9], [4,-5,6], [-2,10,7]]
