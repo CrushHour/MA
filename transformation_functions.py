@@ -510,7 +510,7 @@ def get_helper_points(finger_name: str, path = './Slicer3D/Joints/'):
     helper_points = {'DAU_DIP':[], 'DAU_MCP':[], 'DAU_PIP':[], 'ZF_DIP':[], 'ZF_MCP':[], 'ZF_PIP':[]}
 
     for key in helper_points.keys():
-        file_path = path + key[:3] + '_A' + key[3:] + '.json'        # 1. load mounting points
+        file_path = path + key[:3] + '_A' + key[3:] + '.mrk.json'        # 1. load mounting points
         with open(file_path) as jsonfile:
             data = json.load(jsonfile)
 
@@ -520,15 +520,18 @@ def get_helper_points(finger_name: str, path = './Slicer3D/Joints/'):
         helper_points[key].append(np.mean(helper_points[key], axis=0))
     return helper_points[finger_name]
 
-def get_signle_joint_file(file_path = ['./Slicer3D/DAU_COG.mrk.json']):
+def get_single_joint_file(file_path = ['./Slicer3D/DAU_COG.mrk.json']):
     '''Returns the joint points for the finger_name.'''
-    with open(file_path) as jsonfile:
-        data = json.load(jsonfile)
+    if file_path == '':
+        return np.array([np.nan,np.nan,np.nan])
+    else:
+        with open(file_path) as jsonfile:
+            data = json.load(jsonfile)
 
-    # extract point infos
-    point_data = data['markups'][0]['controlPoints']
-    helper_points = [point['position'] for point in point_data]
-    return np.array(helper_points)
+        # extract point infos
+        point_data = data['markups'][0]['controlPoints']
+        helper_points = [point['position'] for point in point_data]
+        return np.array(helper_points)
 
 def get_joints(path = ['./Slicer3D/Joints/']):
     '''Returns the joint points for the finger_name.'''
@@ -545,6 +548,7 @@ def get_joints(path = ['./Slicer3D/Joints/']):
             point_data = data['markups'][0]['controlPoints']
             helper_points = [point['position'] for point in point_data]
             joint_pos.append(np.mean(helper_points, axis=0))
+            #joint_pos.append(np.array(helper_points))
     return joint_pos
 
 def get_test_metadata(name):
@@ -596,12 +600,7 @@ class tracker_bone():
             
             # initialize the transformation matrix
             self.T_opt_i = np.zeros((len(self.track_traj_opt),4,4))
-            self.T_i_opt = np.zeros((len(self.track_traj_opt),4,4))
-            self.T_ct_i = np.zeros((len(self.track_traj_opt),4,4))
-            self.T_i_ct = np.zeros((len(self.track_traj_opt),4,4))
             self.T_opt_ct = np.zeros((len(self.track_traj_opt),4,4))
-            self.T_ct_opt = np.zeros((len(self.track_traj_opt),4,4))
-            self.q_opt_ct = np.zeros((len(self.track_traj_opt),4))
             
             # T from timestamp i to opt coordinate system
             for i in range(len(self.track_traj_opt)):
@@ -617,16 +616,32 @@ class tracker_bone():
                 # T from CT coordinate system to timestamp i
                 self.T_opt_ct[i,:,:] = self.T_opt_i[i,:,:] @ self.T_def_ct
 
-            self.helper_points = get_joints(self.metadata['joints'])
+            self.helper_points = []
+            for joint in self.metadata['joints']:
+                self.helper_points.append(get_single_joint_file(joint))
 
-            if not np.isnan(self.helper_points[0][0]):
-                self.t_proxi_CT = np.subtract(self.helper_points[0], np.mean(self.marker_pos_ct,axis=0))
+            if not np.isnan(self.helper_points[1]).any():
+                #self.t_proxi_CT = np.subtract(np.mean(self.marker_pos_ct,axis=0), self.helper_points[0])
+                self.t_proxi_CT = self.helper_points[1][1]
+                self.T_proxi_CT = np.eye(4)
+                self.T_proxi_CT[:3,3] = self.t_proxi_CT
+                self.T_proxi_opt = np.zeros((len(self.track_traj_opt),4,4))
+
+                for i in range(len(self.track_traj_opt)):
+                    self.T_proxi_opt[i,:,:] = self.T_opt_ct[i,:,:] @ self.T_proxi_CT
             else:
                 print('No proximal joint found.')
 
-            if not np.isnan(self.helper_points[1][0]):
-                self.t_dist_CT = np.subtract(self.helper_points[1], np.mean(self.marker_pos_ct,axis=0))
-
+            if not np.isnan(self.helper_points[0]).any():
+                #self.t_dist_CT = np.subtract(np.mean(self.marker_pos_ct,axis=0), self.helper_points[1])
+                self.t_dist_CT = self.helper_points[0][-1]
+                self.T_dist_CT = np.eye(4)
+                self.T_dist_CT[:3,3] = self.t_dist_CT
+                self.T_dist_opt = np.zeros((len(self.track_traj_opt),4,4))
+                
+                for i in range(len(self.track_traj_opt)):
+                    #self.T_dist_opt[i,:,:] = self.T_opt_ct[i,:,:] + self.T_dist_CT
+                    self.T_dist_opt[i,:,:] = self.T_opt_ct[i,:,:] @ self.T_dist_CT
             else:
                 print('No distal joint found.')
 
@@ -777,7 +792,7 @@ class marker_bone():
         save_name = './Data/' + init_marker_ID + '_opt_marker_trace.npy'
         
         try:
-            os.remove(save_name)
+            #os.remove(save_name)
             self.opt_marker_trace = np.load(save_name)
         
         # build marker trace from csv file

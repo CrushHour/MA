@@ -59,7 +59,7 @@
         </body>
 
         <body pos="{{dau.pip_joint.pos}}">
-            <geom type="sphere" size="5 5 5" rgba="0.5 1 0 0.9"/>
+            <geom type="sphere" size="5 5 5" rgba="0 1 0 0.9"/>
         </body>
 
         <body pos="{{dau.mcp_joint.pos}}">

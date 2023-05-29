@@ -45,7 +45,7 @@
         "tracker def CT": "./Data/Slicer3D/Tracker_M4_klein.mrk.json",
         "tracker name": "M4_klein",
         "stl": "./Data/STL/Segmentation_DAU_DIP.stl",
-        "joints": ["", "./Data/Slicer3D/Joints/ZF_A_DIP.mrk.json"]
+        "joints": ["", "./Data/Slicer3D/DAU_PIP_CT.mrk.json"]
     },
     "DAU_PIP":{
         "name": "DAU_PIP",
@@ -63,7 +63,7 @@
         "tracker def CT": "./Data/Slicer3D/Tracker53.mrk.json",
         "tracker name": "Tracker 53",
         "stl": "./Data/STL/Segmentation_DAU_Osmetacarpale_1.stl",
-        "joints": ["./Data/Slicer3D/Joints/DAU_A_MCP.mrk.json", ""]
+        "joints": ["./Data/Slicer3D/DAU_PIP_CT.mrk.json", ""]
     },
     "base":{
         "name": "base",
