@@ -53,17 +53,56 @@ def csv_test_load(testrun_path, tracker_designation_motive):
     data = np.array([list(map(float, i)) for i in data])
     return data
 
+def load_marker_from_json(path='./Data/optitrack-20230130-234801.json', initialID='54597'):
+    '''This function is suppose to read in the trakcing data of a single tracker'''
+    
+    f = open(path)
+    data = json.load(f)
+    df = pd.DataFrame(data)
+    f.close()
+    
+    header = []
+    len_header = 0
+    
+    for i in range(df.shape[1]):
+        try:
+            header.append(df[i][0]['name'])
+            header.append(df[i][0]['name']+'.1')
+            header.append(df[i][0]['name']+'.2')
+            len_header += 1
+        except:
+            continue
+
+    xyz = np.zeros((df.shape[0],len(header)))
+    
+    for i in range(df.shape[0]):
+        for j in range(len_header):
+            try:
+                xyz[i,j] = df[j][i]['x']
+                xyz[i,j+1] = df[j][i]['y']
+                xyz[i,j+2] = df[j][i]['z']
+            except:
+                xyz[i,j] = np.nan
+                xyz[i,j+1] = np.nan
+                xyz[i,j+2] = np.nan
+    
+    df = pd.DataFrame(xyz, columns=header)
+
+    return df
+
 def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv", d_max = 56):
+    
+    initialID = str(initialID)
+    df = pd.DataFrame()
+    
     if dtype == "json":
-        print("unable to load from json yet.")
-        #df = load_marker_from_json(testrun_path, initalID)
-        next_col = 0
-        df = pd.DataFrame()
+        print("rebuilding json to be formated as csv")
+        df = load_marker_from_json(testrun_path, initialID)
 
     else:
-        initialID = str(initialID)
         df = pd.read_csv(testrun_path, header=2, low_memory=False)
-        next_col = df.columns.get_loc(initialID)
+    
+    next_col = df.columns.get_loc(initialID)
 
     # variablen initiieren. Position values start at line 4 (counting from 1).
     start_line = 3

@@ -1,23 +1,8 @@
 <mujoco>
     <default>
-        <geom rgba="255 255 255 0.3"/>
+        <geom rgba="255 255 255 0.3" size = "2 2 2"/>
     </default>
-    <asset>
-        <mesh name="ZF-MCP" scale="1 1 1"
-        file="Data\STL\Segmentation_ZF_MCP.stl"/>
-        <mesh name="ZF-PIP" scale="1 1 1"
-        file="Data\STL\Segmentation_ZF_PIP_Tracker.stl"/>
-        <mesh name="ZF-DIP" scale="1 1 1"
-        file="Data\STL\Segmentation_ZF_DIP.stl"/>
-        <mesh name="ZF-Midhand" scale="1 1 1"
-        file="Data\STL\Segmentation_ZF_Mittelhand.stl"/>
-        <mesh name="DAU-MCP" scale="1 1 1"
-        file="Data\STL\Segmentation_DAU_Osmetacarpale_1.stl"/>
-        <mesh name="DAU-PIP" scale="1 1 1"
-        file="Data\STL\Segmentation_DAU_Phalax_proximalis_Tracker.stl"/>
-        <mesh name="DAU-DIP" scale="1 1 1"
-        file="Data\STL\Segmentation_DAU_DIP.stl"/>
-    </asset>
+
     <worldbody>
         <light name="Light" diffuse="1 1 1" pos="0 0 1000" dir="0 0 -1"/>
         <geom type="plane" size="1000 1000 0.01" pos = "0 0 -400" rgba=".3 0.3 0.3 1"/>
@@ -34,37 +19,113 @@
             <geom type="box" size="0.2 0.2 100" rgba="0 0 .9 1"/>
         </body>
 
-        <body name="ZF_DIP">
-        <geom pos = "123.59210267003009 -123.86784710892648 211.66635058122307" quat = "0.854912757250147 0.49955412814747885 0.1272518932689141 0.05811029341898471" type="mesh" mesh="ZF-DIP" rgba="0 0 1 0.9"/>
+
+
+        <body pos="-0.167646586894989 -0.08472830057144165 -0.3572303354740143">
+            <geom type="sphere" rgba="0 0 0 0.9"/>
         </body>
 
-        <body name="ZF_PIP">
-        <geom pos = "107.49336758640878 62.59053973276751 11.802556864608732" quat = "1 0 0 0" type="mesh" mesh="ZF-PIP" rgba="0 0 1 0.9"/>
+        <body pos="-0.13559330999851227 -0.12450344115495682 -0.1856592744588852">
+            <geom type="sphere" rgba="0.1 0 0 0.9"/>
         </body>
 
-        <body name="ZF_Midhand">
-        <geom pos = "175.30940796095564 -3.9428981211687884 162.4751924768304" quat = "0.9507135653107301 0.2560267876655602 0.14712750130652263 -0.0945912210044537" type="mesh" mesh="ZF-Midhand" rgba="0 0 1 0.9"/>
+        <body pos="-0.17946264147758484 -0.17300176620483398 -0.15713444352149963">
+            <geom type="sphere" rgba="0.2 0 0 0.9"/>
         </body>
 
-        <body name="DAU_DIP">
-        <geom pos = "157.72665439617083 37.28276620394364 150.77600280368227" quat = "0.9503015297407359 0.1640836218304674 0.24485737307218253 0.10024187982875937" type="mesh" mesh="DAU-DIP" rgba="1 0 0 0.9"/>
-        </body>
-        
-        <body name="DAU_PIP">
-        <geom pos = "215.20910344795848 -324.48031077791904 -166.26437560668924" quat = "-0.1307404771982425 0.18199813180598173 -0.39548412064001526 0.890716519417206" type="mesh" mesh="DAU-PIP" rgba="1 0 0 0.9"/>
+        <body pos="-0.07311220467090607 -0.0651988759636879 -0.09601161628961563">
+            <geom type="sphere" rgba="0.3 0 0 0.9"/>
         </body>
 
-        <body name="DAU_MCP">
-        <geom pos = "142.49957396536598 5.38022220283321 162.76156117521242" quat = "0.9568489677620207 0.2395364099971991 0.15747892226642857 0.0475683741598694" type="mesh" mesh="DAU-MCP" rgba="1 0 0 0.9"/>
+        <body pos="-0.10022666305303574 -0.08940799534320831 -0.32842227816581726">
+            <geom type="sphere" rgba="0.4 0 0 0.9"/>
         </body>
 
-        <body pos="175.70042129015496 -99.18186604465954 -83.80358678387276">
-            <geom type="sphere" size="5 5 5" rgba="0 1 0 0.9"/>
+        <body pos="-0.3643582761287689 -0.3666192591190338 -0.3565285801887512">
+            <geom type="sphere" rgba="0.5 0 0 0.9"/>
         </body>
 
-        <body pos="156.1707096914233 -85.74313967345653 -104.58640488900926">
-            <geom type="sphere" size="5 5 5" rgba="1 1 0 0.9"/>
+        <body pos="-0.37064027786254883 -0.15462997555732727 -0.12552592158317566">
+            <geom type="sphere" rgba="0.6 0 0 0.9"/>
         </body>
+
+        <body pos="-0.1144992858171463 -0.15777191519737244 -0.12247752398252487">
+            <geom type="sphere" rgba="0.7 0 0 0.9"/>
+        </body>
+
+        <body pos="-0.11007530987262726 -0.10815084725618362 -0.12173768132925034">
+            <geom type="sphere" rgba="0.8 0 0 0.9"/>
+        </body>
+
+        <body pos="-0.13856911659240723 -0.14396825432777405 -0.14728708565235138">
+            <geom type="sphere" rgba="0.9 0 0 0.9"/>
+        </body>
+
+        <body pos="-0.15996067225933075 -0.09849478304386139 0.6907713413238525">
+            <geom type="sphere" rgba="1 0 0 0.9"/>
+        </body>
+
+        <body pos="0.3767775297164917 0.0 0.0">
+            <geom type="sphere" rgba="1 0.1 0 0.9"/>
+        </body>
+
+        <body pos="0.0 0.0 0.0">
+            <geom type="sphere" rgba="1 0.2 0 0.9"/>
+        </body>
+
+        <body pos="0.0 0.0 0.0">
+            <geom type="sphere" rgba="1 0.3 0 0.9"/>
+        </body>
+
+        <body pos="0.0 0.0 0.0">
+            <geom type="sphere" rgba="1 0.4 0 0.9"/>
+        </body>
+
+        <body pos="0.0 0.0 0.0">
+            <geom type="sphere" rgba="1 0.5 0 0.9"/>
+        </body>
+
+        <body pos="0.0 0.0 0.0">
+            <geom type="sphere" rgba="1 0.6 0 0.9"/>
+        </body>
+
+        <body pos="0.0 0.0 0.0">
+            <geom type="sphere" rgba="1 0.7 0 0.9"/>
+        </body>
+
+        <body pos="0.0 0.0 0.0">
+            <geom type="sphere" rgba="1 0.8 0 0.9"/>
+        </body>
+
+        <body pos="0.0 0.0 0.0">
+            <geom type="sphere" rgba="1 0.9 0 0.9"/>
+        </body>
+
+        <body pos="0.0 0.0 0.0">
+            <geom type="sphere" rgba="1 1 0 0.9"/>
+        </body>
+
+        <body pos="0.0 0.0 0.0">
+            <geom type="sphere" rgba="0.9 1 0 0.9"/>
+        </body>
+
+        <body pos="0.0 0.0 0.0">
+            <geom type="sphere" rgba="0.8 1 0 0.9"/>
+        </body>
+
+        <body pos="0.0 0.0 0.0">
+            <geom type="sphere" rgba="0.7 1 0 0.9"/>
+        </body>
+
+        <body pos="0.0 0.0 0.0">
+            <geom type="sphere" rgba="0.6 1 0 0.9"/>
+        </body>
+
+        <body pos="0.0 0.0 0.0">
+            <geom type="sphere" rgba="0.5 1 0 0.9"/>
+        </body>
+
+
 
     </worldbody>
 </mujoco>
