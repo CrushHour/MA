@@ -53,7 +53,7 @@ def csv_test_load(testrun_path, tracker_designation_motive):
     data = np.array([list(map(float, i)) for i in data])
     return data
 
-def load_marker_from_json(path='./Data/optitrack-20230130-234801.json', initialID='54597'):
+def json_test_load(path='./Data/optitrack-20230130-234800.json', initialID=''):
     '''This function is suppose to read in the trakcing data of a single tracker'''
     
     f = open(path)
@@ -69,6 +69,10 @@ def load_marker_from_json(path='./Data/optitrack-20230130-234801.json', initialI
             header.append(df[i][0]['name'])
             header.append(df[i][0]['name']+'.1')
             header.append(df[i][0]['name']+'.2')
+            header.append(df[i][0]['name']+'.3')
+            header.append(df[i][0]['name']+'.4')
+            header.append(df[i][0]['name']+'.5')
+            header.append(df[i][0]['name']+'.6')
             len_header += 1
         except:
             continue
@@ -78,15 +82,28 @@ def load_marker_from_json(path='./Data/optitrack-20230130-234801.json', initialI
     for i in range(df.shape[0]):
         for j in range(len_header):
             try:
-                xyz[i,j] = df[j][i]['x']
-                xyz[i,j+1] = df[j][i]['y']
-                xyz[i,j+2] = df[j][i]['z']
+                xyz[i,j*7] = df[j][i]['qx']
+                xyz[i,j*7+1] = df[j][i]['qy']
+                xyz[i,j*7+2] = df[j][i]['qz']
+                xyz[i,j*7+3] = df[j][i]['qw']
+                xyz[i,j*7+4] = df[j][i]['x']*1000
+                xyz[i,j*7+5] = df[j][i]['y']*1000
+                xyz[i,j*7+6] = df[j][i]['z']*1000
+
             except:
-                xyz[i,j] = np.nan
-                xyz[i,j+1] = np.nan
-                xyz[i,j+2] = np.nan
+                xyz[i,j*7] = np.nan
+                xyz[i,j*7+1] = np.nan
+                xyz[i,j*7+2] = np.nan
+                xyz[i,j*7+3] = np.nan
+                xyz[i,j*7+4] = np.nan
+                xyz[i,j*7+5] = np.nan
+                xyz[i,j*7+6] = np.nan
     
     df = pd.DataFrame(xyz, columns=header)
+
+    if initialID != '':
+        next_col = df.columns.get_loc(initialID)
+        df = df.iloc[:,next_col:next_col+7]
 
     return df
 
@@ -97,7 +114,7 @@ def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv", d_max
     
     if dtype == "json":
         print("rebuilding json to be formated as csv")
-        df = load_marker_from_json(testrun_path, initialID)
+        df = json_test_load(testrun_path, initialID)
 
     else:
         df = pd.read_csv(testrun_path, header=2, low_memory=False)
@@ -632,7 +649,11 @@ class tracker_bone():
             self.T_def_ct = self.invert_T(self.T_ct_def)
             self.t_ct_tr = self.T_ct_def
             # Get the trajectory of the tracker from the test data
-            self.track_traj_opt = csv_test_load(test_path, self.metadata['tracker name'])
+            if test_path.endswith('.json'):
+                self.track_traj_opt = json_test_load(test_path, self.metadata['tracker ID'])
+                self.track_traj_opt = self.track_traj_opt.values
+            else:
+                self.track_traj_opt = csv_test_load(test_path, self.metadata['tracker name'])
             self.track_traj_opt = nan_helper(self.track_traj_opt)
             self.track_traj_opt = self.replace_outliers(self.track_traj_opt)
             #self.track_traj_opt = plot_tiefpass(inter_data, self.finger_name, wp = 0.8, ws = 1.1)
@@ -648,9 +669,10 @@ class tracker_bone():
                 v = self.track_traj_opt[i,:3]
                 q = Quaternion(scalar=s, vector=v)
                 t = self.track_traj_opt[i,4:7]
+                self.T_opt_i[i] = np.eye(4)
                 self.T_opt_i[i,:3,:3] = q.rotation_matrix
                 self.T_opt_i[i,:3,3] = t
-                self.T_opt_i[i,3,3] = 1
+                #self.T_opt_i[i,3,3] = 1
 
                 # T from CT coordinate system to timestamp i
                 self.T_opt_ct[i,:,:] = self.T_opt_i[i,:,:] @ self.T_def_ct
