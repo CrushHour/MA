@@ -1,7 +1,10 @@
 <mujoco>
     <default>
-        <geom rgba="255 255 255 0.3" size = "2 2 2"/>
+        <geom rgba="0.5 1 0 0.9" size = "2 2 2"/>
     </default>
+    <visual>
+        <global offheight="2048"/>
+    </visual>
     <asset>
         <mesh name="ZF-MCP" scale="1 1 1"
         file="Data\STL\Segmentation_ZF_MCP.stl"/>
@@ -73,89 +76,108 @@
         </body>
 
         <body pos="{{marker.5.pos}}">
-            <geom type="sphere" rgba="0 0 1 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="{{marker.6.pos}}">
-            <geom type="sphere" rgba="0 0 1 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="{{marker.7.pos}}">
-            <geom type="sphere" rgba="0 0 1 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="{{marker.8.pos}}">
-            <geom type="sphere" rgba="0 0 1 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="{{marker.9.pos}}">
-            <geom type="sphere" rgba="0 0 1 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="{{marker.10.pos}}">
-            <geom type="sphere" rgba="0 0 1 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="{{marker.11.pos}}">
-            <geom type="sphere" rgba="0 0 1 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="{{marker.12.pos}}">
-            <geom type="sphere" rgba="0 1 0 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="{{marker.13.pos}}">
-            <geom type="sphere" rgba="0 1 0 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="{{marker.14.pos}}">
-            <geom type="sphere" rgba="0 1 0 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="{{marker.15.pos}}">
-            <geom type="sphere" rgba="0 0.5 0 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="{{marker.16.pos}}">
-            <geom type="sphere" rgba="0 0.6 0 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="{{marker.17.pos}}">
-            <geom type="sphere" rgba="0 0.7 0 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="{{marker.18.pos}}">
-            <geom type="sphere" rgba="0 0.8 0 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="{{marker.19.pos}}">
-            <geom type="sphere" rgba="1 0.9 0 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="{{marker.20.pos}}">
-            <geom type="sphere" rgba="0 1 0 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="{{marker.21.pos}}">
-            <geom type="sphere" rgba="0 1 0 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="{{marker.22.pos}}">
-            <geom type="sphere" rgba="0 1 0 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="{{marker.23.pos}}">
-            <geom type="sphere" rgba="0 1 0 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="{{marker.24.pos}}">
-            <geom type="sphere" rgba="0 1 0 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="{{marker.25.pos}}">
-            <geom type="sphere" rgba="0 1 0 0.9"/>
+            <geom type="sphere" />
         </body>
 
+        <body pos="{{marker.26.pos}}">
+            <geom type="sphere" />
+        </body>
+
+        <body pos="{{marker.27.pos}}">
+            <geom type="sphere" />
+        </body>
+
+        <body pos="{{marker.28.pos}}">
+            <geom type="sphere" />
+        </body>
+
+        <body pos="{{marker.29.pos}}">
+            <geom type="sphere" />
+        </body>
+        
+        <body pos="{{marker.30.pos}}">
+            <geom type="sphere" />
+        </body>
 
 
     </worldbody>

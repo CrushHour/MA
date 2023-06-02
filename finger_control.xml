@@ -1,7 +1,10 @@
 <mujoco>
     <default>
-        <geom rgba="255 255 255 0.3" size = "2 2 2"/>
+        <geom rgba="0.5 1 0 0.9" size = "2 2 2"/>
     </default>
+    <visual>
+        <global offheight="2048"/>
+    </visual>
     <asset>
         <mesh name="ZF-MCP" scale="1 1 1"
         file="Data\STL\Segmentation_ZF_MCP.stl"/>
@@ -73,89 +76,108 @@
         </body>
 
         <body pos="-185.6592744588852 713.0013704299927 452.3358345031738">
-            <geom type="sphere" rgba="0 0 1 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="-179.46264147758484 687.4886751174927 425.1587986946106">
-            <geom type="sphere" rgba="0 0 1 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="-173.00176620483398 692.8703784942627 459.1415822505951">
-            <geom type="sphere" rgba="0 0 1 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="-157.13444352149963 714.5069241523743 456.1466574668884">
-            <geom type="sphere" rgba="0 0 1 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="-73.11220467090607 731.7517995834351 327.17058062553406">
-            <geom type="sphere" rgba="0 0 1 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="-65.1988759636879 745.9623217582703 345.2284038066864">
-            <geom type="sphere" rgba="0 0 1 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="-96.01161628961563 759.0498328208923 336.2569212913513">
-            <geom type="sphere" rgba="0 0 1 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="-100.22666305303574 746.0081577301025 382.9473555088043">
-            <geom type="sphere" rgba="0 1 0 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="-89.40799534320831 700.7781863212585 367.9216802120209">
-            <geom type="sphere" rgba="0 1 0 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="-328.42227816581726 762.9860639572144 128.49289178848267">
-            <geom type="sphere" rgba="0 1 0 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="-364.3582761287689 740.2265667915344 174.83794689178467">
-            <geom type="sphere" rgba="0 0.5 0 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="-366.6192591190338 742.4070239067078 123.44715744256973">
-            <geom type="sphere" rgba="0 0.6 0 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="-356.5285801887512 783.0138802528381 147.28771150112152">
-            <geom type="sphere" rgba="0 0.7 0 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="-370.6402778625488 769.7482705116272 130.9303194284439">
-            <geom type="sphere" rgba="0 0.8 0 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="-154.62997555732727 790.3363704681396 318.5093104839325">
-            <geom type="sphere" rgba="1 0.9 0 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="-125.52592158317566 808.4384799003601 342.08422899246216">
-            <geom type="sphere" rgba="0 1 0 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="-114.4992858171463 784.3160033226013 332.36297965049744">
-            <geom type="sphere" rgba="0 1 0 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="-157.77191519737244 777.018666267395 365.1968836784363">
-            <geom type="sphere" rgba="0 1 0 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="-122.47752398252487 777.3386836051941 369.99568343162537">
-            <geom type="sphere" rgba="0 1 0 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="-110.07530987262726 674.4403839111328 416.14052653312683">
-            <geom type="sphere" rgba="0 1 0 0.9"/>
+            <geom type="sphere" />
         </body>
 
         <body pos="-108.15084725618362 711.5671038627625 431.66011571884155">
-            <geom type="sphere" rgba="0 1 0 0.9"/>
+            <geom type="sphere" />
         </body>
 
+        <body pos="-121.73768132925034 686.7189407348633 456.6121995449066">
+            <geom type="sphere" />
+        </body>
+
+        <body pos="-138.56911659240723 706.4525485038757 442.7010715007782">
+            <geom type="sphere" />
+        </body>
+
+        <body pos="-143.96825432777405 676.6685247421265 441.7187571525574">
+            <geom type="sphere" />
+        </body>
+
+        <body pos="-147.28708565235138 774.1310000419617 412.458211183548">
+            <geom type="sphere" />
+        </body>
+        
+        <body pos="-159.96067225933075 736.7645502090454 453.48700881004333">
+            <geom type="sphere" />
+        </body>
 
 
     </worldbody>
