@@ -64,6 +64,7 @@ def construct_marker_rot(opt_info, ct_info):
 
 for t in tqdm(range(len(Marker_DAU.opt_marker_trace))):
     Marker_DAU.T_opt_ct[t] = construct_marker_rot([Marker_DAU.opt_marker_trace[t],Tracker_DAU_DIP.T_proxi_opt[t,:3,3],Tracker_DAU_MCP.T_dist_opt[t,:3,3]],[Marker_DAU.marker_pos_ct[0], Tracker_DAU_DIP.t_proxi_CT, Tracker_DAU_MCP.t_dist_CT])
+    Marker_ZF_proximal.T_opt_ct[t] = construct_marker_rot([Marker_ZF_proximal.opt_marker_trace[t],Tracker_ZF_DIP.T_proxi_opt_left[t,:3,3],Tracker_ZF_DIP.T_dist_opt_right[t,:3,3]],[Marker_ZF_proximal.marker_pos_ct[0], Tracker_ZF_DIP.t_proxi_CT, Tracker_ZF_midhand.t_dist_CT])
 
 # Build mujoco parameters
 

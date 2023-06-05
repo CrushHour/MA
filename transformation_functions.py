@@ -682,7 +682,6 @@ class tracker_bone():
                 self.helper_points.append(get_single_joint_file(joint))
 
             if not np.isnan(self.helper_points[1]).any():
-                #self.t_proxi_CT = np.subtract(np.mean(self.marker_pos_ct,axis=0), self.helper_points[0])
                 self.t_proxi_CT = self.helper_points[1][1]
                 self.T_proxi_CT = np.eye(4)
                 self.T_proxi_CT[:3,3] = self.t_proxi_CT
@@ -694,14 +693,12 @@ class tracker_bone():
                 print('No proximal joint found.')
 
             if not np.isnan(self.helper_points[0]).any():
-                #self.t_dist_CT = np.subtract(np.mean(self.marker_pos_ct,axis=0), self.helper_points[1])
                 self.t_dist_CT = self.helper_points[0][-1]
                 self.T_dist_CT = np.eye(4)
                 self.T_dist_CT[:3,3] = self.t_dist_CT
                 self.T_dist_opt = np.zeros((len(self.track_traj_opt),4,4))
                 
                 for i in range(len(self.track_traj_opt)):
-                    #self.T_dist_opt[i,:,:] = self.T_opt_ct[i,:,:] + self.T_dist_CT
                     self.T_dist_opt[i,:,:] = self.T_opt_ct[i,:,:] @ self.T_dist_CT
             else:
                 print('No distal joint found.')
@@ -709,11 +706,18 @@ class tracker_bone():
 
     def get_metadata(self):
         '''Returns the metadata of the Phalanx.'''
-        with open('hand_metadata.json') as json_data:
-            d = json.load(json_data)
-            metadata = d[self.finger_name]
-            json_data.close()
-        return metadata
+        try:
+            with open('hand_metadata.json') as json_data:
+                d = json.load(json_data)
+                metadata = d[self.finger_name]
+                json_data.close()
+            return metadata
+        except:
+            with open(r'C:/GitHub/MA/hand_metadata.json') as json_data:
+                d = json.load(json_data)
+                metadata = d[self.finger_name]
+                json_data.close()
+            return metadata
     
     def invert_T(self, T = np.array([[1,0,0,1],[0,1,0,1],[0,0,1,1],[0,0,0,1]])):
         ''' gives back the inversese of a 4x4 transformation matrix'''

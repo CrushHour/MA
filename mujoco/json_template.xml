@@ -3,13 +3,17 @@
         <geom rgba="0.5 1 0 0.9" size = "2 2 2"/>
     </default>
     <visual>
-        <global offheight="2048"/>
+        <global offheight="480"/>
+    </visual>    
+
+    <visual>
+        <global offwidth="640"/>
     </visual>
     <asset>
         <mesh name="ZF-MCP" scale="1 1 1"
         file="Data\STL\Segmentation_ZF_MCP.stl"/>
         <mesh name="ZF-PIP" scale="1 1 1"
-        file="Data\STL\Segmentation_ZF_PIP_Tracker.stl"/>
+        file="Data\STL\Segmentation_ZF_PIP.stl"/>
         <mesh name="ZF-DIP" scale="1 1 1"
         file="Data\STL\Segmentation_ZF_DIP.stl"/>
         <mesh name="ZF-Midhand" scale="1 1 1"
@@ -17,7 +21,7 @@
         <mesh name="DAU-MCP" scale="1 1 1"
         file="Data\STL\Segmentation_DAU_Osmetacarpale_1.stl"/>
         <mesh name="DAU-PIP" scale="1 1 1"
-        file="Data\STL\Segmentation_DAU_Phalax_proximalis_Tracker.stl"/>
+        file="Data\STL\Segmentation_DAU_Phalax_proximalis.stl"/>
         <mesh name="DAU-DIP" scale="1 1 1"
         file="Data\STL\Segmentation_DAU_DIP.stl"/>
     </asset>
