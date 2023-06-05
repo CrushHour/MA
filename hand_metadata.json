@@ -8,7 +8,7 @@
         "tracker name": "55",
         "tracker ID": "1028",
         "stl": "./Data/STL/Segmentation_ZF_DIP.stl",
-        "joints": ["", "./Data/Slicer3D/Joints/ZF_A_DIP.mrk.json"]
+        "joints": ["", "./Data/Slicer3D/Joints/ZF_DIP_joint.mrk.json"]
     },
     "ZF_PIP":{
         "name": "ZF_PIP",
@@ -16,7 +16,7 @@
         "tracking": "Marker",
         "marker def CT": "./Data/Slicer3D/Marker_Phalanx_proximalis.mrk.json",
         "stl": "./Data/STL/Segmentation_ZF_PIP.stl",
-        "joints": ["./Data/Slicer3D/Joints/ZF_A_DIP.mrk.json", "./Data/Slicer3D/Joints/ZF_A_PIP.mrk.json"]
+        "joints": ["./Data/Slicer3D/Joints/ZF_DIP_joint.mrk.json", "./Data/Slicer3D/Joints/ZF_PIP_joint.mrk.json"]
     },
     "ZF_MCP":{
         "name": "ZF_MCP",
@@ -24,7 +24,7 @@
         "tracking": "Marker",
         "marker def CT": "",
         "stl": "./Data/STL/Segmentation_ZF_MCP.stl",
-        "joints": ["./Data/Slicer3D/Joints/ZF_A_PIP.mrk.json", "./Data/Slicer3D/Joints/ZF_A_MCP.mrk.json"]
+        "joints": ["./Data/Slicer3D/Joints/ZF_PIP_joint.mrk.json", "./Data/Slicer3D/Joints/ZF_MCP_joint.mrk.json"]
     },
     "ZF_midhand":{
         "name": "ZF_MCP",
@@ -35,7 +35,7 @@
         "tracker ID": "1031",
         "finger": "ZF",
         "stl": "./Data/STL/Segmentation_ZF_Mittelhand.stl",
-        "joints": ["./Data/Slicer3D/Joints/ZF_A_MCP.mrk.json",""]
+        "joints": ["./Data/Slicer3D/Joints/ZF_MCP_joint.mrk.json",""]
     },
 
 
@@ -48,7 +48,7 @@
         "tracker name": "M4_klein",
         "tracker ID": "1032",
         "stl": "./Data/STL/Segmentation_DAU_DIP.stl",
-        "joints": ["", "./Data/Slicer3D/DAU_PIP_CT.mrk.json"]
+        "joints": ["", "./Data/Slicer3D/Joints/DAU_DIP_joint.mrk.json"]
     },
     "DAU_PIP":{
         "name": "DAU_PIP",
@@ -56,7 +56,7 @@
         "tracking": "Marker",
         "marker def CT": "./Data/Slicer3D/Marker_Osmetacarpale1.mrk.json",
         "stl": "./Data/STL/Segmentation_DAU_Phalax_proximalis.stl",
-        "joints": ["./Data/Slicer3D/Joints/DAU_A_DIP.mrk.json", "./Data/Slicer3D/Joints/DAU_A_MCP.mrk.json"]
+        "joints": ["./Data/Slicer3D/Joints/DAU_DIP_joint.mrk.json", "./Data/Slicer3D/Joints/DAU_PIP_joint.mrk.json"]
     },
     "DAU_MCP":{
         "name": "DAU_MCP",
@@ -78,6 +78,6 @@
         "tracker name": "Tracker_52",
         "tracker ID": "1027",
         "stl": "./Data/STL/Segmentation_DAU_Phalax_proximalis.stl",
-        "joints": ["./Data/Slicer3D/Joints/DAU_A_MCP.mrk.json", ""]
+        "joints": ["./Data/Slicer3D/Joints/DAU_PIP_joint.mrk.json", ""]
     }
 }

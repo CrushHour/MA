@@ -682,23 +682,47 @@ class tracker_bone():
                 self.helper_points.append(get_single_joint_file(joint))
 
             if not np.isnan(self.helper_points[1]).any():
-                self.t_proxi_CT = self.helper_points[1][1]
+                self.t_proxi_aussen_CT = self.helper_points[1][0]
+                self.T_proxi_aussen_CT = np.eye(4)
+                self.T_proxi_aussen_CT[:3,3] = self.t_proxi_aussen_CT
+                self.T_proxi_aussen_opt = np.zeros((len(self.track_traj_opt),4,4))
+
+                self.t_proxi_innen_CT = self.helper_points[1][1]
+                self.T_proxi_innen_CT = np.eye(4)
+                self.T_proxi_innen_CT[:3,3] = self.t_proxi_innen_CT
+                self.T_proxi_innen_opt = np.zeros((len(self.track_traj_opt),4,4))
+
+                self.t_proxi_CT = np.mean(self.helper_points[1], axis=0)
                 self.T_proxi_CT = np.eye(4)
                 self.T_proxi_CT[:3,3] = self.t_proxi_CT
                 self.T_proxi_opt = np.zeros((len(self.track_traj_opt),4,4))
 
                 for i in range(len(self.track_traj_opt)):
                     self.T_proxi_opt[i,:,:] = self.T_opt_ct[i,:,:] @ self.T_proxi_CT
+                    self.T_proxi_aussen_opt[i,:,:] = self.T_opt_ct[i,:,:] @ self.T_proxi_aussen_CT
+                    self.T_proxi_innen_opt[i,:,:] = self.T_opt_ct[i,:,:] @ self.T_proxi_innen_CT
             else:
                 print('No proximal joint found.')
 
             if not np.isnan(self.helper_points[0]).any():
-                self.t_dist_CT = self.helper_points[0][-1]
+                self.t_dist_aussen_CT = self.helper_points[0][0]
+                self.T_dist_aussen_CT = np.eye(4)
+                self.T_dist_aussen_CT[:3,3] = self.t_dist_aussen_CT
+                self.T_dist_aussen_opt = np.zeros((len(self.track_traj_opt),4,4))
+
+                self.t_dist_innen_CT = self.helper_points[0][1]
+                self.T_dist_innen_CT = np.eye(4)
+                self.T_dist_innen_CT[:3,3] = self.t_dist_innen_CT
+                self.T_dist_innen_opt = np.zeros((len(self.track_traj_opt),4,4))
+
+                self.t_dist_CT = np.mean(self.helper_points[0],axis=0)
                 self.T_dist_CT = np.eye(4)
                 self.T_dist_CT[:3,3] = self.t_dist_CT
                 self.T_dist_opt = np.zeros((len(self.track_traj_opt),4,4))
                 
                 for i in range(len(self.track_traj_opt)):
+                    self.T_dist_aussen_opt[i,:,:] = self.T_opt_ct[i,:,:] @ self.T_dist_aussen_CT
+                    self.T_dist_innen_opt[i,:,:] = self.T_opt_ct[i,:,:] @ self.T_dist_innen_CT
                     self.T_dist_opt[i,:,:] = self.T_opt_ct[i,:,:] @ self.T_dist_CT
             else:
                 print('No distal joint found.')
