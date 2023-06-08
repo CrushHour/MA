@@ -63,23 +63,35 @@ def construct_marker_rot(opt_info, ct_info):
     return T
 
 for t in tqdm(range(len(Marker_DAU.opt_marker_trace))):
-    Marker_DAU.T_opt_ct[t] = construct_marker_rot([Marker_DAU.opt_marker_trace[t],Tracker_DAU_DIP.T_proxi_opt[t,:3,3],Tracker_DAU_MCP.T_dist_opt[t,:3,3]],[Marker_DAU.marker_pos_ct[0], Tracker_DAU_DIP.t_proxi_CT, Tracker_DAU_MCP.t_dist_CT])
-    Marker_ZF_proximal.T_opt_ct[t] = construct_marker_rot([Marker_ZF_proximal.opt_marker_trace[t],Tracker_ZF_DIP.T_proxi_innen_opt[t,:3,3],Tracker_ZF_DIP.T_proxi_aussen_opt[t,:3,3]],[Marker_ZF_proximal.marker_pos_ct[0], Tracker_ZF_DIP.t_proxi_innen_CT, Tracker_ZF_DIP.t_proxi_aussen_CT])
+    Marker_DAU.T_opt_ct[t] = construct_marker_rot([Marker_DAU.opt_marker_trace[t],Tracker_DAU_DIP.T_proxi_opt[t,:3,3],Tracker_DAU_MCP.T_dist_opt[t,:3,3]],\
+                                                  [Marker_DAU.marker_pos_ct[0], Tracker_DAU_DIP.t_proxi_CT, Tracker_DAU_MCP.t_dist_CT])
+    
+    Marker_ZF_proximal.T_opt_ct[t] = construct_marker_rot([Marker_ZF_proximal.opt_marker_trace[t],Tracker_ZF_DIP.T_proxi_innen_opt[t,:3,3],Tracker_ZF_DIP.T_proxi_aussen_opt[t,:3,3]], \
+                                                          [Marker_ZF_proximal.marker_pos_ct[0], Tracker_ZF_DIP.t_proxi_innen_CT, Tracker_ZF_DIP.t_proxi_aussen_CT])
 
-# Build mujoco parameters
-
+# %% Build mujoco parameters
 parameters = {'zf': dict(), 'dau': dict()}
 
 parameters['zf']['dip'] = mwp.build_parameters([Quaternion(matrix=Tracker_ZF_DIP.T_opt_ct[i,:3,:3]), Tracker_ZF_DIP.T_opt_ct[i,:3,3]])
 parameters['zf']['pip'] = mwp.build_parameters([Quaternion(matrix=Marker_ZF_proximal.T_opt_ct[i,:3,:3]), Marker_ZF_proximal.T_opt_ct[i,:3,3]])
+parameters['zf']['pip_marker'] = mwp.build_parameters([Quaternion(matrix=Marker_ZF_proximal.T_opt_ct[i,:3,:3]), Marker_ZF_proximal.T_opt_ct[i,:3,3]]) # blue
 #parameters['zf']['mcp'] = mwp.build_parameters([Tracker_ZF_MCP.cog_rot_CT[i] ,Tracker_ZF_DIP.T_def_ct[i]])
 parameters['zf']['midhand'] = mwp.build_parameters([Quaternion(matrix=Tracker_ZF_midhand.T_opt_ct[i,:3,:3]), Tracker_ZF_midhand.T_opt_ct[i,:3,3]])
+
+parameters['zf']['dip_joint_aussen' ] = mwp.build_parameters([[1,0,0,0], Tracker_ZF_DIP.T_proxi_aussen_opt[i,:3,3]]) # green
+parameters['zf']['dip_joint_innen' ] = mwp.build_parameters([[1,0,0,0], Tracker_ZF_DIP.T_proxi_innen_opt[i,:3,3]]) # red
+parameters['zf']['mcp_joint_aussen' ] = mwp.build_parameters([[1,0,0,0], Tracker_ZF_midhand.T_dist_aussen_opt[i,:3,3]]) # yellow
+parameters['zf']['mcp_joint_innen' ] = mwp.build_parameters([[1,0,0,0], Tracker_ZF_midhand.T_dist_innen_opt[i,:3,3]]) # white
+parameters['zf']['pip_marker'] = mwp.build_parameters([[1,0,0,0], Marker_ZF_proximal.opt_marker_trace[i]]) # white
+
 
 parameters['dau']['dip'] = mwp.build_parameters([Quaternion(matrix=Tracker_DAU_DIP.T_opt_ct[i,:3,:3]), Tracker_DAU_DIP.T_opt_ct[i,:3,3]])
 parameters['dau']['pip'] = mwp.build_parameters([Quaternion(matrix=Marker_DAU.T_opt_ct[i,:3,:3]), Marker_DAU.T_opt_ct[i,:3,3]])
 parameters['dau']['mcp' ] = mwp.build_parameters([Quaternion(matrix=Tracker_DAU_MCP.T_opt_ct[i,:3,:3]), Tracker_DAU_MCP.T_opt_ct[i,:3,3]])
+
 parameters['dau']['pip_joint' ] = mwp.build_parameters([[1,0,0,0], Tracker_DAU_DIP.T_proxi_opt[i,:3,3]]) # green
 parameters['dau']['mcp_joint' ] = mwp.build_parameters([[1,0,0,0], Tracker_DAU_MCP.T_dist_opt[i,:3,3]]) # yellow
+
 with open("./mujoco/generated_parameters.yaml", "w") as outfile:
     yaml.dump(parameters, outfile)
 

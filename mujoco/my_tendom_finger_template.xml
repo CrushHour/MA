@@ -1,6 +1,6 @@
 <mujoco>
     <default>
-        <geom rgba="255 255 255 0.3"/>
+        <geom rgba="255 255 255 0.3" size = "5 5 5"/>
     </default>
     <asset>
         <mesh name="ZF-MCP" scale="1 1 1"
@@ -41,6 +41,10 @@
         <body name="ZF_PIP">
         <geom pos = "{{zf.pip.pos}}" quat = "{{zf.pip.quat}}" type="mesh" mesh="ZF-PIP" rgba="0 0 1 0.9"/>
         </body>
+        
+        <body name="ZF_PIP_Marker">
+        <geom pos = "{{zf.pip_marker.pos}}" quat = "{{zf.pip_marker.quat}}" type="sphere" rgba="0 0 1 0.9"/>
+        </body>
 
         <body name="ZF_Midhand">
         <geom pos = "{{zf.midhand.pos}}" quat = "{{zf.midhand.quat}}" type="mesh" mesh="ZF-Midhand" rgba="0 0 1 0.9"/>
@@ -63,6 +67,22 @@
         </body>
 
         <body pos="{{dau.mcp_joint.pos}}">
+            <geom type="sphere" size="5 5 5" rgba="1 1 0 0.9"/>
+        </body>        
+        
+        <body pos="{{zf.dip_joint_aussen.pos}}">
+            <geom type="sphere" size="5 5 5" rgba="0 1 0 0.9"/>
+        </body>        
+        
+        <body pos="{{zf.dip_joint_innen.pos}}">
+            <geom type="sphere" size="5 5 5" rgba="1 0 0 0.9"/>
+        </body>        
+        
+        <body pos="{{zf.mcp_joint_innen.pos}}">
+            <geom type="sphere" size="5 5 5" rgba="1 1 1 0.9"/>
+        </body>
+                
+        <body pos="{{zf.mcp_joint_aussen.pos}}">
             <geom type="sphere" size="5 5 5" rgba="1 1 0 0.9"/>
         </body>
 
