@@ -682,12 +682,12 @@ class tracker_bone():
                 self.helper_points.append(get_single_joint_file(joint))
 
             if not np.isnan(self.helper_points[1]).any():
-                self.t_proxi_aussen_CT = self.helper_points[1][0]
+                self.t_proxi_aussen_CT = self.helper_points[1][1]
                 self.T_proxi_aussen_CT = np.eye(4)
                 self.T_proxi_aussen_CT[:3,3] = self.t_proxi_aussen_CT
                 self.T_proxi_aussen_opt = np.zeros((len(self.track_traj_opt),4,4))
 
-                self.t_proxi_innen_CT = self.helper_points[1][1]
+                self.t_proxi_innen_CT = self.helper_points[1][0]
                 self.T_proxi_innen_CT = np.eye(4)
                 self.T_proxi_innen_CT[:3,3] = self.t_proxi_innen_CT
                 self.T_proxi_innen_opt = np.zeros((len(self.track_traj_opt),4,4))
@@ -705,12 +705,12 @@ class tracker_bone():
                 print('No proximal joint found.')
 
             if not np.isnan(self.helper_points[0]).any():
-                self.t_dist_aussen_CT = self.helper_points[0][0]
+                self.t_dist_aussen_CT = self.helper_points[0][1]
                 self.T_dist_aussen_CT = np.eye(4)
                 self.T_dist_aussen_CT[:3,3] = self.t_dist_aussen_CT
                 self.T_dist_aussen_opt = np.zeros((len(self.track_traj_opt),4,4))
 
-                self.t_dist_innen_CT = self.helper_points[0][1]
+                self.t_dist_innen_CT = self.helper_points[0][0]
                 self.T_dist_innen_CT = np.eye(4)
                 self.T_dist_innen_CT[:3,3] = self.t_dist_innen_CT
                 self.T_dist_innen_opt = np.zeros((len(self.track_traj_opt),4,4))
