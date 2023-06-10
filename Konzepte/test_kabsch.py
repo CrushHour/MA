@@ -20,7 +20,7 @@ if artificial:
     for i in range(5):
         Q[i,:] = np.matmul(R, np.append(P[i],1))[:3]
 
-T_ct_def = Tracker_DAU_DIP.calculate_transformation_matrix(P,Q) # P nach Q
+T_ct_def = Tracker_DAU_DIP.kabsch(P,Q) # P nach Q
 T_def_ct = Tracker_DAU_DIP.invert_T(T_ct_def) # Q nach P
 
 P_recover = np.zeros((5,3))

@@ -825,6 +825,43 @@ class tracker_bone():
         """
         return transformation_matrix
     
+    def kabsch(self, markers1=None, markers2=None):
+
+        P = np.array(markers1)
+        Q = np.array(markers2)
+
+        #center points
+        P_mean = np.mean(P, axis=0)
+        Q_mean = np.mean(Q, axis=0)
+        P -= np.mean(P, axis=0)
+        Q -= np.mean(Q, axis=0)
+        
+
+        # Computation of the covariance matrix
+        H = np.dot(np.transpose(P), Q)
+        
+        # Singular value decomposition
+        U, S, V_t = np.linalg.svd(H)
+
+        # Calculation of R
+        d = np.sign(np.linalg.det(np.dot(V_t.T, U.T)))
+        D = np.eye(3)
+        D[2, 2] = d
+        R = np.dot(V_t.T, np.dot(D, U.T))
+
+        # Calculation of t
+        t = Q_mean - np.dot(R, P_mean)
+
+        # build transformation matrix
+        transformation_matrix = np.eye(4)
+        transformation_matrix[:3, :3] = R
+        transformation_matrix[:3, 3] = t
+
+        return transformation_matrix
+
+
+
+    
     def replace_outliers(self, data, n_std = 5):
         dis = np.array([])
         for i in range(len(data)-1):
