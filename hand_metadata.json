@@ -8,7 +8,7 @@
         "tracker name": "55",
         "tracker ID": "1028",
         "stl": "./Data/STL/Segmentation_ZF_DIP.stl",
-        "joints": ["", "./Data/Slicer3D/Joints/ZF_DIP_joint2.mrk.json"]
+        "joints": ["", "./Data/Slicer3D/Joints/ZF_DIP_AXIS.mrk.json"]
     },
     "ZF_PIP":{
         "name": "ZF_PIP",
@@ -16,7 +16,7 @@
         "tracking": "Marker",
         "marker def CT": "./Data/Slicer3D/Marker_Phalanx_proximalis.mrk.json",
         "stl": "./Data/STL/Segmentation_ZF_PIP.stl",
-        "joints": ["./Data/Slicer3D/Joints/ZF_DIP_joint2.mrk.json", "./Data/Slicer3D/Joints/ZF_PIP_joint.mrk.json"]
+        "joints": ["./Data/Slicer3D/Joints/ZF_DIP_AXIS.mrk.json", "./Data/Slicer3D/Joints/ZF_PIP_joint.mrk.json"]
     },
     "ZF_MCP":{
         "name": "ZF_MCP",
