@@ -36,7 +36,7 @@ opt_data = './Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv'
 #opt_traj_M4_gross = tf.csv_test_load(opt_data,"M4_gross")
 #opt_traj_M4_klein = tf.csv_test_load(opt_data,"M4_klein")
 
-# opt_traj_Marker_ZF_proximal = tf.marker_variable_id_linewise(opt_data,"Unlabeled 2023")
+# opt_traj_Marker_ZF_intermedial = tf.marker_variable_id_linewise(opt_data,"Unlabeled 2023")
 # opt_traj_Marker_DAU = tf.marker_variable_id_linewise(opt_data,"Unlabeled 2016")
 
 # Definieren der Tracker und Marker als jeweils eine Tracker Klasse
@@ -48,11 +48,13 @@ Tracker_DAU_MCP = tf.tracker_bone('DAU_MCP',test_path=test_metadata['path'])
 Basetracker = tf.tracker_bone('ZF_midhand',test_path=test_metadata['path']) # Basis, hinten an Fixteur externe existiert nicht im CT
 
 Marker_DAU = tf.marker_bone(finger_name='DAU_PIP',test_path=test_metadata['path'], init_marker_ID=test_metadata['marker_IDs'][1])
-Marker_ZF_proximal = tf.marker_bone(finger_name="ZF_PIP",test_path=test_metadata['path'], init_marker_ID=test_metadata['marker_IDs'][0])
+Marker_ZF_intermedial = tf.marker_bone(finger_name="ZF_PIP",test_path=test_metadata['path'], init_marker_ID=test_metadata['marker_IDs'][0])
 
 
 # %% Berechnung der Markerpositionen im CT
 i = 0
+
+ZF_Proximal_T_opt = np.zeros((len(Tracker_DAU_DIP.track_traj_opt),4,4))
 
 def construct_marker_rot(opt_info, ct_info):
     '''Do kabsch with points from different sources. Points must be in the same order.'''
@@ -64,27 +66,32 @@ for t in tqdm(range(len(Marker_DAU.opt_marker_trace))):
     Marker_DAU.T_opt_ct[t] = construct_marker_rot([Marker_DAU.opt_marker_trace[t],Tracker_DAU_DIP.T_proxi_innen_opt[t,:3,3], Tracker_DAU_DIP.T_proxi_aussen_opt[t,:3,3],Tracker_DAU_MCP.T_dist_innen_opt[t,:3,3],Tracker_DAU_MCP.T_dist_aussen_opt[t,:3,3]],\
                                                   [Marker_DAU.marker_pos_ct[0], Tracker_DAU_DIP.T_proxi_innen_CT[:3,3], Tracker_DAU_DIP.T_proxi_aussen_CT[:3,3],Tracker_DAU_MCP.T_dist_innen_CT[:3,3],Tracker_DAU_MCP.T_dist_aussen_CT[:3,3]])
     
-    Marker_ZF_proximal.T_opt_ct[t] = construct_marker_rot([Marker_ZF_proximal.opt_marker_trace[t],Tracker_ZF_DIP.T_proxi_innen_opt[t,:3,3],Tracker_ZF_DIP.T_proxi_aussen_opt[t,:3,3]], \
-                                                          [np.array(Marker_ZF_proximal.marker_pos_ct[0]), Tracker_ZF_DIP.T_proxi_innen_CT[:3,3], Tracker_ZF_DIP.T_proxi_aussen_CT[:3,3]])
+    Marker_ZF_intermedial.T_opt_ct[t] = construct_marker_rot([Marker_ZF_intermedial.opt_marker_trace[t],Tracker_ZF_DIP.T_proxi_innen_opt[t,:3,3],Tracker_ZF_DIP.T_proxi_aussen_opt[t,:3,3]], \
+                                                          [np.array(Marker_ZF_intermedial.marker_pos_ct[0]), Tracker_ZF_DIP.T_proxi_innen_CT[:3,3], Tracker_ZF_DIP.T_proxi_aussen_CT[:3,3]])
     
-    Marker_ZF_proximal.T_proxi_innen_opt[t] = Marker_ZF_proximal.T_opt_ct[t] @ Marker_ZF_proximal.T_proxi_innen_CT
-    Marker_ZF_proximal.T_proxi_aussen_opt[t] = Marker_ZF_proximal.T_opt_ct[t] @ Marker_ZF_proximal.T_proxi__aussen_CT
+    Marker_ZF_intermedial.T_proxi_opt[t,0] = Marker_ZF_intermedial.T_opt_ct[t] @ Marker_ZF_intermedial.T_proxi_CT[0]
+    Marker_ZF_intermedial.T_proxi_opt[t,1] = Marker_ZF_intermedial.T_opt_ct[t] @ Marker_ZF_intermedial.T_proxi_CT[1]
+
+    ZF_Proximal_T_opt[t] = construct_marker_rot([Tracker_ZF_DIP.T_proxi_innen_opt[t,:3,3],Tracker_ZF_DIP.T_proxi_aussen_opt[t,:3,3],Marker_ZF_intermedial.T_proxi_opt[t,0,:3,3],Marker_ZF_intermedial.T_proxi_opt[t,1,:3,3]],
+                                                [Tracker_ZF_DIP.T_proxi_innen_CT[:3,3], Tracker_ZF_DIP.T_proxi_aussen_CT[:3,3], Marker_ZF_intermedial.T_proxi_CT[0,:3,3], Marker_ZF_intermedial.T_proxi_CT[1,:3,3]])
 
 # %% Build mujoco parameters
 parameters = {'zf': dict(), 'dau': dict()}
 
 # STL
 parameters['zf']['dip'] = mwp.build_parameters([Quaternion(matrix=Tracker_ZF_DIP.T_opt_ct[i,:3,:3]), Tracker_ZF_DIP.T_opt_ct[i,:3,3]])
-parameters['zf']['pip'] = mwp.build_parameters([Quaternion(matrix=Marker_ZF_proximal.T_opt_ct[i,:3,:3]), Marker_ZF_proximal.T_opt_ct[i,:3,3]])
-#parameters['zf']['mcp'] = mwp.build_parameters([Tracker_ZF_MCP.cog_rot_CT[i] ,Tracker_ZF_DIP.T_def_ct[i]])
+parameters['zf']['pip'] = mwp.build_parameters([Quaternion(matrix=Marker_ZF_intermedial.T_opt_ct[i,:3,:3]), Marker_ZF_intermedial.T_opt_ct[i,:3,3]])
+parameters['zf']['mcp'] = mwp.build_parameters([Quaternion(matrix=ZF_Proximal_T_opt[i,:3,:3]) ,ZF_Proximal_T_opt[i,:3,3]])
 parameters['zf']['midhand'] = mwp.build_parameters([Quaternion(matrix=Tracker_ZF_midhand.T_opt_ct[i,:3,:3]), Tracker_ZF_midhand.T_opt_ct[i,:3,3]])
 
 # green, red, yellow, white, blue balls
 parameters['zf']['dip_joint_aussen' ] = mwp.build_parameters([[1,0,0,0], Tracker_ZF_DIP.T_proxi_aussen_opt[i,:3,3]]) 
 parameters['zf']['dip_joint_innen' ] = mwp.build_parameters([[1,0,0,0], Tracker_ZF_DIP.T_proxi_innen_opt[i,:3,3]]) 
+parameters['zf']['pip_joint_aussen' ] = mwp.build_parameters([[1,0,0,0], Marker_ZF_intermedial.T_proxi_opt[i,1,:3,3]]) 
+parameters['zf']['pip_joint_innen' ] = mwp.build_parameters([[1,0,0,0], Marker_ZF_intermedial.T_proxi_opt[i,0,:3,3]]) 
 parameters['zf']['mcp_joint_aussen' ] = mwp.build_parameters([[1,0,0,0], Tracker_ZF_midhand.T_dist_aussen_opt[i,:3,3]]) 
 parameters['zf']['mcp_joint_innen' ] = mwp.build_parameters([[1,0,0,0], Tracker_ZF_midhand.T_dist_innen_opt[i,:3,3]]) 
-parameters['zf']['pip_marker'] = mwp.build_parameters([[1,0,0,0], Marker_ZF_proximal.opt_marker_trace[i]]) 
+parameters['zf']['pip_marker'] = mwp.build_parameters([[1,0,0,0], Marker_ZF_intermedial.opt_marker_trace[i]]) 
 
 # STL
 parameters['dau']['dip'] = mwp.build_parameters([Quaternion(matrix=Tracker_DAU_DIP.T_opt_ct[i,:3,:3]), Tracker_DAU_DIP.T_opt_ct[i,:3,3]])
@@ -141,8 +148,6 @@ plt.show()
 ZF_PIP = stl.mesh.Mesh.from_file("./Data/STL/Segmentation_ZF_PIP.stl")
 minx, maxx, miny, maxy, minz, maxz = tf.stl_find_mins_maxs(ZF_PIP)
 d_ZF_DIP_PIP = np.linalg.norm([maxx-minx, maxy-miny, maxz-minz])
-
-d_ZF_Tracker_PIP = Marker_ZF_proximal.d_dist_CT
 
 ZF_MCP = stl.mesh.Mesh.from_file("./Data/STL/Segmentation_ZF_MCP.stl")
 minx, maxx, miny, maxy, minz, maxz = tf.stl_find_mins_maxs(ZF_MCP)

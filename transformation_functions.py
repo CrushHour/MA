@@ -893,13 +893,17 @@ class marker_bone():
 
         # get marker information
         self.marker_pos_ct = self.get_marker_pos_ct()
-        self.joints = get_joints(self.metadata['joints'])
+        self.joints = []
+        for i in range(len(self.metadata['joints'])):
+            self.joints.append(get_single_joint_file(self.metadata['joints'][i]))
 
-        self.t_proxi_CT = np.subtract(self.joints[0], self.marker_pos_ct)
-        self.d_proxi_CT = np.linalg.norm(self.t_proxi_CT)
-        
-        self.t_dist_CT = np.subtract(self.joints[1], self.marker_pos_ct)
-        self.d_dist_CT = np.linalg.norm(self.t_dist_CT)
+        self.T_proxi_CT = np.array([np.eye(4),np.eye(4)])
+        self.T_proxi_CT[0,:3,3] = self.joints[1][0]
+        self.T_proxi_CT[1,:3,3] = self.joints[1][1]
+
+        self.T_dist_CT = np.array([np.eye(4),np.eye(4)])
+        self.T_dist_CT[0,:3,3] = self.joints[0][0]
+        self.T_dist_CT[1,:3,3] = self.joints[0][1]
 
         # get stl information
         stl_data = stl.mesh.Mesh.from_file(self.metadata['stl'])
@@ -928,16 +932,11 @@ class marker_bone():
             self.opt_marker_trace = plot_tiefpass(inter_data, init_marker_ID, fs, Gp, Gs, wp, ws)
             np.save(save_name, self.opt_marker_trace)
 
-        self.T_opt_i = np.zeros((len(self.opt_marker_trace),4,4))
-        self.T_opt_ct = np.zeros((len(self.opt_marker_trace),4,4))
-        self.T_def_ct = np.eye(4)
-        self.T_def_ct[:3,3] = np.negative(self.marker_pos_ct[0])
-        for i in range(len(self.opt_marker_trace)):
-            self.T_opt_i[i,:,:] = np.eye(4)
-            self.T_opt_i[i,:3,3] = self.opt_marker_trace[i]
+        #prepare matrices for transformation
+        self.T_proxi_opt = np.zeros((len(self.opt_marker_trace),2,4,4))
+        self.T_dist_opt = np.zeros((len(self.opt_marker_trace),2,4,4))
 
-            # marker trace in different coordinate systems
-            self.T_opt_ct[i,:,:] =  self.T_opt_i[i,:,:] @ self.T_def_ct
+        self.T_opt_ct = np.zeros((len(self.opt_marker_trace),4,4))
     
     def get_marker_pos_ct(self):
         '''Returns the relative marker positions in the CT coordinate system to the bone cog.'''

@@ -6,7 +6,7 @@
         <mesh name="ZF-MCP" scale="1 1 1"
         file="Data\STL\Segmentation_ZF_MCP.stl"/>
         <mesh name="ZF-PIP" scale="1 1 1"
-        file="Data\STL\Segmentation_ZF_PIP_Tracker.stl"/>
+        file="Data\STL\Segmentation_ZF_PIP.stl"/>
         <mesh name="ZF-DIP" scale="1 1 1"
         file="Data\STL\Segmentation_ZF_DIP.stl"/>
         <mesh name="ZF-Midhand" scale="1 1 1"
@@ -14,7 +14,7 @@
         <mesh name="DAU-MCP" scale="1 1 1"
         file="Data\STL\Segmentation_DAU_Osmetacarpale_1.stl"/>
         <mesh name="DAU-PIP" scale="1 1 1"
-        file="Data\STL\Segmentation_DAU_Phalax_proximalis_Tracker.stl"/>
+        file="Data\STL\Segmentation_DAU_Phalax_proximalis.stl"/>
         <mesh name="DAU-DIP" scale="1 1 1"
         file="Data\STL\Segmentation_DAU_DIP.stl"/>
     </asset>
@@ -40,6 +40,10 @@
 
         <body name="ZF_PIP">
         <geom pos = "{{zf.pip.pos}}" quat = "{{zf.pip.quat}}" type="mesh" mesh="ZF-PIP" rgba="0 0 1 0.9"/>
+        </body>
+
+        <body name="ZF_MCP">
+        <geom pos = "{{zf.mcp.pos}}" quat = "{{zf.mcp.quat}}" type="mesh" mesh="ZF-MCP" rgba="0 0 1 0.9"/>
         </body>
         
         <body name="ZF_PIP_Marker">
@@ -80,7 +84,15 @@
         
         <body pos="{{zf.dip_joint_innen.pos}}">
             <geom type="sphere" size="5 5 5" rgba="1 0 0 0.9"/>
-        </body>        
+        </body>    
+
+        <body pos="{{zf.pip_joint_innen.pos}}">
+            <geom type="sphere" size="5 5 5" rgba="1 0 1 0.9"/>
+        </body>
+                
+        <body pos="{{zf.pip_joint_aussen.pos}}">
+            <geom type="sphere" size="5 5 5" rgba="1 1 0 0.9"/>
+        </body>    
         
         <body pos="{{zf.mcp_joint_innen.pos}}">
             <geom type="sphere" size="5 5 5" rgba="1 1 1 0.9"/>
