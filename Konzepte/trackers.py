@@ -401,6 +401,12 @@ class TrackerHandler(object):
 # %%
 if __name__ == '__main__':
     tr = Tracker(0, './Data/Trackers/DAU_DIP.csv')
+    # Test retunr_sorted_points
+    points1 = [[1,1,1], [2.5, 2.5, 2.5], [3, 3, 3]]
+    points2 = [[3, 3, 3], [2.5, 2.5, 2.5], [1, 1, 1]]
+    points1, points2 = return_sorted_points(points1, points2)
+    print(points1)
+    print(points2)
 
 
 # %%
@@ -457,13 +463,7 @@ def read_markerdata(path='/home/robotlab/Documents/GitHub/MA_Schote/MA/Data/test
         return result
 
 # %%
-if __name__ == '__main__':
-    # Test retunr_sorted_points
-    points1 = [[1,1,1], [2.5, 2.5, 2.5], [3, 3, 3]]
-    points2 = [[3, 3, 3], [2.5, 2.5, 2.5], [1, 1, 1]]
-    points1, points2 = return_sorted_points(points1, points2)
-    print(points1)
-    print(points2)
+    
     
 
 # %%

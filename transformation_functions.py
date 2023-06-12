@@ -107,11 +107,12 @@ def json_test_load(path='./Data/optitrack-20230130-234800.json', initialID=''):
 
     return df
 
-def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv", d_max = 56):
+def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv", d_max = 560):
     
     initialID = str(initialID)
     df = pd.DataFrame()
     
+    # 1. load data
     if dtype == "json":
         print("rebuilding json to be formated as csv")
         df = json_test_load(testrun_path, initialID)
@@ -121,7 +122,7 @@ def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv", d_max
     
     next_col = df.columns.get_loc(initialID)
 
-    # variablen initiieren. Position values start at line 4 (counting from 1).
+    # 2. variablen initiieren. Position values start at line 4 (counting from 1).
     start_line = 3
     dis_list = []
     start_value = df.values[start_line,next_col:next_col+3]
@@ -138,38 +139,36 @@ def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv", d_max
     #added_data = np.zeros((df.shape[0]-start_line,3)) 
     added_data = np.zeros((df.shape[0]-3,3)) 
     added_data[0,:] = start_value
+    added_data[start_line-3,:] = start_value
     last_signal = added_data[0,:]
 
-    # Start Zeilenschleife
+    # 3. Start Zeilenschleife
     #for k in tqdm(range(1,added_data.shape[0])):
-    for k in tqdm(range(start_line,added_data.shape[0])):
+    for k in tqdm(range(start_line-3,added_data.shape[0])):
         
         min_dis = np.inf
         current_dis = np.inf
 
-        #value = df.values[k+3,:]
-        value = df.values[k,:]
-        value = np.array(list(map(float, value)))
+        #4.1 Zeilen die zu vergleichen sind, werden ausgewählt und in ein Array geschrieben. Dieses Array wird dann in die nächste Schleife gegeben. Es heißt value.
+        line = df.values[k+3,:]
+        #line = df.values[k,:]
+        line = np.array(list(map(float, line)))
 
         # Spalten. If there is no value in any of the coloums of the line, np.nan will be added.
         values_to_add = [np.nan, np.nan, np.nan]
 
-        for j in range(next_col,len(value),3):
-
-            #print(df.iloc[0,j:j+3])
-            #Unlabeled 2291      E0C50
-            #Unlabeled 2291.1    E0C50
-            #Unlabeled 2291.2    E0C50
+        for j in range(next_col,len(line),3):
+            value = line[j:j+3]
             
-            if np.isnan(value[j]) or np.isnan(value[j+1]) or np.isnan(value[j+2]):
-                continue            
+            if np.isnan(value[0]) or np.isnan(value[1]) or np.isnan(value[2]):
+                continue         
 
             else:
-                current_dis = np.absolute(np.linalg.norm(last_signal) - np.linalg.norm(value[j:j+3]))
-                
+                current_dis = np.absolute(np.linalg.norm(last_signal) - np.linalg.norm(value))
                 if current_dis < min_dis:
-                    min_dis = current_dis
-                    values_to_add = value[j:j+3]
+                    min_dis = current_dis.copy()
+                    values_to_add = value.copy()
+                    next_col = j
 
         # safe closest values from line k
         if values_to_add[0] == np.nan:
@@ -180,10 +179,10 @@ def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv", d_max
         # falls die Minimale Distanz zum nächsten Punkt den Grenzwert überschreitet,
         # wird der Punkt nicht in die Ausgabeliste eingetragen.
         dis_list.append(min_dis)
+        
         if min_dis >= d_max:
             added_data[k,:] = [np.nan, np.nan, np.nan]
         else:
-            
             added_data[k,:] = values_to_add
 
     #print(dis_list)
@@ -395,7 +394,7 @@ def plot_tiefpass(marker_data, title: str='', fs: float =120, Gp: float = 0.1, G
     
     # Plotting
     fig = plt.subplot(1, 1, 1)
-    fig.plot(marker_data, color = 'grey', linewidth=0.25, label='marker data')
+    fig.plot(marker_data, color = 'black', linewidth=0.25, label='marker data')
 
     fig.plot(y[:,0], 'r-', linewidth=0.5, label='filtered data x')
     fig.plot(y[:,1], 'g-', linewidth=0.5, label='filtered data y')
@@ -609,10 +608,16 @@ def get_joints(path = ['./Slicer3D/Joints/']):
 
 def get_test_metadata(name):
     '''Returns the metadata of the test.'''
-    with open('test_metadata.json') as json_data:
-        d = json.load(json_data)
-        metadata = d[name]
-        json_data.close()
+    try:
+        with open('test_metadata.json') as json_data:
+            d = json.load(json_data)
+            metadata = d[name]
+            json_data.close()
+    except:
+        with open(r'C:/GitHub/MA/test_metadata.json') as json_data:
+            d = json.load(json_data)
+            metadata = d[name]
+            json_data.close()
     return metadata
 
 def get_json(path):
@@ -891,8 +896,8 @@ class marker_bone():
         test_metadata = get_test_metadata(self.testname)
         self.metadata = self.get_metadata()
 
-        # get marker information
-        self.marker_pos_ct = self.get_marker_pos_ct()
+        
+
         self.joints = []
         for i in range(len(self.metadata['joints'])):
             self.joints.append(get_single_joint_file(self.metadata['joints'][i]))
@@ -908,8 +913,6 @@ class marker_bone():
         # get stl information
         stl_data = stl.mesh.Mesh.from_file(self.metadata['stl'])
         self.volume, self.cog_stl, self.inertia = stl_data.get_mass_properties()
-        self.t_cog_CT = np.subtract(self.cog_stl, np.mean(self.marker_pos_ct,axis=0)) 
-        self.d_cog_CT = np.linalg.norm(self.t_cog_CT)
         
         # Setting standard filter variables.
         fs = 120.0
@@ -921,22 +924,26 @@ class marker_bone():
         # load marker trace from file
         save_name = './Data/' + init_marker_ID + '_opt_marker_trace.npy'
         
-        try:
-            #os.remove(save_name)
-            self.opt_marker_trace = np.load(save_name)
-        
-        # build marker trace from csv file
-        except:
-            marker_trace = marker_variable_id_linewise(test_path, init_marker_ID, test_metadata["type"], 40)
-            inter_data = nan_helper(marker_trace)
-            self.opt_marker_trace = plot_tiefpass(inter_data, init_marker_ID, fs, Gp, Gs, wp, ws)
-            np.save(save_name, self.opt_marker_trace)
+        # get marker information
+        if self.metadata["marker def CT"] != "":
+            self.marker_pos_ct = self.get_marker_pos_ct()
+
+            try:
+                #os.remove(save_name)
+                self.opt_marker_trace = np.load(save_name)
+            
+            # build marker trace from csv file
+            except:
+                marker_trace = marker_variable_id_linewise(test_path, init_marker_ID, test_metadata["type"], 40)
+                inter_data = nan_helper(marker_trace)
+                self.opt_marker_trace = plot_tiefpass(inter_data, init_marker_ID, fs, Gp, Gs, wp, ws)
+                np.save(save_name, self.opt_marker_trace)
 
         #prepare matrices for transformation
-        self.T_proxi_opt = np.zeros((len(self.opt_marker_trace),2,4,4))
-        self.T_dist_opt = np.zeros((len(self.opt_marker_trace),2,4,4))
+        self.T_proxi_opt = np.zeros((int(test_metadata["length"]),2,4,4))
+        self.T_dist_opt = np.zeros((int(test_metadata["length"]),2,4,4))
 
-        self.T_opt_ct = np.zeros((len(self.opt_marker_trace),4,4))
+        self.T_opt_ct = np.zeros((int(test_metadata["length"]),4,4))
     
     def get_marker_pos_ct(self):
         '''Returns the relative marker positions in the CT coordinate system to the bone cog.'''
@@ -954,6 +961,12 @@ class marker_bone():
             metadata = d[self.finger_name]
             json_data.close()
         return metadata
+    
+    def update_joints(self, t):
+        self.T_proxi_opt[t,0] = self.T_opt_ct[t] @ self.T_proxi_CT[0]
+        self.T_proxi_opt[t,1] = self.T_opt_ct[t] @ self.T_proxi_CT[1]
+        self.T_dist_opt[t,0] = self.T_opt_ct[t] @ self.T_dist_CT[0]
+        self.T_dist_opt[t,1] = self.T_opt_ct[t] @ self.T_dist_CT[1]
 
 # %%
 if __name__ == '__main__':
@@ -963,7 +976,7 @@ if __name__ == '__main__':
 
     #raw_data = csv_test_load(path, '55')
     marker_ID = 'Unlabeled 2016'
-    marker_ID = 'Unlabeled 2403'
+    #marker_ID = 'Unlabeled 2403'
     marker_data = marker_variable_id_linewise(path, marker_ID, "csv", 40)
 
     inter_data = nan_helper(marker_data)
@@ -982,7 +995,6 @@ if __name__ == '__main__':
                                     wp = widgets.FloatSlider(value=wp, min=0,max=2,step=0.05), 
                                     ws = widgets.FloatSlider(value=ws, min=0,max=2,step=0.05)
                                         )
-    # %% Test
     test_metadata = get_test_metadata('Take 2023-01-31 06.11.42 PM.csv')
     Tracker_ZF_DIP = tracker_bone('ZF_DIP',test_path=test_metadata['path'])
     markers55 = [[116.838463, -106.912125, -5.724374],[111.952942, -142.248764, -17.220221],[121.998627, -124.245445, 11.670587],[148.879791, -143.25061, -2.70425],[143.807617, -113.712471, 0.872637]] # [x,y,z], Zeitpunkt 0
@@ -1009,14 +1021,14 @@ if __name__ == '__main__':
     print('-------------')
     print(np.mean(out, axis=0))
     '''Test bestanden :)'''
-# %%
-#   Tracker_3dicke:
-#       numTrackers = 5
-#       positions = [[0, 0, 75], [-42, 0, 46], [25, 0, 46], [0, 37, 41.5], [0, -44, 41.5]] # [[x,y,z],[x2,y2,z2],...]
-#       name, opt_positions = get_opt_positions('MakerJS_3dicke.csv')
-#
-#    Tracker_Nico:
-#        numTrackers = 5
-#        positions = [[0, 0, 61], [-41, 0, 35], [20, 0, 35], [-10, 31, 35], [-10, -14, 35]] # [[x,y,z],[x2,y2,z2],...]
-#        name, opt_positions = get_opt_positions('Tracker Nico.csv')
-sort_points_relative([[1,1,1],[4,4,4],[10,10,10]],[[11,11,11],[7,7,7],[2,2,2]])
+
+    #   Tracker_3dicke:
+    #       numTrackers = 5
+    #       positions = [[0, 0, 75], [-42, 0, 46], [25, 0, 46], [0, 37, 41.5], [0, -44, 41.5]] # [[x,y,z],[x2,y2,z2],...]
+    #       name, opt_positions = get_opt_positions('MakerJS_3dicke.csv')
+    #
+    #    Tracker_Nico:
+    #        numTrackers = 5
+    #        positions = [[0, 0, 61], [-41, 0, 35], [20, 0, 35], [-10, 31, 35], [-10, -14, 35]] # [[x,y,z],[x2,y2,z2],...]
+    #        name, opt_positions = get_opt_positions('Tracker Nico.csv')
+    sort_points_relative([[1,1,1],[4,4,4],[10,10,10]],[[11,11,11],[7,7,7],[2,2,2]])

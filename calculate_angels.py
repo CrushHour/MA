@@ -2,7 +2,6 @@
 import sys
 sys.path.append('./mujoco')
 import transformation_functions as tf
-import Konzepte.trackers as trackers
 import numpy as np
 from tqdm import tqdm
 from ipywidgets import interact, interactive, fixed, interact_manual
@@ -15,7 +14,6 @@ import yaml
 from pyquaternion import Quaternion
 import importlib
 importlib.reload(tf)
-importlib.reload(trackers)
 from scipy.spatial.transform import Rotation as Rot
 
 # %%Definition der Pfade
@@ -25,19 +23,10 @@ data_path = 'Data/test_01_31/'
 test_file = '2023_01_31_18_12_48.json'
 opt_data = './Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv'
 
-''' Laden des Testfiles als csv, opttrack Rohdaten '''
+'''  '''
 # %%Tracker
 #Rotation	Rotation	Rotation	Rotation	Position	Position	Position	Mean Marker Error
-#[X	        Y	        Z	        W]	        [X	        Y	        Z]	
-#opt_traj_55 = tf.csv_test_load(opt_data,"55")
-#opt_traj_Tracker_52 = tf.csv_test_load(opt_data,"Tracker_52")
-#opt_traj_Tracker_53 = tf.csv_test_load(opt_data,"Tracker 53")
-#opt_traj_FTTracker = tf.csv_test_load(opt_data,"FT-Tracker-4")
-#opt_traj_M4_gross = tf.csv_test_load(opt_data,"M4_gross")
-#opt_traj_M4_klein = tf.csv_test_load(opt_data,"M4_klein")
-
-# opt_traj_Marker_ZF_intermedial = tf.marker_variable_id_linewise(opt_data,"Unlabeled 2023")
-# opt_traj_Marker_DAU = tf.marker_variable_id_linewise(opt_data,"Unlabeled 2016")
+#[X	        Y	        Z	        W]	        [X	        Y	        Z]
 
 # Definieren der Tracker und Marker als jeweils eine Tracker Klasse
 Tracker_ZF_DIP = tf.tracker_bone('ZF_DIP',test_path=test_metadata['path'])
@@ -49,17 +38,13 @@ Basetracker = tf.tracker_bone('ZF_midhand',test_path=test_metadata['path']) # Ba
 
 Marker_DAU = tf.marker_bone(finger_name='DAU_PIP',test_path=test_metadata['path'], init_marker_ID=test_metadata['marker_IDs'][1])
 Marker_ZF_intermedial = tf.marker_bone(finger_name="ZF_PIP",test_path=test_metadata['path'], init_marker_ID=test_metadata['marker_IDs'][0])
-
+ZF_MCP = tf.marker_bone(finger_name="ZF_MCP",test_path=test_metadata['path'], init_marker_ID='')
 
 # %% Berechnung der Markerpositionen im CT
-i = 0
-
-ZF_Proximal_T_opt = np.zeros((len(Tracker_DAU_DIP.track_traj_opt),4,4))
 
 def construct_marker_rot(opt_info, ct_info):
     '''Do kabsch with points from different sources. Points must be in the same order.'''
     T = Tracker_DAU_DIP.kabsch(ct_info, opt_info)
-    #T = Tracker_DAU_DIP.invert_T(T)
     return T
 
 for t in tqdm(range(len(Marker_DAU.opt_marker_trace))):
@@ -69,19 +54,27 @@ for t in tqdm(range(len(Marker_DAU.opt_marker_trace))):
     Marker_ZF_intermedial.T_opt_ct[t] = construct_marker_rot([Marker_ZF_intermedial.opt_marker_trace[t],Tracker_ZF_DIP.T_proxi_innen_opt[t,:3,3],Tracker_ZF_DIP.T_proxi_aussen_opt[t,:3,3]], \
                                                           [np.array(Marker_ZF_intermedial.marker_pos_ct[0]), Tracker_ZF_DIP.T_proxi_innen_CT[:3,3], Tracker_ZF_DIP.T_proxi_aussen_CT[:3,3]])
     
-    Marker_ZF_intermedial.T_proxi_opt[t,0] = Marker_ZF_intermedial.T_opt_ct[t] @ Marker_ZF_intermedial.T_proxi_CT[0]
-    Marker_ZF_intermedial.T_proxi_opt[t,1] = Marker_ZF_intermedial.T_opt_ct[t] @ Marker_ZF_intermedial.T_proxi_CT[1]
+    # update loop auf basis aller bekannten Punkte
+    for j in range(5):
+        Marker_ZF_intermedial.update_joints(t)
 
-    ZF_Proximal_T_opt[t] = construct_marker_rot([Tracker_ZF_DIP.T_proxi_innen_opt[t,:3,3],Tracker_ZF_DIP.T_proxi_aussen_opt[t,:3,3],Marker_ZF_intermedial.T_proxi_opt[t,0,:3,3],Marker_ZF_intermedial.T_proxi_opt[t,1,:3,3]],
-                                                [Tracker_ZF_DIP.T_proxi_innen_CT[:3,3], Tracker_ZF_DIP.T_proxi_aussen_CT[:3,3], Marker_ZF_intermedial.T_proxi_CT[0,:3,3], Marker_ZF_intermedial.T_proxi_CT[1,:3,3]])
+        ZF_MCP.T_opt_ct[t] = construct_marker_rot([Tracker_ZF_midhand.T_dist_innen_opt[t,:3,3],Tracker_ZF_midhand.T_dist_aussen_opt[t,:3,3],Marker_ZF_intermedial.T_proxi_opt[t,0,:3,3],Marker_ZF_intermedial.T_proxi_opt[t,1,:3,3]], \
+                                                [Tracker_ZF_midhand.T_dist_innen_CT[:3,3],Tracker_ZF_midhand.T_dist_aussen_CT[:3,3],Marker_ZF_intermedial.T_proxi_CT[0,:3,3], Marker_ZF_intermedial.T_proxi_CT[1,:3,3]])
+        ZF_MCP.update_joints(t)
+
+        Marker_ZF_intermedial.T_opt_ct[t] = construct_marker_rot([Tracker_ZF_DIP.T_proxi_innen_opt[t,:3,3],Tracker_ZF_DIP.T_proxi_aussen_opt[t,:3,3], ZF_MCP.T_dist_opt[t,0,:3,3], ZF_MCP.T_dist_opt[t,1,:3,3]], \
+                                                          [Tracker_ZF_DIP.T_proxi_innen_CT[:3,3], Tracker_ZF_DIP.T_proxi_aussen_CT[:3,3], ZF_MCP.T_dist_CT[0,:3,3], ZF_MCP.T_dist_CT[1,:3,3]])
+
 
 # %% Build mujoco parameters
+i = 6000
+
 parameters = {'zf': dict(), 'dau': dict()}
 
 # STL
 parameters['zf']['dip'] = mwp.build_parameters([Quaternion(matrix=Tracker_ZF_DIP.T_opt_ct[i,:3,:3]), Tracker_ZF_DIP.T_opt_ct[i,:3,3]])
 parameters['zf']['pip'] = mwp.build_parameters([Quaternion(matrix=Marker_ZF_intermedial.T_opt_ct[i,:3,:3]), Marker_ZF_intermedial.T_opt_ct[i,:3,3]])
-parameters['zf']['mcp'] = mwp.build_parameters([Quaternion(matrix=ZF_Proximal_T_opt[i,:3,:3]) ,ZF_Proximal_T_opt[i,:3,3]])
+parameters['zf']['mcp'] = mwp.build_parameters([Quaternion(matrix=ZF_MCP.T_opt_ct[i,:3,:3]) ,ZF_MCP.T_opt_ct[i,:3,3]])
 parameters['zf']['midhand'] = mwp.build_parameters([Quaternion(matrix=Tracker_ZF_midhand.T_opt_ct[i,:3,:3]), Tracker_ZF_midhand.T_opt_ct[i,:3,3]])
 
 # green, red, yellow, white, blue balls
@@ -132,7 +125,7 @@ for i in range(len(Tracker_ZF_DIP.T_def_ct)):
     gamma = tf.angle_between(3,4)
     #calculate angeles in DAU joints
     #delta[i] = tf.angle_between(np.subtract(Tracker_DAU_DIP.T_def_ct[i],Tracker_DAU_DIP.dist_traj_CT[i]),np.subtract(Marker_DAU.T_opt_ct[i,:3,3],Tracker_DAU_DIP.dist_traj_CT[i]))*180/np.pi
-    #epsilon[i] = tf.angle_between(np.subtract(Tracker_DAU_MCP.T_def_ct[i],Tracker_DAU_MCP.proxi_traj_CT[i]),np.subtract(Marker_DAU.T_opt_ct[i,:3,3],Tracker_DAU_MCP.proxi_traj_CT[i]))*180/np.pi
+    #epsilon[i] = tf.angle_between(np.subtract(Tracker_DAU_MCP.T_dist_opt[i,:3,3],Tracker_DAU_MCP.T_cog_opt[i,:3,3]),np.subtract(Marker_DAU.[i,:3,3],Tracker_DAU_MCP.))*180/np.pi
 
 # plotten von delta und epsilon
 plt.plot(delta)

@@ -202,5 +202,6 @@ def display_video(frames, framerate=60, dpi=600):
                                    interval=interval, blit=True, repeat=False)
     anim.save('./plots/test_2348.mp4')
 
-finger = MujocoFingerModel(path)
-finger.make_video(60, 0)
+if __name__ == '__main__':
+    finger = MujocoFingerModel(path)
+    finger.make_video(60, 0)
