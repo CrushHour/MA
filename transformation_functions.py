@@ -168,7 +168,6 @@ def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv", d_max
                 if current_dis < min_dis:
                     min_dis = current_dis.copy()
                     values_to_add = value.copy()
-                    next_col = j
 
         # safe closest values from line k
         if values_to_add[0] == np.nan:
@@ -187,6 +186,79 @@ def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv", d_max
 
     #print(dis_list)
     print("len added_data for marker %s:" % initialID, len(added_data))
+    return added_data
+
+def marker_variable_id_linewise_march28(testrun_path, initialID=None, dtype="csv"):
+    if dtype == "json":
+        print("unable to load from json yet.")
+        #df = load_marker_from_json(testrun_path, initalID)
+        next_col = 0
+        df = pd.DataFrame()
+
+    else:
+        initialID = str(initialID)
+        df = pd.read_csv(testrun_path, header=2, low_memory=False)
+        next_col = df.columns.get_loc(initialID)
+
+    # variablen initiieren.
+    start_line = 3
+    dis_list = []
+    start_value = df.values[start_line,next_col:next_col+3]
+
+    """If condition to be able to catch trackers, that a not visiable immidiatly"""
+    if np.isnan(float(start_value[0])):
+        filled_cells = np.where(pd.notna(df.iloc[:,next_col]))
+        start_line = int(filled_cells[0][3])
+        start_value = df.values[start_line,next_col:next_col+3]
+
+    added_data = np.zeros((df.shape[0]-start_line,3)) 
+    added_data[0,:] = start_value
+    last_signal = added_data[0,:]
+
+    # Start Zeilenschleife
+    for k in tqdm(range(1,added_data.shape[0])):
+        
+        min_dis = np.inf
+        current_dis = np.inf
+
+        value = df.values[k+3,:]
+        value = np.array(list(map(float, value)))
+
+        # Spalten
+        values_to_add = [np.nan, np.nan, np.nan]
+
+        for j in range(next_col,len(value),3):
+
+            #print(df.iloc[0,j:j+3])
+            #Unlabeled 2291      E0C50
+            #Unlabeled 2291.1    E0C50
+            #Unlabeled 2291.2    E0C50
+            
+            if np.isnan(value[j]) or np.isnan(value[j+1]) or np.isnan(value[j+2]):
+                continue            
+
+            else:
+                current_dis = np.absolute(np.linalg.norm(last_signal) - np.linalg.norm(value[j:j+3]))
+                
+                if current_dis < min_dis:
+                    min_dis = current_dis
+                    values_to_add = value[j:j+3]
+
+        # safe closest values from line k
+        if values_to_add[0] == np.nan:
+            continue
+        else:
+            last_signal == values_to_add
+        
+        # falls die Minimale Distanz zum nächsten Punkt den Grenzwert überschreitet,
+        # wird der Punkt nicht in die Ausgabeliste eingetragen.
+        dis_list.append(min_dis)
+        if min_dis >= 56:
+            added_data[k,:] = [np.nan, np.nan, np.nan]
+        else:
+            added_data[k,:] = values_to_add
+
+    #print(dis_list)
     return added_data
 	
 def plot_ply(tracker_points, opt_points, line_1, line_2, line_3, line_4):
@@ -394,7 +466,7 @@ def plot_tiefpass(marker_data, title: str='', fs: float =120, Gp: float = 0.1, G
     
     # Plotting
     fig = plt.subplot(1, 1, 1)
-    fig.plot(marker_data, color = 'black', linewidth=0.25, label='marker data')
+    fig.plot(marker_data, color = 'lightgrey', linewidth=0.25, label='marker data')
 
     fig.plot(y[:,0], 'r-', linewidth=0.5, label='filtered data x')
     fig.plot(y[:,1], 'g-', linewidth=0.5, label='filtered data y')
@@ -729,8 +801,12 @@ class tracker_bone():
                     self.T_dist_aussen_opt[i,:,:] = self.T_opt_ct[i,:,:] @ self.T_dist_aussen_CT
                     self.T_dist_innen_opt[i,:,:] = self.T_opt_ct[i,:,:] @ self.T_dist_innen_CT
                     self.T_dist_opt[i,:,:] = self.T_opt_ct[i,:,:] @ self.T_dist_CT
+                    
+
             else:
                 print('No distal joint found.')
+
+            self.v_opt = np.subtract(self.T_dist_opt[:,:3,3],self.T_proxi_opt[:,:3,3])
 
 
     def get_metadata(self):
@@ -934,7 +1010,7 @@ class marker_bone():
             
             # build marker trace from csv file
             except:
-                marker_trace = marker_variable_id_linewise(test_path, init_marker_ID, test_metadata["type"], 40)
+                marker_trace = marker_variable_id_linewise_march28(test_path, init_marker_ID, test_metadata["type"])
                 inter_data = nan_helper(marker_trace)
                 self.opt_marker_trace = plot_tiefpass(inter_data, init_marker_ID, fs, Gp, Gs, wp, ws)
                 np.save(save_name, self.opt_marker_trace)

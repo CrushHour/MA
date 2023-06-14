@@ -36,8 +36,10 @@ path = './Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv'
 #raw_data = csv_test_load(path, '55')
 marker_ID = 'Unlabeled 2016'
 #marker_ID = 'Unlabeled 2403'
-marker_data = tf.marker_variable_id_linewise(path, marker_ID, "csv")
-plt.plot(marker_data)
-plt.show()
+
+if __name__ == "__main__":
+    marker_data = tf.marker_variable_id_linewise_march28(path, marker_ID, "csv")
+    plt.plot(marker_data)
+    plt.show()
 
 # %%
