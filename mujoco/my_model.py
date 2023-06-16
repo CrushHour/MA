@@ -1,6 +1,6 @@
 import numpy as np
 import mujoco
-import mujoco_viewer
+#import mujoco_viewer
 import pystache
 import yaml
 import math

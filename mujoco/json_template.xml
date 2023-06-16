@@ -3,11 +3,11 @@
         <geom rgba="0.5 1 0 0.9" size = "2 2 2"/>
     </default>
     <visual>
-        <global offheight="640"/>
+        <global offheight="1024"/>
     </visual>    
 
     <visual>
-        <global offwidth="640"/>
+        <global offwidth="1024"/>
     </visual>
     <asset>
         <mesh name="ZF-MCP" scale="1 1 1"
@@ -28,7 +28,7 @@
     <worldbody>
         <light name="Light" diffuse="1 1 1" pos="0 0 1000" dir="0 0 -1"/>
 
-        <camera name="y" pos="-.1 -.6 .3" xyaxes="1 0 0 0 1 2"/>
+        <camera name="custom" pos="309.236 84.797 -25.717" xyaxes="-0.660 0.751 0.000 -0.174 -0.153 0.973"/>
 
 
         <geom type="plane" size="1000 1000 0.01" pos = "0 0 -400" rgba=".3 0.3 0.3 1"/>

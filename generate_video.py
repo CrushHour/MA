@@ -1,4 +1,3 @@
-# %%
 import numpy as np
 import sys
 sys.path.append('./')
@@ -16,65 +15,12 @@ import matplotlib.animation as animation
 from pyquaternion import Quaternion
 from tqdm import tqdm
 from dm_control import mujoco as dm_mujoco
-import mujoco
 
 # More legible printing from numpy.
 np.set_printoptions(precision=3, suppress=True, linewidth=100)
 
 path='Data/optitrack-20230130-234800.json'
 
-indipendent = False
-
-if indipendent:
-    Tracker_ZF_DIP = tf.tracker_bone('ZF_DIP',path)
-    Tracker_ZF_midhand = tf.tracker_bone('ZF_midhand',path)
-    Tracker_DAU_DIP = tf.tracker_bone('DAU_DIP',path)
-    Tracker_DAU_MCP = tf.tracker_bone('DAU_MCP',path)
-
-    offset = 0.8*np.array(Tracker_ZF_midhand.T_opt_ct[0,:3,3])
-    
-
-    df = tf.json_test_load(path=path)
-    #df.drop('Index', axis=1, inplace=True)
-    for i in range(0, len(df.columns)):
-        if i % 7 == 4:
-            print(df.columns[i])
-
-
-    print('-'*30)
-    t = 0
-    show_plots = False
-
-    print(Tracker_ZF_midhand.T_opt_ct[t,:3,3]-offset)
-
-    parameters = {'marker': dict(), 'zf': dict(), 'dau': dict()}
-
-    parameters['zf']['dip'] = mwp.build_parameters([Quaternion(matrix=Tracker_ZF_DIP.T_opt_ct[t,:3,:3]), Tracker_ZF_DIP.T_opt_ct[t,:3,3]-offset])
-    parameters['zf']['midhand'] = mwp.build_parameters([Quaternion(matrix=Tracker_ZF_midhand.T_opt_ct[t,:3,:3]), Tracker_ZF_midhand.T_opt_ct[t,:3,3]-offset])
-    parameters['dau']['dip'] = mwp.build_parameters([Quaternion(matrix=Tracker_DAU_DIP.T_opt_ct[t,:3,:3]), Tracker_DAU_DIP.T_opt_ct[t,:3,3]-offset])
-    parameters['dau']['mcp' ] = mwp.build_parameters([Quaternion(matrix=Tracker_DAU_MCP.T_opt_ct[t,:3,:3]), Tracker_DAU_MCP.T_opt_ct[t,:3,3]-offset])
-
-    j = 0
-    
-    for i in range(0, len(df.columns)):
-        if i%7 == 0:
-            parameters['marker'][str(j)] = mwp.build_parameters([[1,0,0,0], df.iloc[t,i+4:i+7]-offset])
-            j += 1
-            if show_plots:
-                plt.plot(df.iloc[:,i+4:i+7])
-                plt.legend(['x','y','z'])
-                plt.title('Marker ID: ' + str(df.columns[i]))
-                plt.show()
-                #plt.savefig('./plots/optitrack-20230130-235000/' + str(df.columns[i]) + '.png')
-                plt.close()
-
-    with open("./mujoco/json_parameters.yaml", "w") as outfile:
-        yaml.dump(parameters, outfile)
-
-    model = mwj.MujocoFingerModel("./mujoco/json_template.xml", "./mujoco/json_parameters.yaml")
-    print("Model updated!")
-
-# %%
 class MujocoFingerModel:
 
     def __init__(self, path) -> None:
@@ -124,7 +70,7 @@ class MujocoFingerModel:
         #media.show_image(renderer.render())
 
     def get_pixels(self):
-        pixels = self.physics.render(height=480, width=640)
+        pixels = self.physics.render(height=1024, width=1024, camera_id=0)
         return pixels
     
     def make_video(self, fps, start_pos=0):
@@ -154,7 +100,6 @@ class MujocoFingerModel:
             xml_string = xml_string[:start_p] + extra_string + xml_string[end_p:]
         return xml_string
 
-# %%
 def find_between(s: str, first: str, last: str):
     """helper for string preformatting"""
     try:
@@ -201,8 +146,8 @@ def display_video(frames, framerate=60, dpi=600):
     interval = 1000 / framerate
     anim = animation.FuncAnimation(fig=fig, func=update, frames=frames,
                                    interval=interval, blit=True, repeat=False)
-    anim.save('./plots/test_2348.mp4')
+    anim.save('./plots/asd.mp4')
 
 if __name__ == '__main__':
     finger = MujocoFingerModel(path)
-    finger.make_video(60, 0)
+    finger.make_video(60, 6000)
