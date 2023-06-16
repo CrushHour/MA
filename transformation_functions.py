@@ -168,21 +168,10 @@ def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv", d_max
                 if current_dis < min_dis:
                     min_dis = current_dis.copy()
                     values_to_add = value.copy()
-
-        # safe closest values from line k
-        if values_to_add[0] == np.nan:
-            continue
-        else:
-            last_signal = values_to_add
         
         # falls die Minimale Distanz zum nächsten Punkt den Grenzwert überschreitet,
         # wird der Punkt nicht in die Ausgabeliste eingetragen.
-        dis_list.append(min_dis)
-        
-        if min_dis >= d_max:
-            added_data[k,:] = [np.nan, np.nan, np.nan]
-        else:
-            added_data[k,:] = values_to_add
+        added_data[k,:] = values_to_add
 
     #print(dis_list)
     print("len added_data for marker %s:" % initialID, len(added_data))
@@ -950,9 +939,11 @@ class tracker_bone():
         threshold = np.mean(dis)+n_std*np.std(dis, axis=0)
         clean_data = []
         last_valid = data[0]
+        dis_lst = []
 
         for i in range(len(data)):
             dis = np.linalg.norm(data[i] - last_valid)
+            dis_lst.append(dis)
             if dis <= threshold:
                 clean_data.append(data[i])
                 last_valid = data[i]
@@ -1020,6 +1011,35 @@ class marker_bone():
         self.T_dist_opt = np.zeros((int(test_metadata["length"]),2,4,4))
 
         self.T_opt_ct = np.zeros((int(test_metadata["length"]),4,4))
+        self.v_opt = np.zeros((int(test_metadata["length"]),3))
+    
+    def replace_outliers(self, data, threshold = 0, n_std = 5):
+        dis = np.array([])
+        for i in range(len(data)-1):
+            dis = np.append(dis, np.linalg.norm(np.subtract(data[i],data[i+1])))
+        if threshold == 0:
+            threshold = np.mean(dis)+n_std*np.std(dis, axis=0)
+        print('treshold =', threshold)
+        clean_data = []
+        last_valid = data[0]
+        dis_lst = []
+
+        compare_steps = 20
+
+        clean_data.append(data[:compare_steps])
+
+        for i in range(compare_steps,len(data)):
+            dis = np.linalg.norm(data[i] - last_valid)
+            dis_lst.append(dis)
+            if dis <= threshold:
+                clean_data.append(data[i])
+                last_valid = data[i-compare_steps]
+            else:
+                #clean_data.append(last_valid)
+                clean_data.append([np.nan,np.nan,np.nan])
+
+        print(max(dis_lst))
+        return np.array(clean_data)
     
     def get_marker_pos_ct(self):
         '''Returns the relative marker positions in the CT coordinate system to the bone cog.'''

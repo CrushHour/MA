@@ -27,8 +27,7 @@ except:
 
 #%%
 #Marker_DAU = tf.marker_bone(finger_name='DAU_PIP',test_path=test_metadata['path'], init_marker_ID=test_metadata['marker_IDs'][1])
-#Marker_ZF_intermedial = tf.marker_bone(finger_name="ZF_PIP",test_path=test_metadata['path'], init_marker_ID=test_metadata['marker_IDs'][0])
-
+Marker_ZF_intermedial = tf.marker_bone(finger_name="ZF_PIP",test_path=test_metadata['path'], init_marker_ID=test_metadata['marker_IDs'][0])
 # %%
 #path = r'C:\\GitHub\\MA\\Data\test_01_31\\Take 2023-01-31 06.11.42 PM.csv'
 path = './Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv'
@@ -38,7 +37,8 @@ marker_ID = 'Unlabeled 2016'
 #marker_ID = 'Unlabeled 2403'
 
 if __name__ == "__main__":
-    marker_data = tf.marker_variable_id_linewise_march28(path, marker_ID, "csv")
+    marker_data = tf.marker_variable_id_linewise(path, marker_ID, "csv")
+    marker_data = Marker_ZF_intermedial.replace_outliers(marker_data, 80)
     plt.plot(marker_data)
     plt.show()
 
