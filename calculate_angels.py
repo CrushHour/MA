@@ -14,7 +14,7 @@ import yaml
 from pyquaternion import Quaternion
 import importlib
 importlib.reload(tf)
-from scipy.spatial.transform import Rotation as Rot
+#from scipy.spatial.transform import Rotation as Rot
 
 # %%Definition der Pfade
 test_metadata = tf.get_test_metadata('Take 2023-01-31 06.11.42 PM.csv')
@@ -48,16 +48,16 @@ def construct_marker_rot(opt_info, ct_info):
     return T
 
 for t in tqdm(range(len(Marker_DAU.opt_marker_trace))):
-    Marker_DAU.T_opt_ct[t] = construct_marker_rot([Marker_DAU.opt_marker_trace[t],Tracker_DAU_DIP.T_proxi_innen_opt[t,:3,3], Tracker_DAU_DIP.T_proxi_aussen_opt[t,:3,3],Tracker_DAU_MCP.T_dist_innen_opt[t,:3,3],Tracker_DAU_MCP.T_dist_aussen_opt[t,:3,3]],\
-                                                  [Marker_DAU.marker_pos_ct[0], Tracker_DAU_DIP.T_proxi_innen_CT[:3,3], Tracker_DAU_DIP.T_proxi_aussen_CT[:3,3],Tracker_DAU_MCP.T_dist_innen_CT[:3,3],Tracker_DAU_MCP.T_dist_aussen_CT[:3,3]])
+    Marker_DAU.T_opt_ct[t] = construct_marker_rot([Tracker_DAU_DIP.T_proxi_innen_opt[t,:3,3], Tracker_DAU_DIP.T_proxi_aussen_opt[t,:3,3],Tracker_DAU_MCP.T_dist_innen_opt[t,:3,3],Tracker_DAU_MCP.T_dist_aussen_opt[t,:3,3]],\
+                                                  [Tracker_DAU_DIP.T_proxi_innen_CT[:3,3], Tracker_DAU_DIP.T_proxi_aussen_CT[:3,3],Tracker_DAU_MCP.T_dist_innen_CT[:3,3],Tracker_DAU_MCP.T_dist_aussen_CT[:3,3]])
     Marker_DAU.update_joints(t)
 
     #Marker_ZF_intermedial.T_opt_ct[t] = construct_marker_rot([Marker_ZF_intermedial.opt_marker_trace[t],Tracker_ZF_DIP.T_proxi_innen_opt[t,:3,3],Tracker_ZF_DIP.T_proxi_aussen_opt[t,:3,3]], \
     #                                                      [np.array(Marker_ZF_intermedial.marker_pos_ct[0]), Tracker_ZF_DIP.T_proxi_innen_CT[:3,3], Tracker_ZF_DIP.T_proxi_aussen_CT[:3,3]])
-    Marker_ZF_intermedial.T_opt_ct[t] = Tracker_DAU_DIP.T_opt_ct[t]
+    Marker_ZF_intermedial.T_opt_ct[t] = Tracker_ZF_DIP.T_opt_ct[t]
 
     # update loop auf basis aller bekannten Punkte
-    for j in range(100):
+    for j in range(3):
         Marker_ZF_intermedial.update_joints(t)
 
         ZF_MCP.T_opt_ct[t] = construct_marker_rot([Tracker_ZF_midhand.T_dist_innen_opt[t,:3,3],Tracker_ZF_midhand.T_dist_aussen_opt[t,:3,3],Marker_ZF_intermedial.T_proxi_opt[t,0,:3,3],Marker_ZF_intermedial.T_proxi_opt[t,1,:3,3]], \
@@ -69,7 +69,8 @@ for t in tqdm(range(len(Marker_DAU.opt_marker_trace))):
 
 
 # %% Build mujoco parameters
-i = 0 # 4553
+#i = 4553
+i = 5831
 
 parameters = {'zf': dict(), 'dau': dict()}
 

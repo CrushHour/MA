@@ -3,7 +3,7 @@
         <geom rgba="0.5 1 0 0.9" size = "2 2 2"/>
     </default>
     <visual>
-        <global offheight="480"/>
+        <global offheight="640"/>
     </visual>    
 
     <visual>
@@ -11,19 +11,19 @@
     </visual>
     <asset>
         <mesh name="ZF-MCP" scale="1 1 1"
-        file="Data\STL\Segmentation_ZF_MCP.stl"/>
+        file="Data/STL/Segmentation_ZF_MCP.stl"/>
         <mesh name="ZF-PIP" scale="1 1 1"
-        file="Data\STL\Segmentation_ZF_PIP.stl"/>
+        file="Data/STL/Segmentation_ZF_PIP.stl"/>
         <mesh name="ZF-DIP" scale="1 1 1"
-        file="Data\STL\Segmentation_ZF_DIP.stl"/>
+        file="Data/STL/Segmentation_ZF_DIP.stl"/>
         <mesh name="ZF-Midhand" scale="1 1 1"
-        file="Data\STL\Segmentation_ZF_Mittelhand.stl"/>
+        file="Data/STL/Segmentation_ZF_Mittelhand.stl"/>
         <mesh name="DAU-MCP" scale="1 1 1"
-        file="Data\STL\Segmentation_DAU_Osmetacarpale_1.stl"/>
+        file="Data/STL/Segmentation_DAU_Osmetacarpale_1.stl"/>
         <mesh name="DAU-PIP" scale="1 1 1"
-        file="Data\STL\Segmentation_DAU_Phalax_proximalis.stl"/>
+        file="Data/STL/Segmentation_DAU_Phalax_proximalis.stl"/>
         <mesh name="DAU-DIP" scale="1 1 1"
-        file="Data\STL\Segmentation_DAU_DIP.stl"/>
+        file="Data/STL/Segmentation_DAU_DIP.stl"/>
     </asset>
     <worldbody>
         <light name="Light" diffuse="1 1 1" pos="0 0 1000" dir="0 0 -1"/>
