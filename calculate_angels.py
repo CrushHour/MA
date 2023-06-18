@@ -4,10 +4,7 @@ sys.path.append('./mujoco')
 import transformation_functions as tf
 import numpy as np
 from tqdm import tqdm
-from ipywidgets import interact, interactive, fixed, interact_manual
-import ipywidgets as widgets
 import matplotlib.pyplot as plt
-import stl
 import my_write_parameters as mwp
 import my_model as mwj
 import yaml
@@ -17,13 +14,14 @@ importlib.reload(tf)
 #from scipy.spatial.transform import Rotation as Rot
 
 # %%Definition der Pfade
-test_metadata = tf.get_test_metadata('Take 2023-01-31 06.11.42 PM.csv')
-hand_metadata = tf.get_json('hand_metadata.json')
-data_path = 'Data/test_01_31/'
-test_file = '2023_01_31_18_12_48.json'
-opt_data = './Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv'
+test_number = 1
+if test_number == 1:
+    test_metadata = tf.get_json('test_metadata.json')['Take 2023-01-31 06.11.42 PM.csv']
+    hand_metadata = tf.get_json('hand_metadata.json')
+else:
+    test_metadata = tf.get_test_metadata('test_metadata.json')['optitrack-20230130-234800.json']
+    hand_metadata = tf.get_json('hand_metadata.json')
 
-'''  '''
 # %%Tracker
 #Rotation	Rotation	Rotation	Rotation	Position	Position	Position	Mean Marker Error
 #[X	        Y	        Z	        W]	        [X	        Y	        Z]
@@ -34,7 +32,6 @@ Tracker_ZF_midhand = tf.tracker_bone('ZF_midhand',test_path=test_metadata['path'
 Tracker_DAU_DIP = tf.tracker_bone('DAU_DIP',test_path=test_metadata['path'])
 Tracker_DAU_MCP = tf.tracker_bone('DAU_MCP',test_path=test_metadata['path'])
 #Tracker_FT = tf.tracker_bone('FT',test_path=test_metadata['path'])
-Basetracker = tf.tracker_bone('ZF_midhand',test_path=test_metadata['path']) # Basis, hinten an Fixteur externe existiert nicht im CT
 
 Marker_DAU = tf.marker_bone(finger_name='DAU_PIP',test_path=test_metadata['path'], init_marker_ID=test_metadata['marker_IDs'][1])
 Marker_ZF_intermedial = tf.marker_bone(finger_name="ZF_PIP",test_path=test_metadata['path'], init_marker_ID=test_metadata['marker_IDs'][0])
@@ -106,75 +103,55 @@ with open("./mujoco/generated_parameters.yaml", "w") as outfile:
 model = mwj.MujocoFingerModel("./mujoco/my_tendom_finger_template.xml", "./mujoco/generated_parameters.yaml")
 print("Model updated!")
 
-# %% Berechnung der Winkel zwischen den Markern und den Trackern
-# angle ZF joints
+# %% plotten von delta und epsilon
+def plot_angels(angles, legend, title, save_plots=False):
 
-alpha = np.zeros(len(Marker_ZF_intermedial.opt_marker_trace))
-beta = np.zeros(len(Marker_ZF_intermedial.opt_marker_trace))
-gamma = np.zeros(len(Marker_ZF_intermedial.opt_marker_trace))
-delta = np.zeros(len(Marker_ZF_intermedial.opt_marker_trace))
-epsilon = np.zeros(len(Marker_ZF_intermedial.opt_marker_trace))
+    pos_x = np.arange(len(angles[0]), step=600) # type: ignore
+    x = [int(pos_x[i]/120) for i in range(len(pos_x))]
 
-vZF_PIP = np.subtract(np.mean(Marker_ZF_intermedial.T_dist_opt[i,:,:3,3],axis=0),np.mean(Marker_ZF_intermedial.T_proxi_opt[i,:,:3,3],axis=0))
-vZF_MCP = np.subtract(np.mean(ZF_MCP.T_dist_opt[i,:,:3,3],axis=0),np.mean(ZF_MCP.T_proxi_opt[i,:,:3,3],axis=0))
+    for i in range(len(angles)):
+        default_x = np.arange(len(angles[i]))
+        plt.plot(default_x, angles[i])
 
+    plt.xticks(pos_x,x)
+    plt.legend(legend, loc='upper right')
+    plt.ylabel('angle [°]')
+    plt.xlabel('time [sec]')
+    plt.title(title)
+    if save_plots:
+        plt.savefig('./plots/angles/' + title + '.png', dpi=1200)
+    else:
+        plt.show()
+    plt.close()
 
-for i in range(len(Marker_ZF_intermedial.opt_marker_trace)):
+if __name__=="__main__":
+    alpha = np.zeros(len(Marker_ZF_intermedial.opt_marker_trace))
+    beta = np.zeros(len(Marker_ZF_intermedial.opt_marker_trace))
+    gamma = np.zeros(len(Marker_ZF_intermedial.opt_marker_trace))
+    delta = np.zeros(len(Marker_ZF_intermedial.opt_marker_trace))
+    epsilon = np.zeros(len(Marker_ZF_intermedial.opt_marker_trace))
+    zeta = np.zeros(len(Marker_ZF_intermedial.opt_marker_trace))
+    eta = np.zeros(len(Marker_ZF_intermedial.opt_marker_trace))
+
     vZF_PIP = np.subtract(np.mean(Marker_ZF_intermedial.T_dist_opt[i,:,:3,3],axis=0),np.mean(Marker_ZF_intermedial.T_proxi_opt[i,:,:3,3],axis=0))
     vZF_MCP = np.subtract(np.mean(ZF_MCP.T_dist_opt[i,:,:3,3],axis=0),np.mean(ZF_MCP.T_proxi_opt[i,:,:3,3],axis=0))
 
-    alpha[i] = tf.angle_between(np.subtract(Tracker_ZF_DIP.T_dist_opt[i,:3,3],Tracker_ZF_DIP.T_proxi_opt[i,:3,3]),vZF_PIP)*180/np.pi
-    beta[i] = tf.angle_between(vZF_PIP,vZF_MCP)*180/np.pi
-    gamma[i] = tf.angle_between(vZF_MCP,Tracker_ZF_midhand.v_opt[i])*180/np.pi
-    #calculate angeles in DAU joints
-    delta[i] = tf.angle_between(np.subtract(np.mean(Marker_DAU.T_dist_opt[i,:,:3,3],axis=0),np.mean(Marker_DAU.T_proxi_opt[i,:,:3,3],axis=0)),np.subtract(Tracker_DAU_DIP.T_dist_opt[i,:3,3],Tracker_DAU_DIP.T_proxi_opt[i,:3,3]))*180/np.pi
-    epsilon[i] = tf.angle_between(np.subtract(Tracker_DAU_MCP.T_dist_opt[i,:3,3],Tracker_DAU_MCP.T_proxi_opt[i,:3,3]),np.subtract(np.mean(Marker_DAU.T_dist_opt[i,:,:3,3],axis=0),np.mean(Marker_DAU.T_proxi_opt[i,:,:3,3],axis=0)))*180/np.pi
 
-# plotten von delta und epsilon
-plt.plot(delta)
-plt.plot(epsilon)
-plt.legend(['delta (DAU DIP)','epsilon (DAU PIP)'])
-plt.ylabel('[°]')
-plt.title('Angles in Thumb joints')
-plt.show()
-plt.close()
+    for i in range(len(Marker_ZF_intermedial.opt_marker_trace)):
+        vZF_PIP = np.subtract(np.mean(Marker_ZF_intermedial.T_dist_opt[i,:,:3,3],axis=0),np.mean(Marker_ZF_intermedial.T_proxi_opt[i,:,:3,3],axis=0))
+        vZF_MCP = np.subtract(np.mean(ZF_MCP.T_dist_opt[i,:,:3,3],axis=0),np.mean(ZF_MCP.T_proxi_opt[i,:,:3,3],axis=0))
 
-# plotten von alpha, beta, gamma
-plt.plot(alpha)
-plt.plot(beta)
-plt.plot(gamma)
-plt.legend(['alpha (DIP)', 'beta (PIP)', 'gamma (MCP)'])
-plt.ylabel('[°]')
-plt.title('Angles in Index finger joints')
-plt.show()
-plt.close()
+        alpha[i] = tf.angle_between(np.subtract(Tracker_ZF_DIP.T_dist_opt[i,:3,3],Tracker_ZF_DIP.T_proxi_opt[i,:3,3]),vZF_PIP)*180/np.pi
+        beta[i] = tf.angle_between(vZF_PIP,vZF_MCP)*180/np.pi
+        gamma[i] = tf.angle_between(vZF_MCP,Tracker_ZF_midhand.v_opt[i])*180/np.pi
+        #calculate angeles in DAU joints
+        delta[i] = tf.angle_between(np.subtract(np.mean(Marker_DAU.T_dist_opt[i,:,:3,3],axis=0),np.mean(Marker_DAU.T_proxi_opt[i,:,:3,3],axis=0)),np.subtract(Tracker_DAU_DIP.T_dist_opt[i,:3,3],Tracker_DAU_DIP.T_proxi_opt[i,:3,3]))*180/np.pi
+        epsilon[i] = tf.angle_between(np.subtract(Tracker_DAU_MCP.T_dist_opt[i,:3,3],Tracker_DAU_MCP.T_proxi_opt[i,:3,3]),np.subtract(np.mean(Marker_DAU.T_dist_opt[i,:,:3,3],axis=0),np.mean(Marker_DAU.T_proxi_opt[i,:,:3,3],axis=0)))*180/np.pi
 
-# %% Visualisierung der Marker und Tracker
-# calculate spheres
-# diese Berechnung gibt die Länge eines Fingers zurück.
-# es würde aber viel mehr sinn machen den Abstand zwischen den Joints
-# aus den mkr.json files zu nehmen.
-ZF_PIP = stl.mesh.Mesh.from_file("./Data/STL/Segmentation_ZF_PIP.stl")
-minx, maxx, miny, maxy, minz, maxz = tf.stl_find_mins_maxs(ZF_PIP)
-d_ZF_DIP_PIP = np.linalg.norm([maxx-minx, maxy-miny, maxz-minz])
+        zeta[i] = tf.angle_between(Tracker_DAU_MCP.v_opt[i,:2],Tracker_DAU_MCP.v_opt[0,:2])
+        eta[i] = tf.angle_between([Tracker_DAU_MCP.v_opt[i,0],Tracker_DAU_MCP.v_opt[i,2]],[Tracker_DAU_MCP.v_opt[0,0],Tracker_DAU_MCP.v_opt[0,2]])
 
-ZF_MCP = stl.mesh.Mesh.from_file("./Data/STL/Segmentation_ZF_MCP.stl")
-minx, maxx, miny, maxy, minz, maxz = tf.stl_find_mins_maxs(ZF_MCP)
-d_ZF_MCP_PIP = np.linalg.norm([maxx-minx, maxy-miny, maxz-minz])
-ZF_Tracker_lst = []
-DAU_Tracker_lst = []
-name_lst = []
-
-radius_lst = []
-
-tf.plot_class(0,ZF_Tracker_lst,DAU_Tracker_lst,name_lst,radius_lst, save=False, show=True)
-
-interact(tf.plot_class, i = widgets.IntSlider(min=0,max=len(Tracker_ZF_DIP.track_traj_opt)-1,step=1,value=0),
-         Trackers1 = widgets.fixed(ZF_Tracker_lst), 
-         Trackers2 = widgets.fixed(DAU_Tracker_lst),
-         names = widgets.fixed(name_lst),
-         radius = widgets.fixed(radius_lst),
-         show = widgets.fixed(True))
-#%%
-# test_points1 = [[2,-5,4], [5,6,7], [-10,0,3], [-3,11,13], [8,5,4]]
-# test_points2 = [[-1,4,3], [8,4,-3], [12,7,9], [4,-5,6], [-2,10,7]]
+    #plot_angels([delta, epsilon], ['delta (DIP)','epsilon (PIP)'], 'Angles in Thumb joints', save_plots=True)
+    #plot_angels([alpha, beta, gamma], ['alpha (DIP)', 'beta (PIP)', 'gamma (MCP)'], 'Angles in Index finger joints', save_plots=True)
+    plot_angels([zeta, eta], ['xy-plane', 'xz-plane'], 'Angles in Thumb MCP joint', save_plots=True)
+# %%

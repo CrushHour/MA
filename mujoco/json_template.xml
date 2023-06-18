@@ -28,7 +28,7 @@
     <worldbody>
         <light name="Light" diffuse="1 1 1" pos="0 0 1000" dir="0 0 -1"/>
 
-        <camera name="custom" pos="309.236 84.797 -25.717" xyaxes="-0.660 0.751 0.000 -0.174 -0.153 0.973"/>
+        <camera name="custom" pos="248.146 -80.622 51.316" xyaxes="0.153 0.988 0.000 -0.482 0.075 0.873"/>
 
 
         <geom type="plane" size="1000 1000 0.01" pos = "0 0 -400" rgba=".3 0.3 0.3 1"/>

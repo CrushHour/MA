@@ -16,10 +16,7 @@ from pyquaternion import Quaternion
 from tqdm import tqdm
 from dm_control import mujoco as dm_mujoco
 
-# More legible printing from numpy.
-np.set_printoptions(precision=3, suppress=True, linewidth=100)
 
-path='Data/optitrack-20230130-234800.json'
 
 class MujocoFingerModel:
 
@@ -28,9 +25,16 @@ class MujocoFingerModel:
         self.Tracker_ZF_midhand = tf.tracker_bone('ZF_midhand',path)
         self.Tracker_DAU_DIP = tf.tracker_bone('DAU_DIP',path)
         self.Tracker_DAU_MCP = tf.tracker_bone('DAU_MCP',path)
+        self.Marker_DAU = tf.marker_bone(finger_name='DAU_PIP',test_path=test_metadata['path'], init_marker_ID=test_metadata['marker_IDs'][1])
+        self.Marker_ZF_intermedial = tf.marker_bone(finger_name="ZF_PIP",test_path=test_metadata['path'], init_marker_ID=test_metadata['marker_IDs'][0])
+        self.ZF_MCP = tf.marker_bone(finger_name="ZF_MCP",test_path=test_metadata['path'], init_marker_ID='')
+
+        self.construct_all_T_opt_ct()
 
         self.end_pos = self.Tracker_ZF_DIP.T_opt_ct.shape[0]
         self.offset = 0.85*np.array(self.Tracker_ZF_midhand.T_opt_ct[0,:3,3])
+
+        self.title = path.split('/')[-1].split('.')[0]
 
         try:
             self.df = tf.json_test_load(path=path)
@@ -39,35 +43,65 @@ class MujocoFingerModel:
             print("Error loading json file!")
             return
     
-    def update(self, t, offset = np.array([0,0,0])):
+
+    
+    def construct_all_T_opt_ct(self):
+        for t in tqdm(range(len(self.Marker_DAU.opt_marker_trace))):
+            self.Marker_DAU.T_opt_ct[t] = self.construct_marker_rot([self.Tracker_DAU_DIP.T_proxi_innen_opt[t,:3,3], self.Tracker_DAU_DIP.T_proxi_aussen_opt[t,:3,3],self.Tracker_DAU_MCP.T_dist_innen_opt[t,:3,3],self.Tracker_DAU_MCP.T_dist_aussen_opt[t,:3,3]],\
+                                                        [self.Tracker_DAU_DIP.T_proxi_innen_CT[:3,3], self.Tracker_DAU_DIP.T_proxi_aussen_CT[:3,3],self.Tracker_DAU_MCP.T_dist_innen_CT[:3,3],self.Tracker_DAU_MCP.T_dist_aussen_CT[:3,3]])
+            self.Marker_DAU.update_joints(t)
+
+            self.Marker_ZF_intermedial.T_opt_ct[t] = self.Tracker_ZF_DIP.T_opt_ct[t]
+
+            # update loop auf basis aller bekannten Punkte
+            for j in range(3):
+                self.Marker_ZF_intermedial.update_joints(t)
+
+                self.ZF_MCP.T_opt_ct[t] = self.construct_marker_rot([self.Tracker_ZF_midhand.T_dist_innen_opt[t,:3,3],self.Tracker_ZF_midhand.T_dist_aussen_opt[t,:3,3],self.Marker_ZF_intermedial.T_proxi_opt[t,0,:3,3],self.Marker_ZF_intermedial.T_proxi_opt[t,1,:3,3]], \
+                                                        [self.Tracker_ZF_midhand.T_dist_innen_CT[:3,3],self.Tracker_ZF_midhand.T_dist_aussen_CT[:3,3],self.Marker_ZF_intermedial.T_proxi_CT[0,:3,3], self.Marker_ZF_intermedial.T_proxi_CT[1,:3,3]])
+                self.ZF_MCP.update_joints(t)
+
+                self.Marker_ZF_intermedial.T_opt_ct[t] = self.construct_marker_rot([self.Tracker_ZF_DIP.T_proxi_innen_opt[t,:3,3],self.Tracker_ZF_DIP.T_proxi_aussen_opt[t,:3,3], self.ZF_MCP.T_dist_opt[t,0,:3,3], self.ZF_MCP.T_dist_opt[t,1,:3,3]], \
+                                                                [self.Tracker_ZF_DIP.T_proxi_innen_CT[:3,3], self.Tracker_ZF_DIP.T_proxi_aussen_CT[:3,3], self.ZF_MCP.T_dist_CT[0,:3,3], self.ZF_MCP.T_dist_CT[1,:3,3]])
+
+    
+    def update(self, i, offset = np.array([0,0,0])):
         parameters = {'marker': dict(), 'zf': dict(), 'dau': dict()}
 
-        parameters['zf']['dip'] = mwp.build_parameters([Quaternion(matrix=self.Tracker_ZF_DIP.T_opt_ct[t,:3,:3]), self.Tracker_ZF_DIP.T_opt_ct[t,:3,3]-offset])
-        parameters['zf']['midhand'] = mwp.build_parameters([Quaternion(matrix=self.Tracker_ZF_midhand.T_opt_ct[t,:3,:3]), self.Tracker_ZF_midhand.T_opt_ct[t,:3,3]-offset])
-        parameters['dau']['dip'] = mwp.build_parameters([Quaternion(matrix=self.Tracker_DAU_DIP.T_opt_ct[t,:3,:3]), self.Tracker_DAU_DIP.T_opt_ct[t,:3,3]-offset])
-        parameters['dau']['mcp' ] = mwp.build_parameters([Quaternion(matrix=self.Tracker_DAU_MCP.T_opt_ct[t,:3,:3]), self.Tracker_DAU_MCP.T_opt_ct[t,:3,3]-offset])
+        # STL
+        parameters['zf']['dip'] = mwp.build_parameters([Quaternion(matrix=self.Tracker_ZF_DIP.T_opt_ct[i,:3,:3]), self.Tracker_ZF_DIP.T_opt_ct[i,:3,3]])
+        parameters['zf']['pip'] = mwp.build_parameters([Quaternion(matrix=self.Marker_ZF_intermedial.T_opt_ct[i,:3,:3]), self.Marker_ZF_intermedial.T_opt_ct[i,:3,3]])
+        parameters['zf']['mcp'] = mwp.build_parameters([Quaternion(matrix=self.ZF_MCP.T_opt_ct[i,:3,:3]) ,self.ZF_MCP.T_opt_ct[i,:3,3]])
+        parameters['zf']['midhand'] = mwp.build_parameters([Quaternion(matrix=self.Tracker_ZF_midhand.T_opt_ct[i,:3,:3]), self.Tracker_ZF_midhand.T_opt_ct[i,:3,3]])
 
-        j = 0
-        for i in range(0, len(self.df.columns)):
-            if i%7 == 0:
-                parameters['marker'][str(j)] = mwp.build_parameters([[1,0,0,0], self.df.iloc[t,i+4:i+7]-offset])
-                j += 1
+        # green, red, yellow, white, blue balls
+        parameters['zf']['dip_joint_aussen' ] = mwp.build_parameters([[1,0,0,0], self.Tracker_ZF_DIP.T_proxi_aussen_opt[i,:3,3]]) 
+        parameters['zf']['dip_joint_innen' ] = mwp.build_parameters([[1,0,0,0], self.Tracker_ZF_DIP.T_proxi_innen_opt[i,:3,3]]) 
+        parameters['zf']['pip_joint_aussen' ] = mwp.build_parameters([[1,0,0,0], self.Marker_ZF_intermedial.T_proxi_opt[i,1,:3,3]]) 
+        parameters['zf']['pip_joint_innen' ] = mwp.build_parameters([[1,0,0,0], self.Marker_ZF_intermedial.T_proxi_opt[i,0,:3,3]]) 
+        parameters['zf']['mcp_joint_aussen' ] = mwp.build_parameters([[1,0,0,0], self.Tracker_ZF_midhand.T_dist_aussen_opt[i,:3,3]]) 
+        parameters['zf']['mcp_joint_innen' ] = mwp.build_parameters([[1,0,0,0], self.Tracker_ZF_midhand.T_dist_innen_opt[i,:3,3]]) 
+        parameters['zf']['pip_marker'] = mwp.build_parameters([[1,0,0,0], self.Marker_ZF_intermedial.opt_marker_trace[i]]) 
+
+        # STL
+        parameters['dau']['dip'] = mwp.build_parameters([Quaternion(matrix=self.Tracker_DAU_DIP.T_opt_ct[i,:3,:3]), self.Tracker_DAU_DIP.T_opt_ct[i,:3,3]])
+        parameters['dau']['pip'] = mwp.build_parameters([Quaternion(matrix=self.Marker_DAU.T_opt_ct[i,:3,:3]), self.Marker_DAU.T_opt_ct[i,:3,3]])
+        parameters['dau']['mcp' ] = mwp.build_parameters([Quaternion(matrix=self.Tracker_DAU_MCP.T_opt_ct[i,:3,:3]), self.Tracker_DAU_MCP.T_opt_ct[i,:3,3]])
+
+        # green, yellow balls
+        parameters['dau']['pip_joint' ] = mwp.build_parameters([[1,0,0,0], self.Tracker_DAU_DIP.T_proxi_opt[i,:3,3]]) 
+        parameters['dau']['mcp_joint' ] = mwp.build_parameters([[1,0,0,0], self.Tracker_DAU_MCP.T_dist_opt[i,:3,3]]) 
+        parameters['dau']['pip_marker'] = mwp.build_parameters([[1,0,0,0], self.Marker_DAU.opt_marker_trace[i]])
+
         
-        with open("./mujoco/json_parameters.yaml", "w") as outfile:
+        with open("./mujoco/generated_parameters.yaml", "w") as outfile:
             yaml.dump(parameters, outfile)
         
-        self.model = mwj.MujocoFingerModel("./mujoco/json_template.xml", "./mujoco/json_parameters.yaml")
+        self.model = mwj.MujocoFingerModel("./mujoco/my_tendom_finger_template.xml", "./mujoco/generated_parameters.yaml")
 
         self.physics_model = self.recursive_loading(xml_path = './finger_control.xml',path_ext='./', template_mode=False)
 
         self.physics = dm_mujoco.Physics.from_xml_string(self.physics_model)
-        #model = mujoco.MjModel.from_xml_string(self.physics_model)
-        #data = mujoco.MjData(model)
-        #renderer = mujoco.Renderer(model)
-        #mujoco.mj_forward(model, data)
-        #renderer.update_scene(data)
-
-        #media.show_image(renderer.render())
 
     def get_pixels(self):
         pixels = self.physics.render(height=1024, width=1024, camera_id=0)
@@ -79,7 +113,7 @@ class MujocoFingerModel:
         for index in tqdm(range(start_pos, self.end_pos, stepsize), desc='Rendering frames'):
             self.update(index, self.offset)
             frames.append(self.get_pixels())
-        display_video(frames, framerate=fps)
+        display_video(frames, framerate=fps, title=self.title)
 
     def recursive_loading(self, xml_path, path_ext='../', st_s='<include file=', end_s='/>', template_mode=False):
         """recursively load subfiles"""
@@ -99,6 +133,11 @@ class MujocoFingerModel:
             extra_string = extra_string.replace('</mujoco>', '')
             xml_string = xml_string[:start_p] + extra_string + xml_string[end_p:]
         return xml_string
+
+    def construct_marker_rot(self, opt_info, ct_info):
+        '''Do kabsch with points from different sources. Points must be in the same order.'''
+        T = self.Tracker_DAU_DIP.kabsch(ct_info, opt_info)
+        return T
 
 def find_between(s: str, first: str, last: str):
     """helper for string preformatting"""
@@ -129,7 +168,7 @@ def recursive_loading(xml_path, path_ext='../', st_s='<include file=', end_s='/>
         xml_string = xml_string[:start_p] + extra_string + xml_string[end_p:]
     return xml_string
 
-def display_video(frames, framerate=60, dpi=600):
+def display_video(frames, framerate=60, dpi=600, title='Video'):
     height, width, _ = frames[0].shape
     orig_backend = matplotlib.get_backend()
     # Switch to headless 'Agg' to inhibit figure rendering.
@@ -146,8 +185,16 @@ def display_video(frames, framerate=60, dpi=600):
     interval = 1000 / framerate
     anim = animation.FuncAnimation(fig=fig, func=update, frames=frames,
                                    interval=interval, blit=True, repeat=False)
-    anim.save('./plots/asd.mp4')
+    anim.save('./plots/' + title + '.mp4')
+    plt.close(fig)
 
 if __name__ == '__main__':
-    finger = MujocoFingerModel(path)
-    finger.make_video(60, 6000)
+    test_metadata = tf.get_test_metadata('Take 2023-01-31 06.11.42 PM.csv')
+    hand_metadata = tf.get_json('hand_metadata.json')
+
+    # More legible printing from numpy.
+    np.set_printoptions(precision=3, suppress=True, linewidth=100)
+
+    #path='Data/optitrack-20230130-234800.json'
+    finger = MujocoFingerModel(test_metadata['path'])
+    finger.make_video(60, 0)

@@ -992,11 +992,10 @@ class marker_bone():
         save_name = './Data/' + init_marker_ID + '_opt_marker_trace.npy'
         
         # get marker information
-        if self.metadata["marker def CT"] != "":
+        if self.metadata["marker def CT"] != "" and init_marker_ID != "Unlabeled ...":
             self.marker_pos_ct = self.get_marker_pos_ct()
 
             try:
-                #os.remove(save_name)
                 self.opt_marker_trace = np.load(save_name)
             
             # build marker trace from csv file

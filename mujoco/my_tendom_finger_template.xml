@@ -3,11 +3,11 @@
         <geom rgba="255 255 255 0.3" size = "5 5 5"/>
     </default>
     <visual>
-        <global offheight="640"/>
+        <global offheight="1024"/>
     </visual>    
 
     <visual>
-        <global offwidth="640"/>
+        <global offwidth="1024"/>
     </visual>
     <asset>
         <mesh name="ZF-MCP" scale="1 1 1"
