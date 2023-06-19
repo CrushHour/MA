@@ -249,7 +249,53 @@ def marker_variable_id_linewise_march28(testrun_path, initialID=None, dtype="csv
 
     #print(dis_list)
     return added_data
-	
+
+def plot_angels(angles, legend, title, save_plots=False):
+
+    pos_x = np.arange(len(angles[0]), step=600) # type: ignore
+    x = [int(pos_x[i]/120) for i in range(len(pos_x))]
+
+    for i in range(len(angles)):
+        default_x = np.arange(len(angles[i]))
+        plt.plot(default_x, angles[i])
+
+    plt.xticks(pos_x,x)
+    plt.legend(legend, loc='upper right')
+    plt.ylabel('angle [°]')
+    plt.xlabel('time [sec]')
+    plt.title(title)
+    if save_plots:
+        plt.savefig('./plots/angles/' + title + '.svg', dpi=1200)
+    else:
+        plt.show()
+    plt.close()
+
+def plot_quaternion(quaternion, title, save_plots=False):
+    pos_x = np.arange(len(quaternion), step=600) # type: ignore
+    x = [int(pos_x[i]/120) for i in range(len(pos_x))]
+
+    q_lst = np.zeros((len(quaternion),4))
+    default_x = np.arange(len(quaternion))
+
+    for i in range(len(quaternion)):
+        q_lst[i] = quaternion[i].elements
+        q_lst = np.array(q_lst)
+    
+    plt.plot(default_x, q_lst[:,0], label="s")
+    plt.plot(default_x, q_lst[:,1], label="x")
+    plt.plot(default_x, q_lst[:,2], label="y")
+    plt.plot(default_x, q_lst[:,3], label="z")
+
+    plt.xticks(pos_x,x)
+    plt.legend(loc='upper right')
+    plt.xlabel('time [sec]')
+    plt.title(title)
+    if save_plots:
+        plt.savefig('./plots/angles/' + title + '.svg', dpi=1200)
+    else:
+        plt.show()
+    plt.close()
+
 def plot_ply(tracker_points, opt_points, line_1, line_2, line_3, line_4):
     n = len(tracker_points)
     fig = plt.figure()

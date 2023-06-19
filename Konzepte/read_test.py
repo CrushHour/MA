@@ -452,75 +452,75 @@ if __name__ == '__main__':
 
 # %%
 
-data = TestEvaluator(finger_a, body_a, name='2023_01_30_21_50_38.json', path='./Data/test_01_30')
-# %%
-data.act[0][0]
-# %%
-len(data.act)
-# %%
-fx = [data.obs['force_torques'][i]['fx']
-          for i in range(len(data.obs['force_torques']))][0]
-fy = [data.obs['force_torques'][i]['fy']
-        for i in range(len(data.obs['force_torques']))][0]
-fz = [data.obs['force_torques'][i]['fz']
-        for i in range(len(data.obs['force_torques']))][0]
+    data = TestEvaluator(finger_a, body_a, name='2023_01_30_21_50_38.json', path='./Data/test_01_30')
+    # %%
+    data.act[0][0]
+    # %%
+    len(data.act)
+    # %%
+    fx = [data.obs['force_torques'][i]['fx']
+            for i in range(len(data.obs['force_torques']))][0]
+    fy = [data.obs['force_torques'][i]['fy']
+            for i in range(len(data.obs['force_torques']))][0]
+    fz = [data.obs['force_torques'][i]['fz']
+            for i in range(len(data.obs['force_torques']))][0]
 
-f_all = [np.sqrt(fxi**2 + fyi**2 + fzi**2)
-            for fxi, fyi, fzi in zip(fx, fy, fz)]
+    f_all = [np.sqrt(fxi**2 + fyi**2 + fzi**2)
+                for fxi, fyi, fzi in zip(fx, fy, fz)]
 
-fs = 12
+    fs = 12
 
-name_list = [
-    'Extensor pollicis brevis',
-    'Extensor pollicis longus',
-    'Abductor pollicis longus',
-    'Flexor pollicis longus',
-    'Extensor digitorum',
-    'Extensor indicis',
-    'Flexor digitorum superficialis',
-    'Flexor digitorum profundus',
-]
-id_list = [7, 5, 0, 1, 4, 6, 2, 3]
+    name_list = [
+        'Extensor pollicis brevis',
+        'Extensor pollicis longus',
+        'Abductor pollicis longus',
+        'Flexor pollicis longus',
+        'Extensor digitorum',
+        'Extensor indicis',
+        'Flexor digitorum superficialis',
+        'Flexor digitorum profundus',
+    ]
+    id_list = [7, 5, 0, 1, 4, 6, 2, 3]
 
-sign_list = [
-    '-',
-    '-.',
-    '--',
-    ':',
-]
+    sign_list = [
+        '-',
+        '-.',
+        '--',
+        ':',
+    ]
 
-motor_forces = {}
+    motor_forces = {}
 
-for loc_name, idx in zip(name_list, id_list):
-    motor_forces[loc_name] = []
-    for i in range(len(data.act)):
-        motor_forces[loc_name].append(data.act[i][0][idx])
+    for loc_name, idx in zip(name_list, id_list):
+        motor_forces[loc_name] = []
+        for i in range(len(data.act)):
+            motor_forces[loc_name].append(data.act[i][0][idx])
 
-plt.figure(figsize=(6, 6))
-plt.subplot(3, 1, 1)
+    plt.figure(figsize=(6, 6))
+    plt.subplot(3, 1, 1)
 
-for force, sty in zip(name_list[:4], sign_list):
-    plt.plot(motor_forces[force], sty, label=force)
-plt.grid()
-plt.legend(loc='upper right', ncol=2)
-plt.ylabel('forces thumb [N]', fontsize=fs)
-#plt.ylim([-5, 40])
+    for force, sty in zip(name_list[:4], sign_list):
+        plt.plot(motor_forces[force], sty, label=force)
+    plt.grid()
+    plt.legend(loc='upper right', ncol=2)
+    plt.ylabel('forces thumb [N]', fontsize=fs)
+    #plt.ylim([-5, 40])
 
-plt.subplot(3, 1, 2)
-for force, sty in zip(name_list[4:8], sign_list):
-    plt.plot(motor_forces[force]
-                , sty,  label=force)
-plt.grid()
-plt.legend(loc='upper right', ncol=2)
-plt.ylabel('forces index [N]', fontsize=fs)
-#plt.ylim([-5, 40])
+    plt.subplot(3, 1, 2)
+    for force, sty in zip(name_list[4:8], sign_list):
+        plt.plot(motor_forces[force]
+                    , sty,  label=force)
+    plt.grid()
+    plt.legend(loc='upper right', ncol=2)
+    plt.ylabel('forces index [N]', fontsize=fs)
+    #plt.ylim([-5, 40])
 
-plt.subplot(3, 1, 3)
-plt.plot(f_all)
-plt.grid()
-plt.xlabel('time [s]', fontsize=fs)
-plt.ylabel('pincer force [N]', fontsize=fs)
-#plt.ylim([-5, 40])
-# %%
-motor_forces
-# %%
+    plt.subplot(3, 1, 3)
+    plt.plot(f_all)
+    plt.grid()
+    plt.xlabel('time [s]', fontsize=fs)
+    plt.ylabel('pincer force [N]', fontsize=fs)
+    #plt.ylim([-5, 40])
+    # %%
+    motor_forces
+    # %%

@@ -104,25 +104,7 @@ model = mwj.MujocoFingerModel("./mujoco/my_tendom_finger_template.xml", "./mujoc
 print("Model updated!")
 
 # %% plotten von delta und epsilon
-def plot_angels(angles, legend, title, save_plots=False):
 
-    pos_x = np.arange(len(angles[0]), step=600) # type: ignore
-    x = [int(pos_x[i]/120) for i in range(len(pos_x))]
-
-    for i in range(len(angles)):
-        default_x = np.arange(len(angles[i]))
-        plt.plot(default_x, angles[i])
-
-    plt.xticks(pos_x,x)
-    plt.legend(legend, loc='upper right')
-    plt.ylabel('angle [°]')
-    plt.xlabel('time [sec]')
-    plt.title(title)
-    if save_plots:
-        plt.savefig('./plots/angles/' + title + '.png', dpi=1200)
-    else:
-        plt.show()
-    plt.close()
 
 if __name__=="__main__":
     alpha = np.zeros(len(Marker_ZF_intermedial.opt_marker_trace))
@@ -132,6 +114,9 @@ if __name__=="__main__":
     epsilon = np.zeros(len(Marker_ZF_intermedial.opt_marker_trace))
     zeta = np.zeros(len(Marker_ZF_intermedial.opt_marker_trace))
     eta = np.zeros(len(Marker_ZF_intermedial.opt_marker_trace))
+    theta = np.zeros(len(Marker_ZF_intermedial.opt_marker_trace))
+    ita = np.zeros(len(Marker_ZF_intermedial.opt_marker_trace))
+    q = []
 
     vZF_PIP = np.subtract(np.mean(Marker_ZF_intermedial.T_dist_opt[i,:,:3,3],axis=0),np.mean(Marker_ZF_intermedial.T_proxi_opt[i,:,:3,3],axis=0))
     vZF_MCP = np.subtract(np.mean(ZF_MCP.T_dist_opt[i,:,:3,3],axis=0),np.mean(ZF_MCP.T_proxi_opt[i,:,:3,3],axis=0))
@@ -148,10 +133,14 @@ if __name__=="__main__":
         delta[i] = tf.angle_between(np.subtract(np.mean(Marker_DAU.T_dist_opt[i,:,:3,3],axis=0),np.mean(Marker_DAU.T_proxi_opt[i,:,:3,3],axis=0)),np.subtract(Tracker_DAU_DIP.T_dist_opt[i,:3,3],Tracker_DAU_DIP.T_proxi_opt[i,:3,3]))*180/np.pi
         epsilon[i] = tf.angle_between(np.subtract(Tracker_DAU_MCP.T_dist_opt[i,:3,3],Tracker_DAU_MCP.T_proxi_opt[i,:3,3]),np.subtract(np.mean(Marker_DAU.T_dist_opt[i,:,:3,3],axis=0),np.mean(Marker_DAU.T_proxi_opt[i,:,:3,3],axis=0)))*180/np.pi
 
-        zeta[i] = tf.angle_between(Tracker_DAU_MCP.v_opt[i,:2],Tracker_DAU_MCP.v_opt[0,:2])
-        eta[i] = tf.angle_between([Tracker_DAU_MCP.v_opt[i,0],Tracker_DAU_MCP.v_opt[i,2]],[Tracker_DAU_MCP.v_opt[0,0],Tracker_DAU_MCP.v_opt[0,2]])
-
-    #plot_angels([delta, epsilon], ['delta (DIP)','epsilon (PIP)'], 'Angles in Thumb joints', save_plots=True)
-    #plot_angels([alpha, beta, gamma], ['alpha (DIP)', 'beta (PIP)', 'gamma (MCP)'], 'Angles in Index finger joints', save_plots=True)
-    plot_angels([zeta, eta], ['xy-plane', 'xz-plane'], 'Angles in Thumb MCP joint', save_plots=True)
+        zeta[i] = tf.angle_between(Tracker_DAU_MCP.v_opt[i,:2],Tracker_DAU_MCP.v_opt[0,:2])*180/np.pi
+        eta[i] = tf.angle_between([Tracker_DAU_MCP.v_opt[i,0],Tracker_DAU_MCP.v_opt[i,2]],[Tracker_DAU_MCP.v_opt[0,0],Tracker_DAU_MCP.v_opt[0,2]])*180/np.pi
+        
+        theta[i] = tf.angle_between(Tracker_DAU_MCP.v_opt[i,:2],Tracker_ZF_midhand.v_opt[i,:2])*180/np.pi
+        ita[i] = tf.angle_between([Tracker_DAU_MCP.v_opt[i,0],Tracker_DAU_MCP.v_opt[i,2]],[Tracker_ZF_midhand.v_opt[i,0],Tracker_ZF_midhand.v_opt[i,2]])*180/np.pi
+        q.append(Quaternion(matrix=Tracker_DAU_MCP.T_opt_ct[i,:3,:3]))
+    #tf.plot_angels([delta, epsilon], ['delta (DIP)','epsilon (PIP)'], 'Angles in Thumb joints', save_plots=True)
+    tf.plot_angels([alpha, beta, gamma], ['alpha (DIP)', 'beta (PIP)', 'gamma (MCP)'], 'Angles in Index finger joints', save_plots=True)
+    #tf.plot_angels([theta, ita], ['xy-plane', 'xz-plane'], 'Angles in Thumb MCP joint to midhand', save_plots=True)
+    #tf.plot_quaternion(q, 'Quaternion Tracker', save_plots=True)
 # %%
