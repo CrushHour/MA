@@ -108,7 +108,8 @@ class MujocoFingerModel:
         return pixels
     
     def make_video(self, fps, start_pos=0):
-        stepsize = int(120/fps)
+        #stepsize = int(120/fps)
+        stepsize = 1
         frames = []
         for index in tqdm(range(start_pos, self.end_pos, stepsize), desc='Rendering frames'):
             self.update(index, self.offset)
@@ -196,4 +197,4 @@ if __name__ == '__main__':
     np.set_printoptions(precision=3, suppress=True, linewidth=100)
 
     finger = MujocoFingerModel(test_metadata['path'])
-    finger.make_video(60, 0)
+    finger.make_video(30, 0)

@@ -11,19 +11,19 @@
     </visual>
     <asset>
         <mesh name="ZF-MCP" scale="1 1 1"
-        file="Data\STL\Segmentation_ZF_MCP.stl"/>
+        file="Data/STL/Segmentation_ZF_MCP.stl"/>
         <mesh name="ZF-PIP" scale="1 1 1"
-        file="Data\STL\Segmentation_ZF_PIP.stl"/>
+        file="Data/STL/Segmentation_ZF_PIP.stl"/>
         <mesh name="ZF-DIP" scale="1 1 1"
-        file="Data\STL\Segmentation_ZF_DIP.stl"/>
+        file="Data/STL/Segmentation_ZF_DIP.stl"/>
         <mesh name="ZF-Midhand" scale="1 1 1"
-        file="Data\STL\Segmentation_ZF_Mittelhand.stl"/>
+        file="Data/STL/Segmentation_ZF_Mittelhand.stl"/>
         <mesh name="DAU-MCP" scale="1 1 1"
-        file="Data\STL\Segmentation_DAU_Osmetacarpale_1.stl"/>
+        file="Data/STL/Segmentation_DAU_Osmetacarpale_1.stl"/>
         <mesh name="DAU-PIP" scale="1 1 1"
-        file="Data\STL\Segmentation_DAU_Phalax_proximalis.stl"/>
+        file="Data/STL/Segmentation_DAU_Phalax_proximalis.stl"/>
         <mesh name="DAU-DIP" scale="1 1 1"
-        file="Data\STL\Segmentation_DAU_DIP.stl"/>
+        file="Data/STL/Segmentation_DAU_DIP.stl"/>
     </asset>
     <worldbody>
         <light name="Light" diffuse="1 1 1" pos="0 0 1000" dir="0 0 -1"/>
@@ -45,15 +45,15 @@
         </body>
 
         <body name="ZF_DIP">
-        <geom pos = "120.1476098344238 -34.20958149948085 197.22049081121122" quat = "0.9372999604789941 0.3393486522427271 0.07619260356294714 -0.022493631752581646" type="mesh" mesh="ZF-DIP" rgba="0 0 1 0.9"/>
+        <geom pos = "188.88306939261443 -221.57691598854035 166.2025513406752" quat = "0.7188968208920323 0.6592894669743956 0.21927832926080726 0.021018419648863768" type="mesh" mesh="ZF-DIP" rgba="0 0 1 0.9"/>
         </body>
 
         <body name="ZF_PIP">
-        <geom pos = "121.43632931008584 -13.68314424357203 188.6445499223781" quat = "0.9499933104974094 0.3031042793312378 0.05668233249939528 -0.04927087419248375" type="mesh" mesh="ZF-PIP" rgba="0 0 1 0.9"/>
+        <geom pos = "175.5672770081726 -200.46992172217782 176.41705680559184" quat = "0.7544111120172972 0.6301501180209553 0.18319563117647547 -0.01463091045880722" type="mesh" mesh="ZF-PIP" rgba="0 0 1 0.9"/>
         </body>
 
         <body name="ZF_MCP">
-        <geom pos = "116.46126866683385 83.72734414932805 116.57656617295169" quat = "0.9941899914722535 0.06342136713014691 -0.008866396700071468 -0.08651807936669019" type="mesh" mesh="ZF-MCP" rgba="0 0 1 0.9"/>
+        <geom pos = "135.1919970948349 41.24446125126835 145.84132799829487" quat = "0.9809443297861509 0.1673864709234135 0.05084758271891984 -0.08452523022060882" type="mesh" mesh="ZF-MCP" rgba="0 0 1 0.9"/>
         </body>
         
         <body name="ZF_PIP_Marker">
@@ -61,26 +61,26 @@
         </body>
 
         <body name="ZF_Midhand">
-        <geom pos = "175.9655287961762 -5.336147142449994 162.643223346258" quat = "0.9499742441014846 0.25814488987944834 0.14774377164443064 -0.09529915693865747" type="mesh" mesh="ZF-Midhand" rgba="0 0 1 0.9"/>
+        <geom pos = "176.83376329423305 1.7444775512536594 158.89832928216188" quat = "0.9528419415581532 0.24586280293736643 0.15709920088844093 -0.08344793358546289" type="mesh" mesh="ZF-Midhand" rgba="0 0 1 0.9"/>
         </body>
 
         <body name="DAU_DIP">
-        <geom pos = "197.71501845593633 5.249193767438143 155.3409343990588" quat = "0.9341827458549913 0.22866803380128514 0.2720231392437559 0.031889486986391415" type="mesh" mesh="DAU-DIP" rgba="1 0 0 0.9"/>
+        <geom pos = "89.81537768751784 86.7420228774696 121.74088774471248" quat = "0.8798993398939294 -0.025396856843346336 0.33383918272225155 0.3371699147255645" type="mesh" mesh="DAU-DIP" rgba="1 0 0 0.9"/>
         </body>
         
         <body name="DAU_PIP">
-        <geom pos = "181.02246139469736 -2.430919339445296 159.8299545065767" quat = "0.9446735052114458 0.25016019883927787 0.21203819017739828 0.007186749926561237" type="mesh" mesh="DAU-PIP" rgba="1 0 0 0.9"/>
+        <geom pos = "66.29163873487076 67.83510688828738 123.82967247341438" quat = "0.9438741663264023 0.04947533430445456 0.18342248156275168 0.27020352087725225" type="mesh" mesh="DAU-PIP" rgba="1 0 0 0.9"/>
         </body>
 
         <body name="DAU_MCP">
-        <geom pos = "170.2759592812969 -20.466870715674574 165.87589477119622" quat = "0.9417608751496045 0.2852958087814518 0.1779169261023116 -0.006190552115359774" type="mesh" mesh="DAU-MCP" rgba="1 0 0 0.9"/>
+        <geom pos = "84.56282802338833 36.342895446378854 145.98252936324087" quat = "0.953909681640356 0.1503329164612871 0.15170466903224347 0.2108127768776253" type="mesh" mesh="DAU-MCP" rgba="1 0 0 0.9"/>
         </body>
 
-        <body pos="173.74425092123852 -110.24629535119425 -91.17770159961094">
+        <body pos="179.4038653195139 -72.75421560928247 -81.28644142549548">
             <geom type="sphere" size="5 5 5" rgba="0 1 0 0.9"/>
         </body>
 
-        <body pos="155.79323713594317 -90.73206210632046 -107.99526563799088">
+        <body pos="158.32294236604116 -70.44007668253317 -105.6306683455696">
             <geom type="sphere" size="5 5 5" rgba="1 1 0 0.9"/>
         </body>        
 
@@ -88,27 +88,27 @@
             <geom type="sphere" size="5 5 5" rgba="1 0 0 0.9"/>
         </body>  
         
-        <body pos="141.9907523619841 -124.26116917175212 -41.635607671435366">
+        <body pos="143.76260594555532 -117.94501687855325 -63.7174790292511">
             <geom type="sphere" size="5 5 5" rgba="0 1 0 0.9"/>
         </body>        
         
-        <body pos="152.0942509310386 -122.32306256063924 -37.246308233323106">
+        <body pos="154.66906624139716 -117.46764558522878 -61.28352533374385">
             <geom type="sphere" size="5 5 5" rgba="1 0 0 0.9"/>
         </body>    
 
-        <body pos="145.04652459512553 -101.93979279050905 -34.46159540341279">
+        <body pos="148.44474899240998 -106.42215087601741 -43.94616086782813">
             <geom type="sphere" size="5 5 5" rgba="1 0 1 0.9"/>
         </body>
                 
-        <body pos="135.13488814987502 -104.05926143055481 -35.02148298799003">
+        <body pos="138.66342581091712 -109.12294102240259 -44.224742724198784">
             <geom type="sphere" size="5 5 5" rgba="1 1 0 0.9"/>
         </body>    
         
-        <body pos="139.93371251684417 -74.23221876499369 -69.59691407881937">
+        <body pos="140.02135849051956 -72.81830291134743 -71.46156419514989">
             <geom type="sphere" size="5 5 5" rgba="1 1 1 0.9"/>
         </body>
                 
-        <body pos="130.90966652681985 -75.33393054208888 -62.55145062459869">
+        <body pos="131.12789906043676 -74.06346712625796 -64.27534992072137">
             <geom type="sphere" size="5 5 5" rgba="1 1 0 0.9"/>
         </body>
 
