@@ -107,6 +107,52 @@ def json_test_load(path='./Data/optitrack-20230130-234800.json', initialID=''):
 
     return df
 
+def phoenix_test_load(path='Data/test_01_31/2023_01_31_18_12_48.json', initialID=''):
+    '''This function is suppose to read in the trakcing data of a single tracker'''
+    
+    f = open(path)
+    data = json.load(f)
+    time = data['time']
+    df = pd.DataFrame(data['observation']['rigid_bodies'])
+    f.close()
+
+    body_ids = ['1028', '1031', '1032', '1029', '1030', '1027']
+    
+    header = []
+    len_header = 0
+    
+    for i in range(df.shape[0]):
+        try:
+            header.append(body_ids[i])
+            header.append(body_ids[i]+'.1')
+            header.append(body_ids[i]+'.2')
+            header.append(body_ids[i]+'.3')
+            header.append(body_ids[i]+'.4')
+            header.append(body_ids[i]+'.5')
+            header.append(body_ids[i]+'.6')
+            len_header += 1
+        except:
+            continue
+
+    xyz = np.zeros((len(time),len(header)))
+    
+    for j in range(len_header):
+        xyz[:,j*7] = df['qx'][j]
+        xyz[:,j*7+1] = df['qy'][j]
+        xyz[:,j*7+2] = df['qz'][j]
+        xyz[:,j*7+3] = df['qw'][j]
+        xyz[:,j*7+4] = [i*1000 for i in df['x'][j]]
+        xyz[:,j*7+5] = [i*1000 for i in df['y'][j]]
+        xyz[:,j*7+6] = [i*1000 for i in df['z'][j]]
+
+    df = pd.DataFrame(xyz, columns=header)
+
+    if initialID != '':
+        next_col = df.columns.get_loc(initialID)
+        df = df.iloc[:,next_col:next_col+7]
+
+    return df, time
+
 def marker_variable_id_linewise(testrun_path, initialID=None, dtype="csv", d_max = 560):
     
     initialID = str(initialID)
@@ -761,8 +807,11 @@ class tracker_bone():
             self.T_def_ct = self.invert_T(self.T_ct_def)
             self.t_ct_tr = self.T_ct_def
             # Get the trajectory of the tracker from the test data
-            if test_path.endswith('.json'):
+            if test_path.endswith('00.json')and test_path.find('optitrack'):
                 self.track_traj_opt = json_test_load(test_path, self.metadata['tracker ID'])
+                self.track_traj_opt = self.track_traj_opt.values
+            elif test_path.endswith('.json'):
+                self.track_traj_opt, time = phoenix_test_load(test_path, self.metadata['tracker ID'])
                 self.track_traj_opt = self.track_traj_opt.values
             else:
                 self.track_traj_opt = csv_test_load(test_path, self.metadata['tracker name'])
@@ -1050,6 +1099,8 @@ class marker_bone():
                 inter_data = nan_helper(marker_trace)
                 self.opt_marker_trace = plot_tiefpass(inter_data, init_marker_ID, fs, Gp, Gs, wp, ws)
                 np.save(save_name, self.opt_marker_trace)
+        else:
+            self.opt_marker_trace = np.zeros((int(test_metadata["length"]),3))
 
         #prepare matrices for transformation
         self.T_proxi_opt = np.zeros((int(test_metadata["length"]),2,4,4))
