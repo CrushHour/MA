@@ -22,6 +22,7 @@ import mujoco
 np.set_printoptions(precision=3, suppress=True, linewidth=100)
 
 path='Data/optitrack-20230130-234800.json'
+path='Data/test_01_31/2023_01_31_18_12_48.json'
 
 indipendent = False
 

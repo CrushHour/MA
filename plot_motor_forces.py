@@ -6,7 +6,7 @@ import transformation_functions as tf
 
 
 if __name__ == "__main__":
-    path= 'Data/test_01_31/2023_01_31_18_12_48.json'
+    path = 'Data/test_01_31/2023_01_31_18_12_48.json'
     f = open(path)
     data = json.load(f)
     f.close()
