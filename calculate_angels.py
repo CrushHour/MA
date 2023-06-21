@@ -14,13 +14,14 @@ importlib.reload(tf)
 #from scipy.spatial.transform import Rotation as Rot
 
 # %%Definition der Pfade
+hand_metadata = tf.get_json('hand_metadata.json')
 test_number = 1
 if test_number == 1:
     test_metadata = tf.get_json('test_metadata.json')['Take 2023-01-31 06.11.42 PM.csv']
-    hand_metadata = tf.get_json('hand_metadata.json')
-else:
+elif test_number == 0:
     test_metadata = tf.get_test_metadata('test_metadata.json')['optitrack-20230130-234800.json']
-    hand_metadata = tf.get_json('hand_metadata.json')
+else:
+    test_metadata = tf.get_test_metadata('test_metadata.json')['2023_01_31_18_12_48.json']
 
 # %%Tracker
 #Rotation	Rotation	Rotation	Rotation	Position	Position	Position	Mean Marker Error
@@ -139,8 +140,17 @@ if __name__=="__main__":
         theta[i] = tf.angle_between(Tracker_DAU_MCP.v_opt[i,:2],Tracker_ZF_midhand.v_opt[i,:2])*180/np.pi
         ita[i] = tf.angle_between([Tracker_DAU_MCP.v_opt[i,0],Tracker_DAU_MCP.v_opt[i,2]],[Tracker_ZF_midhand.v_opt[i,0],Tracker_ZF_midhand.v_opt[i,2]])*180/np.pi
         q.append(Quaternion(matrix=Tracker_DAU_MCP.T_opt_ct[i,:3,:3]))
+    alpha = tf.interpolate_1d(alpha)
+    alpha = Tracker_DAU_DIP.delete_outliers(alpha)
+    alpha = tf.interpolate_1d(alpha)
+    beta = tf.interpolate_1d(beta)
+    beta = Tracker_DAU_DIP.delete_outliers(beta, 1.5)
+    beta = tf.interpolate_1d(beta)
+    gamma = tf.interpolate_1d(gamma)
+    gamma = Tracker_DAU_DIP.delete_outliers(gamma)
+    gamma = tf.interpolate_1d(gamma)
     #tf.plot_angels([delta, epsilon], ['delta (DIP)','epsilon (PIP)'], 'Angles in Thumb joints', save_plots=True)
-    tf.plot_angels([alpha, beta, gamma], ['alpha (DIP)', 'beta (PIP)', 'gamma (MCP)'], 'Angles in Index finger joints', save_plots=True)
+    tf.plot_angels([alpha, beta, gamma], ['alpha (DIP)', 'beta (PIP)', 'gamma (MCP)'], 'Angles in Index finger joints', save_plots=False)
     #tf.plot_angels([theta, ita], ['xy-plane', 'xz-plane'], 'Angles in Thumb MCP joint to midhand', save_plots=True)
     #tf.plot_quaternion(q, 'Quaternion Tracker', save_plots=True)
 # %%

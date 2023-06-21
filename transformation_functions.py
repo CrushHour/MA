@@ -690,6 +690,14 @@ def nan_helper(a):
     interp[np.isnan(interp)] = interpolate.griddata((x[~np.isnan(a)], y[~np.isnan(a)]), a[~np.isnan(a)], (x[np.isnan(a)], y[np.isnan(a)]), method='nearest') 
     return interp
 
+def nan_helper_1d(y):
+    return np.isnan(y), lambda z: z.nonzero()[0]
+
+def interpolate_1d(y):
+    nans, x= nan_helper_1d(y)
+    y[nans]= np.interp(x(nans), x(~nans), y[~nans])
+    return y
+
 def read_markups(path):
     """read the data of the marker points from the ct scan"""
     # 1. load mounting points
@@ -810,14 +818,20 @@ class tracker_bone():
             if test_path.endswith('00.json')and test_path.find('optitrack'):
                 self.track_traj_opt = json_test_load(test_path, self.metadata['tracker ID'])
                 self.track_traj_opt = self.track_traj_opt.values
+                self.time = np.arange(0, len(self.track_traj_opt)/120, 1/120)
             elif test_path.endswith('.json'):
-                self.track_traj_opt, time = phoenix_test_load(test_path, self.metadata['tracker ID'])
+                self.track_traj_opt, self.time = phoenix_test_load(test_path, self.metadata['tracker ID'])
                 self.track_traj_opt = self.track_traj_opt.values
             else:
                 self.track_traj_opt = csv_test_load(test_path, self.metadata['tracker name'])
+                self.time = np.arange(0, len(self.track_traj_opt)/120, 1/120)
+
             self.track_traj_opt = nan_helper(self.track_traj_opt)
-            self.track_traj_opt = self.replace_outliers(self.track_traj_opt)
+            #self.track_traj_opt = self.replace_outliers(self.track_traj_opt)
             #self.track_traj_opt = plot_tiefpass(inter_data, self.finger_name, wp = 0.8, ws = 1.1)
+            self.track_traj_opt = self.delete_outliers(self.track_traj_opt, 2.5)
+            self.track_traj_opt = nan_helper(self.track_traj_opt)
+
             
             # initialize the transformation matrix
             self.T_opt_i = np.zeros((len(self.track_traj_opt),4,4))
@@ -1024,8 +1038,6 @@ class tracker_bone():
 
         return transformation_matrix
 
-
-
     
     def replace_outliers(self, data, n_std = 5):
         dis = np.array([])
@@ -1046,6 +1058,22 @@ class tracker_bone():
                 clean_data.append(last_valid)
 
         return np.array(clean_data)
+    
+    def delete_outliers(self,data, n_std = 2):
+        data = np.array(data)
+        no_value = np.where(np.isnan(data)==False)
+        if len(no_value) >= 1:
+            ValueError('NaN values in data.')
+        indexes = np.where(abs(data - np.mean(data)) > n_std * np.std(data))
+
+        if indexes[0].size > 0:
+            for index in indexes[0]:
+                try:
+                    data[index] = [np.nan]*len(data[index])
+                except:
+                    data[index] = np.nan
+    
+        return data
     
 class marker_bone():
     '''Class for the bones with markers on top. Inherits from tracker_bone.'''
@@ -1109,7 +1137,7 @@ class marker_bone():
         self.T_opt_ct = np.zeros((int(test_metadata["length"]),4,4))
         self.v_opt = np.zeros((int(test_metadata["length"]),3))
     
-    def replace_outliers(self, data, threshold = 0, n_std = 5):
+    def replace_outliers(self, data, threshold = 0, compare_steps = 20, n_std = 5):
         dis = np.array([])
         for i in range(len(data)-1):
             dis = np.append(dis, np.linalg.norm(np.subtract(data[i],data[i+1])))
@@ -1119,8 +1147,6 @@ class marker_bone():
         clean_data = []
         last_valid = data[0]
         dis_lst = []
-
-        compare_steps = 20
 
         clean_data.append(data[:compare_steps])
 
@@ -1136,6 +1162,7 @@ class marker_bone():
 
         print(max(dis_lst))
         return np.array(clean_data)
+
     
     def get_marker_pos_ct(self):
         '''Returns the relative marker positions in the CT coordinate system to the bone cog.'''
