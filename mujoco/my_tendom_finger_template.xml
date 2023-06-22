@@ -82,6 +82,10 @@
 
         <body pos="{{dau.mcp_joint.pos}}">
             <geom type="sphere" size="5 5 5" rgba="1 1 0 0.9"/>
+        </body>            
+        
+        <body pos="{{dau.mcp_joint2.pos}}">
+            <geom type="sphere" size="5 5 5" rgba="1 1 0 0.9"/>
         </body>        
 
         <body pos="{{dau.pip_marker.pos}}">
@@ -109,6 +113,14 @@
         </body>
                 
         <body pos="{{zf.mcp_joint_aussen.pos}}">
+            <geom type="sphere" size="5 5 5" rgba="1 1 0 0.9"/>
+        </body>
+
+        <body pos="{{dau.mcp_joint_innen.pos}}">
+            <geom type="sphere" size="5 5 5" rgba="1 1 1 0.9"/>
+        </body>
+                
+        <body pos="{{dau.mcp_joint_aussen.pos}}">
             <geom type="sphere" size="5 5 5" rgba="1 1 0 0.9"/>
         </body>
 

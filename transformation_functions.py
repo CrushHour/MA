@@ -283,7 +283,7 @@ def marker_variable_id_linewise_march28(testrun_path, initialID=None, dtype="csv
         if values_to_add[0] == np.nan:
             continue
         else:
-            last_signal == values_to_add
+            last_signal == values_to_add #type: ignore
         
         # falls die Minimale Distanz zum nächsten Punkt den Grenzwert überschreitet,
         # wird der Punkt nicht in die Ausgabeliste eingetragen.
@@ -295,6 +295,11 @@ def marker_variable_id_linewise_march28(testrun_path, initialID=None, dtype="csv
 
     #print(dis_list)
     return added_data
+
+def perpendicular_vector(v):
+    '''on possible solution for 3x1 vectors.'''
+    vp = np.array([0, v[2], -v[1]])
+    return vp
 
 def plot_angels(angles, legend, title, save_plots=False):
 
@@ -589,6 +594,25 @@ def hist_filter(T_in, n_std = 3):
     return T_in
 
 # %%
+def angle_axis(v1,v2,axis):
+
+    # Normalize the vectors
+    v1_normalized = v1 / np.linalg.norm(v1)
+    v2_normalized = v2 / np.linalg.norm(v2)
+
+    # Project the vectors onto a plane perpendicular to the axis
+    v1_projected = v1_normalized - np.dot(v1_normalized, axis) * axis
+    v2_projected = v2_normalized - np.dot(v2_normalized, axis) * axis
+
+    # Calculate the dot product of the projected vectors
+    dot_product_projected = np.dot(v1_projected, v2_projected)
+
+    # Calculate the angle between the vectors
+    angle = np.arccos(dot_product_projected) * (180 / np.pi)
+
+    print("The angle between the vectors is:", angle)
+    return angle
+
 # calculate angle beween two vectors
 def angle_between(v1, v2):
     """ Returns the angle in radians between vectors 'v1' and 'v2'::
@@ -1059,7 +1083,7 @@ class tracker_bone():
 
         return np.array(clean_data)
     
-    def delete_outliers(self,data, n_std = 2):
+    def delete_outliers(self,data, n_std = 2.0):
         data = np.array(data)
         no_value = np.where(np.isnan(data)==False)
         if len(no_value) >= 1:
@@ -1072,6 +1096,26 @@ class tracker_bone():
                     data[index] = [np.nan]*len(data[index])
                 except:
                     data[index] = np.nan
+    
+        return data
+
+    def delete_outliers_local(self,data, n_std = 2.0, window = 1500):
+        data = np.array(data)
+        no_value = np.where(np.isnan(data)==False)
+        if len(no_value) >= 1:
+            ValueError('NaN values in data.')
+        indexes = []
+        iterations = int(len(data)/window)
+        for i in range(iterations-1):
+            indexes = np.where(abs(data[i*window:(i+1)*window] - np.mean(data[i*window:(i+1)*window])) > n_std * np.std(data[i*window:(i+1)*window]))
+
+        
+            if indexes[0].size > 0:
+                for index in indexes[0]:
+                    try:
+                        data[i*window+index] = [np.nan]*len(data[index])
+                    except:
+                        data[i*window+index] = np.nan
     
         return data
     
