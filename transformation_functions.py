@@ -27,6 +27,27 @@ from tqdm import tqdm
 path_csv = "Data"
 ct_folder = "Slicer3D"
 
+def plot_analogs(path):
+    data = get_json(path)
+    sensor_data = data['observation']['analogs']
+    time = data['time']
+    labels = ['Thumb Spreader', 'Thumb flexor', 'Flexor 2 index finger', 'Flexor 1 pointer finger', 'Extensor 1 index finger', 'Extensor 2 thumb', 'Extensor 2 index finger', 'Extensor 1 thumb','Temperature']
+    thumb = [0,1,5,7]
+    index = [2,3,4,6]
+
+    for i in thumb:
+        plt.plot(time,sensor_data[i]['force'], label=labels[i])
+    plt.legend()
+    plt.title('Thumb')
+    plt.show()
+
+    for i in index:
+        plt.plot(time,sensor_data[i]['force'], label=labels[i])
+    plt.legend()
+    plt.title('Index')
+    plt.show()
+
+
 def get_opt_positions(filename):
     '''Loads tracker information of a given tracker export file.'''
     path = path_csv + "/" + filename
@@ -301,14 +322,17 @@ def perpendicular_vector(v):
     vp = np.array([0, v[2], -v[1]])
     return vp
 
-def plot_angels(angles, legend, title, save_plots=False):
+def plot_angles(angles, time, step_size, legend, title, save_plots=False):
 
-    pos_x = np.arange(len(angles[0]), step=600) # type: ignore
+    pos_x = np.arange(max(time), step=step_size) # type: ignore
     x = [int(pos_x[i]/120) for i in range(len(pos_x))]
+    if max(pos_x) > 1000.0:
+        x = [int(i/1000) for i in pos_x]
 
     for i in range(len(angles)):
-        default_x = np.arange(len(angles[i]))
-        plt.plot(default_x, angles[i])
+        #default_x = np.arange(len(angles[i]))
+        #plt.plot(default_x, angles[i])
+        plt.plot(time, angles[i])
 
     plt.xticks(pos_x,x)
     plt.legend(legend, loc='upper right')
@@ -599,10 +623,11 @@ def angle_axis(v1,v2,axis):
     # Normalize the vectors
     v1_normalized = v1 / np.linalg.norm(v1)
     v2_normalized = v2 / np.linalg.norm(v2)
+    axis_normalized = axis / np.linalg.norm(axis)
 
     # Project the vectors onto a plane perpendicular to the axis
-    v1_projected = v1_normalized - np.dot(v1_normalized, axis) * axis
-    v2_projected = v2_normalized - np.dot(v2_normalized, axis) * axis
+    v1_projected = v1_normalized - np.dot(v1_normalized, axis_normalized) * axis_normalized
+    v2_projected = v2_normalized - np.dot(v2_normalized, axis_normalized) * axis_normalized
 
     # Calculate the dot product of the projected vectors
     dot_product_projected = np.dot(v1_projected, v2_projected)
@@ -611,6 +636,39 @@ def angle_axis(v1,v2,axis):
     angle = np.arccos(dot_product_projected) * (180 / np.pi)
 
     print("The angle between the vectors is:", angle)
+    return angle
+
+def angle_projectet(v1,v2,normal):
+    '''Normalisiere den Normalenvektor der Ebene, um sicherzustellen, dass er eine Länge von 1 hat.
+
+    Bestimme den Richtungsvektor des gegebenen Vektors im Raum. Du kannst dies tun, indem du den gegebenen Vektor vom Ursprung aus subtrahierst.
+
+    Berechne das Skalarprodukt zwischen dem Richtungsvektor des gegebenen Vektors und dem normalisierten Normalenvektor der Ebene.
+
+    Multipliziere das Skalarprodukt aus Schritt 3 mit dem normalisierten Normalenvektor der Ebene.
+
+    Subtrahiere das Ergebnis aus Schritt 4 vom gegebenen Vektor, um den Schattenpunkt zu erhalten.'''
+
+    # Normalisiere den Normalenvektor der Ebene, um sicherzustellen, dass er eine Länge von 1 hat.
+    normal = normal / np.linalg.norm(normal)
+
+    # Bestimme den Richtungsvektor des gegebenen Vektors im Raum. Du kannst dies tun, indem du den gegebenen Vektor vom Ursprung aus subtrahierst.
+    #v1 = v1 - np.array([0,0,0])
+    #v2 = v2 - np.array([0,0,0])
+
+    # Berechne das Skalarprodukt zwischen dem Richtungsvektor des gegebenen Vektors und dem normalisierten Normalenvektor der Ebene.
+    dot_product = [np.dot(v1, normal), np.dot(v2, normal)]
+
+    # Multipliziere das Skalarprodukt aus Schritt 3 mit dem normalisierten Normalenvektor der Ebene.
+    v1_projected = dot_product[0] * normal
+    v2_projected = dot_product[1] * normal
+
+    # Subtrahiere das Ergebnis aus Schritt 4 vom gegebenen Vektor, um den Schattenpunkt zu erhalten.
+    v1_shadow = v1 - v1_projected
+    v2_shadow = v2 - v2_projected
+
+    angle = angle_between(v1_shadow, v2_shadow)
+
     return angle
 
 # calculate angle beween two vectors
@@ -839,7 +897,7 @@ class tracker_bone():
             self.T_def_ct = self.invert_T(self.T_ct_def)
             self.t_ct_tr = self.T_ct_def
             # Get the trajectory of the tracker from the test data
-            if test_path.endswith('00.json')and test_path.find('optitrack'):
+            if test_path.endswith('00.json') and test_path.find('optitrack'):
                 self.track_traj_opt = json_test_load(test_path, self.metadata['tracker ID'])
                 self.track_traj_opt = self.track_traj_opt.values
                 self.time = np.arange(0, len(self.track_traj_opt)/120, 1/120)
@@ -1159,7 +1217,7 @@ class marker_bone():
         save_name = './Data/' + init_marker_ID + '_opt_marker_trace.npy'
         
         # get marker information
-        if self.metadata["marker def CT"] != "" and init_marker_ID != "Unlabeled ...":
+        if self.metadata["marker def CT"] != "" and init_marker_ID != "Unlabeled ..." and init_marker_ID != "" and init_marker_ID != " ":
             self.marker_pos_ct = self.get_marker_pos_ct()
 
             try:
