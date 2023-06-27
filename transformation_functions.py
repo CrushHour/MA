@@ -34,18 +34,26 @@ def plot_analogs(path):
     labels = ['Thumb Spreader', 'Thumb flexor', 'Flexor 2 index finger', 'Flexor 1 pointer finger', 'Extensor 1 index finger', 'Extensor 2 thumb', 'Extensor 2 index finger', 'Extensor 1 thumb','Temperature']
     thumb = [0,1,5,7]
     index = [2,3,4,6]
+    pos_x = np.arange(max(time), step=5000) # type: ignore
+    x = [int(i/1000) for i in pos_x]
 
     for i in thumb:
         plt.plot(time,sensor_data[i]['force'], label=labels[i])
+    plt.xticks(pos_x,x)
     plt.legend()
     plt.title('Thumb')
+    plt.grid()
     plt.show()
+    plt.close()
 
     for i in index:
         plt.plot(time,sensor_data[i]['force'], label=labels[i])
+    plt.xticks(pos_x,x)
     plt.legend()
     plt.title('Index')
+    plt.grid()
     plt.show()
+    plt.close()
 
 
 def get_opt_positions(filename):
@@ -325,7 +333,7 @@ def perpendicular_vector(v):
 def plot_angles(angles, time, step_size, legend, title, save_plots=False):
 
     pos_x = np.arange(max(time), step=step_size) # type: ignore
-    x = [int(pos_x[i]/120) for i in range(len(pos_x))]
+    x = [int(i) for i in pos_x]
     if max(pos_x) > 1000.0:
         x = [int(i/1000) for i in pos_x]
 
@@ -339,6 +347,7 @@ def plot_angles(angles, time, step_size, legend, title, save_plots=False):
     plt.ylabel('angle [°]')
     plt.xlabel('time [sec]')
     plt.title(title)
+    plt.grid(True)
     if save_plots:
         plt.savefig('./plots/angles/' + title + '.svg', dpi=1200)
     else:
