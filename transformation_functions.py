@@ -40,6 +40,8 @@ def plot_analogs(path):
     for i in thumb:
         plt.plot(time,sensor_data[i]['force'], label=labels[i])
     plt.xticks(pos_x,x)
+    plt.xlabel('time [sec]')
+    plt.ylabel('force [N]') # ist die Kraft woirklich in N?
     plt.legend()
     plt.title('Thumb')
     plt.grid()
@@ -49,11 +51,16 @@ def plot_analogs(path):
     for i in index:
         plt.plot(time,sensor_data[i]['force'], label=labels[i])
     plt.xticks(pos_x,x)
+    plt.xlabel('time [sec]')
+    plt.ylabel('force [N]') # ist die Kraft woirklich in N?
     plt.legend()
-    plt.title('Index')
+    plt.title('Index Finger')
     plt.grid()
     plt.show()
     plt.close()
+
+def plot_analogs_angles(angles = [], flexor = [], extensor = []):
+    return 'done'
 
 
 def get_opt_positions(filename):

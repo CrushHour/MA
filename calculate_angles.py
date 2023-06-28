@@ -19,6 +19,8 @@ hand_metadata = tf.get_json('hand_metadata.json')
 test_number = 2
 
 xtick_range = 0
+start = 0
+end = 0
 
 if test_number == 0:
     test_metadata = tf.get_json('test_metadata.json')['Take 2023-01-31 06.11.42 PM.csv']
@@ -28,6 +30,8 @@ elif test_number == 1:
 else:
     test_metadata = tf.get_json('test_metadata.json')['2023_01_31_18_12_48.json']
     xtick_range = 5000
+    start = 1300
+    end = -1
 # %%Tracker
 #Rotation	Rotation	Rotation	Rotation	Position	Position	Position	Mean Marker Error
 #[X	        Y	        Z	        W]	        [X	        Y	        Z]
@@ -168,11 +172,12 @@ if __name__=="__main__":
     epsilon = tf.interpolate_1d(epsilon)
     epsilon = Tracker_DAU_DIP.delete_outliers_local(epsilon, 1.5, 300) # tune for csv: 1.5, 1000
     epsilon = tf.interpolate_1d(epsilon)
-    tf.plot_angles([delta, epsilon],Tracker_DAU_DIP.time, xtick_range, ['delta (DIP)','epsilon (PIP)'], 'Angles in Thumb joints', save_plots=False)
-    tf.plot_angles([alpha, beta, gamma],Tracker_DAU_DIP.time, xtick_range, ['alpha (DIP)', 'beta (PIP)', 'gamma (MCP)'], 'Angles in Index finger joints', save_plots=False)
-    tf.plot_angles([ita, ita2], Tracker_DAU_DIP.time, xtick_range, ['between vectors', 'around specified axis'], 'Angles in Thumb MCP joint to midhand', save_plots=False)
-    tf.plot_angles([theta], Tracker_DAU_DIP.time, xtick_range, ['perpendicular around specified axis'], 'Angles in Thumb MCP joint to midhand', save_plots=False)
-    tf.plot_quaternion(q, 'Quaternion Tracker', save_plots=False)
+    tf.plot_angles([delta[start:end], epsilon[start:end]],Tracker_DAU_DIP.time[start:end], xtick_range, ['delta (DIP)','epsilon (PIP)'], 'Angles in Thumb joints', save_plots=False)
+    tf.plot_angles([alpha[start:end], beta[start:end], gamma[start:end]],Tracker_DAU_DIP.time[start:end], xtick_range, ['alpha (DIP)', 'beta (PIP)', 'gamma (MCP)'], 'Angles in Index finger joints', save_plots=False)
+    tf.plot_angles([ita[start:end], ita2[start:end]], Tracker_DAU_DIP.time[start:end], xtick_range, ['between vectors', 'around specified axis'], 'Angles in Thumb MCP joint to midhand', save_plots=False)
+    tf.plot_angles([theta[start:end]], Tracker_DAU_DIP.time[start:end], xtick_range, ['perpendicular around specified axis'], 'Angles in Thumb MCP joint to midhand', save_plots=False)
 
-    tf.plot_analogs(test_metadata['path'])
+    if test_number > 1:
+        tf.plot_analogs(test_metadata['path'])
+
 # %%
