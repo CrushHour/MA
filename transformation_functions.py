@@ -59,8 +59,36 @@ def plot_analogs(path):
     plt.show()
     plt.close()
 
-def plot_analogs_angles(angles = [], flexor = [], extensor = []):
-    return 'done'
+def plot_analogs_angles(angles=[], flexor=[], extensor=[], time=[], step_size=5000, start = 0, end = 0, legend=[], title='', save_plots=False):
+    time = time[start:end]
+    angles = [angle[start:end] for angle in angles]
+    flexor = [flex[start:end] for flex in flexor]
+    extensor = [ext[start:end] for ext in extensor]
+
+    pos_x = np.arange(max(time), step=step_size)  # type: ignore
+    start_ticks = int(time[0]/step_size)
+    pos_x = pos_x[start_ticks:]
+    x = [int(i / 1000) for i in pos_x]
+
+    fig, (ax1, ax2, ax3) = plt.subplots(3, sharex=True)
+    ax1.plot(time, np.transpose(angles))
+    ax2.plot(time, np.transpose(flexor))
+    ax3.plot(time, np.transpose(extensor))
+    ax1.set_ylabel('angle [°]')
+    ax2.set_ylabel('force [N]')
+    ax3.set_ylabel('force [N]')
+    ax3.set_xlabel('time [sec]')
+    ax1.set_title(title)
+    ax2.set_title('flexor')
+    ax3.set_title('extensor')
+    ax1.grid(True)
+    ax2.grid(True)
+    ax3.grid(True)
+    plt.xticks(pos_x, x)
+    plt.subplots_adjust(hspace=0.4)
+    plt.show()
+    plt.close()
+
 
 
 def get_opt_positions(filename):

@@ -29,8 +29,8 @@ elif test_number == 1:
     test_metadata = tf.get_json('test_metadata.json')['optitrack-20230130-234800.json']
 else:
     test_metadata = tf.get_json('test_metadata.json')['2023_01_31_18_12_48.json']
-    xtick_range = 5000
-    start = 1300
+    xtick_range = 1000
+    start = 1400
     end = -1
 # %%Tracker
 #Rotation	Rotation	Rotation	Rotation	Position	Position	Position	Mean Marker Error
@@ -178,6 +178,13 @@ if __name__=="__main__":
     tf.plot_angles([theta[start:end]], Tracker_DAU_DIP.time[start:end], xtick_range, ['perpendicular around specified axis'], 'Angles in Thumb MCP joint to midhand', save_plots=False)
 
     if test_number > 1:
+        data = tf.get_json(test_metadata['path'])
+        sensor_data = data['observation']['analogs']
+        thumb_flexor = [sensor_data[i]['force'] for i in [1]] # Beuger
+        thumb_extensor = [sensor_data[i]['force'] for i in [0,5,7]] # Strecker
+        index_flexor = [sensor_data[i]['force'] for i in [2,3]]
+        index_extensor = [sensor_data[i]['force'] for i in [4,6]]
         tf.plot_analogs(test_metadata['path'])
+        tf.plot_analogs_angles(angles=[alpha, beta, gamma], flexor=index_flexor, extensor=index_extensor, time=Tracker_DAU_DIP.time, step_size=xtick_range, start=start,end=end,legend=['alpha (DIP)', 'beta (PIP)', 'gamma (MCP)'], title='Angles in Index finger joints', save_plots=False)
 
 # %%
