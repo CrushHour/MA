@@ -8,6 +8,7 @@ import stl
 import math
 from PIL import Image
 import matplotlib.pyplot as plt
+import seaborn as sns
 import matplotlib.colors as mcolors
 from ipywidgets import interact, fixed
 import ipywidgets as widgets
@@ -23,6 +24,9 @@ from scipy.spatial import distance
 from scipy.signal import butter, buttord, filtfilt
 from tqdm import tqdm
 
+#plot style
+#sns.set_style('dark')
+
 #%% transformation opttrack tracker to real tracker
 path_csv = "Data"
 ct_folder = "Slicer3D"
@@ -32,10 +36,15 @@ def plot_analogs(path):
     sensor_data = data['observation']['analogs']
     time = data['time']
     labels = ['Thumb Spreader', 'Thumb flexor', 'Flexor 2 index finger', 'Flexor 1 pointer finger', 'Extensor 1 index finger', 'Extensor 2 thumb', 'Extensor 2 index finger', 'Extensor 1 thumb','Temperature']
-    thumb = [0,1,5,7]
-    index = [2,3,4,6]
+    thumb = [0,3,5,7]
+    index = [1,2,4,6]
     pos_x = np.arange(max(time), step=5000) # type: ignore
     x = [int(i/1000) for i in pos_x]
+
+    # Filter data
+    for i in range(len(sensor_data)):
+        sensor_data[i]['force'] = plot_tiefpass(sensor_data[i]['force'], fs=6,plotting=True)
+
 
     for i in thumb:
         plt.plot(time,sensor_data[i]['force'], label=labels[i])
@@ -59,7 +68,7 @@ def plot_analogs(path):
     plt.show()
     plt.close()
 
-def plot_analogs_angles(angles=[], flexor=[], extensor=[], time=[], step_size=5000, start = 0, end = 0, legend=[], title='', save_plots=False):
+def plot_analogs_angles(angles=[], flexor=[], extensor=[], time=[], step_size=5000, start = 0, end = 0, legend1=[], legend2=[], legend3=[], title='', save_plots=False):
     time = time[start:end]
     angles = [angle[start:end] for angle in angles]
     flexor = [flex[start:end] for flex in flexor]
@@ -70,10 +79,13 @@ def plot_analogs_angles(angles=[], flexor=[], extensor=[], time=[], step_size=50
     pos_x = pos_x[start_ticks:]
     x = [int(i / 1000) for i in pos_x]
 
+
     fig, (ax1, ax2, ax3) = plt.subplots(3, sharex=True)
     ax1.plot(time, np.transpose(angles))
     ax2.plot(time, np.transpose(flexor))
+    ax2.plot(time, np.transpose(extensor), color = 'lightgrey', linewidth=0.5)
     ax3.plot(time, np.transpose(extensor))
+    ax3.plot(time, np.transpose(flexor), color = 'lightgrey', linewidth=0.5)
     ax1.set_ylabel('angle [°]')
     ax2.set_ylabel('force [N]')
     ax3.set_ylabel('force [N]')
@@ -84,8 +96,11 @@ def plot_analogs_angles(angles=[], flexor=[], extensor=[], time=[], step_size=50
     ax1.grid(True)
     ax2.grid(True)
     ax3.grid(True)
+    ax1.legend(legend1, loc='upper center', bbox_to_anchor =(0.5,-0.05), fancybox=True, shadow=True, ncol=4)
+    ax2.legend(legend2, loc='upper center', bbox_to_anchor =(0.5,-0.05), fancybox=True, shadow=True, ncol=4)
+    ax3.legend(legend3, loc='upper center', bbox_to_anchor =(0.5,-0.5), fancybox=True, shadow=True, ncol=4)
     plt.xticks(pos_x, x)
-    plt.subplots_adjust(hspace=0.4)
+    plt.subplots_adjust(hspace=0.9)
     plt.show()
     plt.close()
 
@@ -368,6 +383,8 @@ def perpendicular_vector(v):
 def plot_angles(angles, time, step_size, legend, title, save_plots=False):
 
     pos_x = np.arange(max(time), step=step_size) # type: ignore
+    start_ticks = int(time[0]/step_size)
+    pos_x = pos_x[start_ticks:]
     x = [int(i) for i in pos_x]
     if max(pos_x) > 1000.0:
         x = [int(i/1000) for i in pos_x]
@@ -614,30 +631,34 @@ def butter_lowpass_filter(data, cutoff, fs, order=1):
     y = filtfilt(b, a, data, axis = 0)
     return y
 
-def plot_tiefpass(marker_data, title: str='', fs: float =120, Gp: float = 0.1, Gs: float=3.0, wp: float=0.8, ws: float=1.1):
+def plot_tiefpass(marker_data, title: str='', fs: float =120, Gp: float = 0.1, Gs: float=3.0, wp: float=0.8, ws: float=1.1, plotting = False):
     order, wn = buttord(wp, ws, Gp, Gs)
     y = butter_lowpass_filter(marker_data, wn, fs, order)
     
-    # Plotting
-    fig = plt.subplot(1, 1, 1)
-    fig.plot(marker_data, color = 'lightgrey', linewidth=0.25, label='marker data')
+    if plotting:
+        # Plotting
+        fig = plt.subplot(1, 1, 1)
+        fig.plot(marker_data, color = 'lightgrey', linewidth=0.25, label='marker data')
+        try:
+            fig.plot(y[:,0], 'r-', linewidth=0.5, label='filtered data x')
+            fig.plot(y[:,1], 'g-', linewidth=0.5, label='filtered data y')
+            fig.plot(y[:,2], 'b-', linewidth=0.5, label='filtered data z')
+            plt.xlabel('Time [120 Hz]')
+        except:
+            fig.plot(y, 'r-', linewidth=0.5, label='filtered data x')
 
-    fig.plot(y[:,0], 'r-', linewidth=0.5, label='filtered data x')
-    fig.plot(y[:,1], 'g-', linewidth=0.5, label='filtered data y')
-    fig.plot(y[:,2], 'b-', linewidth=0.5, label='filtered data z')
 
-    plt.xlabel('Time [120 Hz]')
-    plt.title(title)
-    fig.grid()
-    handles, labels = plt.gca().get_legend_handles_labels()
-    by_label = dict(zip(labels, handles))
-    fig.legend(by_label.values(), by_label.keys())
-    plt.subplots_adjust(hspace=0.35)
-    now = datetime.now()
-    plot_file_title = "marker_" + now.strftime("%d_%m_%Y_%H_%M_%S")
-    # plt.savefig(plot_file_title + ".pdf", format="pdf")
-    plt.show()
-    plt.close()
+        plt.title(title)
+        fig.grid()
+        handles, labels = plt.gca().get_legend_handles_labels()
+        by_label = dict(zip(labels, handles))
+        fig.legend(by_label.values(), by_label.keys())
+        plt.subplots_adjust(hspace=0.35)
+        now = datetime.now()
+        plot_file_title = "marker_" + now.strftime("%d_%m_%Y_%H_%M_%S")
+        # plt.savefig(plot_file_title + ".pdf", format="pdf")
+        plt.show()
+        plt.close()
     return y
 
 def hist_filter(T_in, n_std = 3):

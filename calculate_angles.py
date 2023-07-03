@@ -174,17 +174,18 @@ if __name__=="__main__":
     epsilon = tf.interpolate_1d(epsilon)
     tf.plot_angles([delta[start:end], epsilon[start:end]],Tracker_DAU_DIP.time[start:end], xtick_range, ['delta (DIP)','epsilon (PIP)'], 'Angles in Thumb joints', save_plots=False)
     tf.plot_angles([alpha[start:end], beta[start:end], gamma[start:end]],Tracker_DAU_DIP.time[start:end], xtick_range, ['alpha (DIP)', 'beta (PIP)', 'gamma (MCP)'], 'Angles in Index finger joints', save_plots=False)
-    tf.plot_angles([ita[start:end], ita2[start:end]], Tracker_DAU_DIP.time[start:end], xtick_range, ['between vectors', 'around specified axis'], 'Angles in Thumb MCP joint to midhand', save_plots=False)
+    #tf.plot_angles([ita[start:end], ita2[start:end]], Tracker_DAU_DIP.time[start:end], xtick_range, ['between vectors', 'around specified axis'], 'Angles in Thumb MCP joint to midhand', save_plots=True)
     tf.plot_angles([theta[start:end]], Tracker_DAU_DIP.time[start:end], xtick_range, ['perpendicular around specified axis'], 'Angles in Thumb MCP joint to midhand', save_plots=False)
 
     if test_number > 1:
         data = tf.get_json(test_metadata['path'])
         sensor_data = data['observation']['analogs']
-        thumb_flexor = [sensor_data[i]['force'] for i in [1]] # Beuger
+        thumb_flexor = [sensor_data[i]['force'] for i in [3]] # Beuger
         thumb_extensor = [sensor_data[i]['force'] for i in [0,5,7]] # Strecker
-        index_flexor = [sensor_data[i]['force'] for i in [2,3]]
+        index_flexor = [sensor_data[i]['force'] for i in [1,2]]
         index_extensor = [sensor_data[i]['force'] for i in [4,6]]
         tf.plot_analogs(test_metadata['path'])
-        tf.plot_analogs_angles(angles=[alpha, beta, gamma], flexor=index_flexor, extensor=index_extensor, time=Tracker_DAU_DIP.time, step_size=xtick_range, start=start,end=end,legend=['alpha (DIP)', 'beta (PIP)', 'gamma (MCP)'], title='Angles in Index finger joints', save_plots=False)
+        tf.plot_analogs_angles(angles=[alpha, beta, gamma], flexor=index_flexor, extensor=index_extensor, time=Tracker_DAU_DIP.time, step_size=xtick_range, start=start,end=end,legend1=['alpha (DIP)', 'beta (PIP)', 'gamma (MCP)'],legend2= ['Flexor super','Flexor profundus'], legend3=['Extensor digitorum', 'Extensor indicis'], title='Angles in Index finger joints', save_plots=False)
+        tf.plot_analogs_angles(angles=[delta, epsilon, ita, theta], flexor=thumb_flexor, extensor=thumb_extensor, time=Tracker_DAU_DIP.time, step_size=xtick_range, start=start,end=end,legend1=['gamma (DI)', 'delta (PIP)', 'ita (MCP)', 'theta (perpendicular to MCP)'], legend2=['Flexor'], legend3=['E. Brevis','E. Longus','Abductor'], title='Angles in Thumb joints', save_plots=False)
 
 # %%
