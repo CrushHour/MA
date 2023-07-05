@@ -31,6 +31,21 @@ from tqdm import tqdm
 path_csv = "Data"
 ct_folder = "Slicer3D"
 
+def plot_analogs_raw(path):
+    data = get_json(path)
+    sensor_data = data['observation']['analogs']
+    time = data['time']
+
+    for i in range(9):
+        plt.plot(time,sensor_data[i]['force'], label=i)
+    title = path.split('/')[-1]
+    plt.title(title)
+    plt.legend()
+    plt.show()
+    plt.close()
+
+
+
 def plot_analogs(path):
     data = get_json(path)
     sensor_data = data['observation']['analogs']

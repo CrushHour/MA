@@ -134,29 +134,35 @@ if __name__=="__main__":
     axis = np.zeros((len(Marker_ZF_intermedial.opt_marker_trace),3))
     q = []
 
-    vZF_PIP = np.subtract(np.mean(Marker_ZF_intermedial.T_dist_opt[i,:,:3,3],axis=0),np.mean(Marker_ZF_intermedial.T_proxi_opt[i,:,:3,3],axis=0))
-    vZF_MCP = np.subtract(np.mean(ZF_MCP.T_dist_opt[i,:,:3,3],axis=0),np.mean(ZF_MCP.T_proxi_opt[i,:,:3,3],axis=0))
+    #vZF_PIP = np.subtract(np.mean(Marker_ZF_intermedial.T_dist_opt[i,:,:3,3],axis=0),np.mean(Marker_ZF_intermedial.T_proxi_opt[i,:,:3,3],axis=0))
+    #vZF_MCP = np.subtract(np.mean(ZF_MCP.T_dist_opt[i,:,:3,3],axis=0),np.mean(ZF_MCP.T_proxi_opt[i,:,:3,3],axis=0))
 
 
     for i in range(len(Marker_ZF_intermedial.opt_marker_trace)):
+        vZF_DIP = np.subtract(Tracker_ZF_DIP.T_dist_opt[i,:3,3],Tracker_ZF_DIP.T_proxi_opt[i,:3,3])
         vZF_PIP = np.subtract(np.mean(Marker_ZF_intermedial.T_dist_opt[i,:,:3,3],axis=0),np.mean(Marker_ZF_intermedial.T_proxi_opt[i,:,:3,3],axis=0))
         vZF_MCP = np.subtract(np.mean(ZF_MCP.T_dist_opt[i,:,:3,3],axis=0),np.mean(ZF_MCP.T_proxi_opt[i,:,:3,3],axis=0))
 
-        alpha[i] = tf.angle_between(np.subtract(Tracker_ZF_DIP.T_dist_opt[i,:3,3],Tracker_ZF_DIP.T_proxi_opt[i,:3,3]),vZF_PIP)*180/np.pi
-        beta[i] = tf.angle_between(vZF_PIP,vZF_MCP)*180/np.pi
-        gamma[i] = tf.angle_between(vZF_MCP,Tracker_ZF_midhand.v_opt[i])*180/np.pi
-        #calculate angeles in DAU joints
-        delta[i] = tf.angle_between(np.subtract(np.mean(Marker_DAU.T_dist_opt[i,:,:3,3],axis=0),np.mean(Marker_DAU.T_proxi_opt[i,:,:3,3],axis=0)),np.subtract(Tracker_DAU_DIP.T_dist_opt[i,:3,3],Tracker_DAU_DIP.T_proxi_opt[i,:3,3]))*180/np.pi
-        epsilon[i] = tf.angle_between(np.subtract(Tracker_DAU_MCP.T_dist_opt[i,:3,3],Tracker_DAU_MCP.T_proxi_opt[i,:3,3]),np.subtract(np.mean(Marker_DAU.T_dist_opt[i,:,:3,3],axis=0),np.mean(Marker_DAU.T_proxi_opt[i,:,:3,3],axis=0)))*180/np.pi
+        vDAU_PIP = np.subtract(np.mean(Marker_DAU.T_dist_opt[i,:,:3,3],axis=0),np.mean(Marker_DAU.T_proxi_opt[i,:,:3,3],axis=0))
 
-        zeta[i] = tf.angle_between(Tracker_DAU_MCP.v_opt[i,:2],Tracker_DAU_MCP.v_opt[0,:2])*180/np.pi
-        eta[i] = tf.angle_between([Tracker_DAU_MCP.v_opt[i,0],Tracker_DAU_MCP.v_opt[i,2]],[Tracker_DAU_MCP.v_opt[0,0],Tracker_DAU_MCP.v_opt[0,2]])*180/np.pi
+        #calculate angles in ZF joints
+        alpha[i] = tf.angle_between(vZF_DIP,-vZF_PIP)*180/np.pi
+        beta[i] = tf.angle_between(vZF_PIP,-vZF_MCP)*180/np.pi
+        gamma[i] = tf.angle_between(vZF_MCP,-Tracker_ZF_midhand.v_opt[i])*180/np.pi
+        
+        #calculate angeles in DAU joints
+        delta[i] = tf.angle_between(Tracker_DAU_DIP.v_opt[i],-vDAU_PIP)*180/np.pi
+        epsilon[i] = tf.angle_between(np.subtract(Tracker_DAU_MCP.T_dist_opt[i,:3,3],Tracker_DAU_MCP.T_proxi_opt[i,:3,3]),vDAU_PIP)*180/np.pi
+
+        #zeta[i] = tf.angle_between(Tracker_DAU_MCP.v_opt[i,:2],Tracker_DAU_MCP.v_opt[0,:2])*180/np.pi
+        #eta[i] = tf.angle_between([Tracker_DAU_MCP.v_opt[i,0],Tracker_DAU_MCP.v_opt[i,2]],[Tracker_DAU_MCP.v_opt[0,0],Tracker_DAU_MCP.v_opt[0,2]])*180/np.pi
         
         axis[i]=np.subtract(Tracker_DAU_MCP.T_proxi_innen_opt[i,:3,3],Tracker_DAU_MCP.T_proxi_aussen_opt[i,:3,3])
         axisp = np.cross(axis[i],Tracker_DAU_MCP.v_opt[i])
         ita2[i] = tf.angle_projectet(v1=Tracker_DAU_MCP.v_opt[i],v2=Tracker_DAU_MCP.v_opt[0],normal=axis[i])*180/np.pi
         theta[i] = tf.angle_projectet(v1=Tracker_DAU_MCP.v_opt[i],v2=Tracker_DAU_MCP.v_opt[0],normal=axisp)*180/np.pi
         ita[i] = tf.angle_between(v1=Tracker_DAU_MCP.v_opt[i],v2=Tracker_DAU_MCP.v_opt[0])*180/np.pi
+    
     alpha = tf.interpolate_1d(alpha)
     alpha = Tracker_DAU_DIP.delete_outliers(alpha)
     alpha = tf.interpolate_1d(alpha)
@@ -186,6 +192,6 @@ if __name__=="__main__":
         index_extensor = [sensor_data[i]['force'] for i in [4,6]]
         tf.plot_analogs(test_metadata['path'])
         tf.plot_analogs_angles(angles=[alpha, beta, gamma], flexor=index_flexor, extensor=index_extensor, time=Tracker_DAU_DIP.time, step_size=xtick_range, start=start,end=end,legend1=['alpha (DIP)', 'beta (PIP)', 'gamma (MCP)'],legend2= ['Flexor super','Flexor profundus'], legend3=['Extensor digitorum', 'Extensor indicis'], title='Angles in Index finger joints', save_plots=False)
-        tf.plot_analogs_angles(angles=[delta, epsilon, ita, theta], flexor=thumb_flexor, extensor=thumb_extensor, time=Tracker_DAU_DIP.time, step_size=xtick_range, start=start,end=end,legend1=['gamma (DI)', 'delta (PIP)', 'ita (MCP)', 'theta (perpendicular to MCP)'], legend2=['Flexor'], legend3=['E. Brevis','E. Longus','Abductor'], title='Angles in Thumb joints', save_plots=False)
+        tf.plot_analogs_angles(angles=[delta, epsilon, ita, theta], flexor=thumb_flexor, extensor=thumb_extensor, time=Tracker_DAU_DIP.time, step_size=xtick_range, start=start,end=end,legend1=['delta (DI)', 'epsilon (PIP)', 'ita (MCP)', 'theta (perpendicular to MCP)'], legend2=['Flexor'], legend3=['E. Brevis','E. Longus','Abductor'], title='Angles in Thumb joints', save_plots=False)
 
 # %%
