@@ -116,7 +116,11 @@ def plot_analogs_angles(angles=[], flexor=[], extensor=[], time=[], step_size=50
     ax3.legend(legend3, loc='upper center', bbox_to_anchor =(0.5,-0.5), fancybox=True, shadow=True, ncol=4)
     plt.xticks(pos_x, x)
     plt.subplots_adjust(hspace=0.9)
-    plt.show()
+    if save_plots:
+        date_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+        plt.savefig('./plots/angles/' + title + '_' + date_time + '.svg', dpi=1200)
+    else:
+        plt.show()
     plt.close()
 
 
