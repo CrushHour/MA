@@ -190,7 +190,7 @@ if __name__=="__main__":
         sensor_data = data['observation']['analogs']
         # calibrate sensor data
         for i in range(9):
-            sensor_data[i]['force'] = cs.apply_calibration(sensor_data[i]['force'], i)
+            sensor_data[i]['force'] = cs.apply_calibration(sensor_data[i]['force'], i, 'calibration_parameters_long.json')
         
         thumb_flexor = [sensor_data[i]['force'] for i in [7,6]] # Beuger
         thumb_extensor = [sensor_data[i]['force'] for i in [8,0]] # Strecker

@@ -50,7 +50,7 @@ def calibrate_sensor(calibrated_values, uncalibrated_values):
 
     return scale[0], offset[0] # type: ignore
 
-def apply_calibration(uncalibrated_values, sensor_id, calibration_file='calibration_parameters.json'):
+def apply_calibration(uncalibrated_values, sensor_id, calibration_file='calibration_parameters_long.json'):
     # Load the calibration parameters from the JSON file
     with open(calibration_file, 'r') as f:
         calibration_params = json.load(f)
@@ -74,28 +74,41 @@ def apply_calibration(uncalibrated_values, sensor_id, calibration_file='calibrat
 
 
 if __name__ == '__main__':
-    path = 'Data\\test_01_31\\2023_07_05_19_04_12.json' # Messung, dreimal auf jeden Sensor gedrückt, begonnen bei Motor 0, dann chronologisch weiter
-    #path = 'Data\\test_01_31\\2023_07_05_19_02_38.json' 
-    data = tf.get_json(path)
-    sensor_data = data['observation']['analogs']
+    #path = 'Data\\test_01_31\\2023_07_05_19_04_12.json' # Messung, dreimal auf jeden Sensor gedrückt, begonnen bei Motor 0, dann chronologisch weiter
+    path = ["Data\\calibration\\Motor_0_Sensor_0_2023_07_06_18_17_07.json",
+            "Data\\calibration\\Motor_2_Sensor_1_2023_07_06_18_19_38.json",
+            "Data\\calibration\\Motor_4_Sensor_2.json",
+            "Data\\calibration\\Motor_6_Sensor_3_2023_07_06_18_14_00.json",
+            'Data\\test_01_31\\2023_07_05_19_04_12.json',
+            "Data\\calibration\\Motor_1_Sensor_5_2023_07_06_18_18_20.json",
+            "Data\\calibration\\Motor_3_Sensor_6_nicht sicher.json",
+            "Data\\calibration\\Motor_5_Sensor_7_2023_07_06_18_12_24.json",
+            "Data\\calibration\\Motor_7_Sensor_8_2023_07_06_18_15_15.json" \
+            ]
+    
     
     scale = []
     offset = []
     add_on = [1500,1750]
     #range = [[129,213]]
     for i in range(9):
-        press_period = find_calibration_range(sensor_data[i]['force'])
-        calibrated_values =  data['observation']['force_torques'][0]['fz'][press_period[0]:press_period[1]] + data['observation']['force_torques'][0]['fz'][add_on[0]:add_on[1]]
-        uncalibrated_values = sensor_data[i]['force'][press_period[0]:press_period[1]] + sensor_data[i]['force'][add_on[0]:add_on[1]]
+        data = tf.get_json(path[i])
+        sensor_data = data['observation']['analogs']
+        #press_period = find_calibration_range(sensor_data[i]['force'])
+        #print(press_period)
+        #calibrated_values =  data['observation']['force_torques'][0]['fz'][press_period[0]:press_period[1]] + data['observation']['force_torques'][0]['fz'][add_on[0]:add_on[1]]
+        #uncalibrated_values = sensor_data[i]['force'][press_period[0]:press_period[1]] + sensor_data[i]['force'][add_on[0]:add_on[1]]
+        #time = data['time'][press_period[0]:press_period[1]] + data['time'][add_on[0]:add_on[1]]
 
-        time = data['time'][press_period[0]:press_period[1]] + data['time'][add_on[0]:add_on[1]]
+        uncalibrated_values = sensor_data[i]['force']
+        calibrated_values =  data['observation']['force_torques'][0]['fz']
+        time = data['time']
 
         iscale, ioffset = calibrate_sensor(calibrated_values, uncalibrated_values)
 
         scale.append(iscale)
         offset.append(ioffset)
 
-        print(press_period)
 
         plt.plot(time, calibrated_values, label='Calibrated')
         plt.plot(time, uncalibrated_values, label='Uncalibrated')
@@ -105,13 +118,13 @@ if __name__ == '__main__':
 
     # Save the calibration parameters to a json file
     calibration_parameters = {'scale': scale, 'offset': offset}
-    with open('calibration_parameters.json', 'w') as f:
+    with open('calibration_parameters_long.json', 'w') as f:
         json.dump(calibration_parameters, f, indent=4)
     
-    time = data['time']
+    time = data['time'] # type: ignore
     for i in [0,1,2,3,5,6,7,8]:
         print(f'Sensor {i}: {scale[i]} * sensor_value + {offset[i]} = calibrated_value')
-        calibratet_value = scale[i] * np.array(sensor_data[i]['force']) + offset[i]
+        calibratet_value = scale[i] * np.array(sensor_data[i]['force']) + offset[i] # type: ignore
         if i > 3:
             calibratet_value = np.array(calibratet_value) - np.mean(calibratet_value[add_on[0]:add_on[1]])
         plt.plot(time, calibratet_value, label=f'Sensor {i}')

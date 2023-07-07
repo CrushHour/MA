@@ -38,7 +38,7 @@ def plot_analogs_raw(path):
 
     for i in range(9):
         plt.plot(time,sensor_data[i]['force'], label=i)
-    title = path.split('/')[-1]
+    title = path.split('\\')[-1]
     plt.title(title)
     plt.legend()
     plt.show()
@@ -118,7 +118,7 @@ def plot_analogs_angles(angles=[], flexor=[], extensor=[], time=[], step_size=50
     plt.subplots_adjust(hspace=0.9)
     if save_plots:
         date_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-        plt.savefig('./plots/angles/' + title + '_' + date_time + '.svg', dpi=1200)
+        plt.savefig('./plots/angles/' + title + '_' + date_time + '.png', dpi=1200)
     else:
         plt.show()
     plt.close()
