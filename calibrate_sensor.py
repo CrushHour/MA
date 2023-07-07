@@ -1,3 +1,4 @@
+# %%
 from sklearn.linear_model import LinearRegression
 import numpy as np
 import transformation_functions as tf
@@ -72,8 +73,23 @@ def apply_calibration(uncalibrated_values, sensor_id, calibration_file='calibrat
 
     return calibrated_values
 
+def filter_array(arr, t=0.8, decimal_places=7):
+    """Filter the array using the given threshold t and round the filtered values to the specified number of decimal places"""
+    filtered_arr = []
+    loc_value = arr[0]
+    filtered_arr.append(round(loc_value, decimal_places))
+    for value in arr[1:]:
+        loc_value = t * loc_value + (1 - t) * value
+        filtered_arr.append(round(loc_value, decimal_places))
+    for i in range(len(arr)-1, 0, -1):
+        loc_value = t * loc_value + (1 - t) * filtered_arr[i]
+        filtered_arr[i] = round(loc_value, decimal_places)
+    return filtered_arr
+
 
 if __name__ == '__main__':
+    save_parameters = False
+
     #path = 'Data\\test_01_31\\2023_07_05_19_04_12.json' # Messung, dreimal auf jeden Sensor gedrückt, begonnen bei Motor 0, dann chronologisch weiter
     path = ["Data\\calibration\\Motor_0_Sensor_0_2023_07_06_18_17_07.json",
             "Data\\calibration\\Motor_2_Sensor_1_2023_07_06_18_19_38.json",
@@ -83,16 +99,21 @@ if __name__ == '__main__':
             "Data\\calibration\\Motor_1_Sensor_5_2023_07_06_18_18_20.json",
             "Data\\calibration\\Motor_3_Sensor_6_nicht sicher.json",
             "Data\\calibration\\Motor_5_Sensor_7_2023_07_06_18_12_24.json",
-            "Data\\calibration\\Motor_7_Sensor_8_2023_07_06_18_15_15.json" \
-            ]
+            "Data\\calibration\\Motor_7_Sensor_8_2023_07_06_18_15_15.json"
+           ]
     
     
     scale = []
     offset = []
     add_on = [1500,1750]
     #range = [[129,213]]
-    for i in range(9):
-        data = tf.get_json(path[i])
+    j = 0
+    k = 0
+
+    for i in range(0,9):
+        #data = tf.get_json(path[i])
+        data = tf.get_json(path)
+
         sensor_data = data['observation']['analogs']
         #press_period = find_calibration_range(sensor_data[i]['force'])
         #print(press_period)
@@ -100,7 +121,16 @@ if __name__ == '__main__':
         #uncalibrated_values = sensor_data[i]['force'][press_period[0]:press_period[1]] + sensor_data[i]['force'][add_on[0]:add_on[1]]
         #time = data['time'][press_period[0]:press_period[1]] + data['time'][add_on[0]:add_on[1]]
 
-        uncalibrated_values = sensor_data[i]['force']
+        if i % 2 == 0:
+            uncalibrated_values = sensor_data[k]['force']
+            k += 1
+        else:            
+            uncalibrated_values = sensor_data[j]['dforce']
+            print('dforce')
+            #uncalibrated_values = filter_array(uncalibrated_values, t=0.8)
+            #uncalibrated_values = tf.interpolate_1d(np.array(uncalibrated_values))
+            j += 1
+
         calibrated_values =  data['observation']['force_torques'][0]['fz']
         time = data['time']
 
@@ -113,13 +143,14 @@ if __name__ == '__main__':
         plt.plot(time, calibrated_values, label='Calibrated')
         plt.plot(time, uncalibrated_values, label='Uncalibrated')
         plt.legend()
-        plt.title(f'Sensor {i}')
+        plt.title(f'Sensor {i} dforce')
         plt.show()
 
     # Save the calibration parameters to a json file
     calibration_parameters = {'scale': scale, 'offset': offset}
-    with open('calibration_parameters_long.json', 'w') as f:
-        json.dump(calibration_parameters, f, indent=4)
+    if save_parameters:
+        with open('calibration_parameters.json', 'w') as f:
+            json.dump(calibration_parameters, f, indent=4)
     
     time = data['time'] # type: ignore
     for i in [0,1,2,3,5,6,7,8]:
@@ -130,3 +161,5 @@ if __name__ == '__main__':
         plt.plot(time, calibratet_value, label=f'Sensor {i}')
     plt.legend()
     plt.show()
+
+#%%
