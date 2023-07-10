@@ -8,6 +8,8 @@ import stl
 import math
 from PIL import Image
 import matplotlib.pyplot as plt
+import matplotlib as mpl
+from cycler import cycler
 import seaborn as sns
 import matplotlib.colors as mcolors
 from ipywidgets import interact, fixed
@@ -43,8 +45,6 @@ def plot_analogs_raw(path):
     plt.legend()
     plt.show()
     plt.close()
-
-
 
 def plot_analogs(path):
     data = get_json(path)
@@ -97,10 +97,13 @@ def plot_analogs_angles(angles=[], flexor=[], extensor=[], time=[], step_size=50
 
     fig, (ax1, ax2, ax3) = plt.subplots(3, sharex=True)
     ax1.plot(time, np.transpose(angles))
+    
     ax2.plot(time, np.transpose(flexor))
     ax2.plot(time, np.transpose(extensor), color = 'lightgrey', linewidth=0.5)
+    
     ax3.plot(time, np.transpose(extensor))
     ax3.plot(time, np.transpose(flexor), color = 'lightgrey', linewidth=0.5)
+
     ax1.set_ylabel('angle [°]')
     ax2.set_ylabel('force [N]')
     ax3.set_ylabel('force [N]')
@@ -123,6 +126,62 @@ def plot_analogs_angles(angles=[], flexor=[], extensor=[], time=[], step_size=50
         plt.show()
     plt.close()
 
+def plot_ft_splitted(forces=[], torques=[], time=[], step_size=5000, start = 0, end = 0, legend1=[], legend2=[], title='', save_plots=False):
+    time = time[start:end]
+    forces = [force[start:end] for force in forces]
+    torques = [torque[start:end] for torque in torques]
+
+    pos_x = np.arange(max(time), step=step_size)  # type: ignore
+    start_ticks = int(time[0]/step_size)
+    pos_x = pos_x[start_ticks:]
+    x = [int(i / 1000) for i in pos_x]
+
+    # Set the default color cycle
+    #mpl.rcParams['axes.prop_cycle'] = mpl.cycler(color=["r", "k", "c"])    
+    default_cycler = (cycler(color=['r', 'g', 'b', 'y']))
+    plt.rc('axes', prop_cycle=default_cycler)
+
+    fig, (ax1, ax2) = plt.subplots(2, sharex=True)
+    ax1.plot(time, np.transpose(forces))
+    ax2.plot(time, np.transpose(torques))
+    ax1.set_ylabel('force [N]')
+    ax2.set_ylabel('torque [Nmm]')
+    ax2.set_xlabel('time [sec]')
+    ax1.set_title(title)
+    ax1.grid(True)
+    ax2.grid(True)
+    ax1.legend(legend1, loc='lower left', fancybox=True, shadow=True, ncol=3)
+    ax2.legend(legend2, loc='lower left', fancybox=True, shadow=True, ncol=3)
+    plt.xticks(pos_x, x)
+    if save_plots:
+        date_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+        plt.savefig('./plots/angles/' + title + '_' + date_time + '.png', dpi=1200)
+    else:
+        plt.show()
+    plt.close()
+
+def plot_ft_norm(data, time, step_size=5000, start=0, end=1000, title="", save_plots=False):
+    data = data[start:end]
+    time = time[start:end]
+    
+    pos_x = np.arange(max(time), step=step_size)  # type: ignore
+    start_ticks = int(time[0]/step_size)
+    pos_x = pos_x[start_ticks:]
+    x = [int(i / 1000) for i in pos_x]
+
+    plt.plot(time, data, label='normed FT-Sensor force')
+    plt.xticks(pos_x,x)
+    plt.legend()
+    plt.title(title)
+    plt.xlabel('time [sec]')
+    plt.ylabel('force [N]')
+    plt.grid(True)
+    if save_plots:
+        date_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+        plt.savefig('./plots/angles/' + title + '_' + date_time + '.png', dpi=1200)
+    else:
+        plt.show()
+    plt.close()
 
 
 def get_opt_positions(filename):
