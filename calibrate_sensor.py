@@ -75,13 +75,10 @@ def apply_calibration(uncalibrated_values, sensor_id, calibration_file='calibrat
 
     # Apply the scale and offset to the uncalibrated values
     calibrated_values = scale * uncalibrated_values + offset
-
-    #add_on = [1500,1750]
-
-    #if np.mean(calibrated_values) < -10 or np.mean(calibrated_values) > 10:
-    #    print('Calibration failed, subtracting mean value to center the data on y=0')
-    #    calibrated_values = np.array(calibrated_values) - np.mean(calibrated_values)
-
+    
+    #calibration from FT-Sensor to Newton [N] (for documentation look in MA)
+    calibrated_values = calibrated_values / 8.998278583527435 #[Units/N]
+    
     return calibrated_values
 
 def filter_array(arr, t=0.8, decimal_places=7):
