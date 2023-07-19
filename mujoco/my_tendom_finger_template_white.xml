@@ -1,0 +1,70 @@
+<mujoco>
+    <default>
+        <geom rgba="1 0 0 0.9"/>
+    </default>
+    <asset>
+        <mesh name="ZF-MCP" scale="1 1 1"
+        file="Data\STL\Segmentation_ZF_MCP.stl"/>
+        <mesh name="ZF-PIP" scale="1 1 1"
+        file="Data\STL\Segmentation_ZF_PIP.stl"/>
+        <mesh name="ZF-DIP" scale="1 1 1"
+        file="Data\STL\Segmentation_ZF_DIP.stl"/>
+        <mesh name="ZF-Midhand" scale="1 1 1"
+        file="Data\STL\Segmentation_ZF_Mittelhand.stl"/>
+        <mesh name="DAU-MCP" scale="1 1 1"
+        file="Data\STL\Segmentation_DAU_Osmetacarpale_1.stl"/>
+        <mesh name="DAU-PIP" scale="1 1 1"
+        file="Data\STL\Segmentation_DAU_Phalax_proximalis.stl"/>
+        <mesh name="DAU-Sesam" scale="1 1 1"
+        file="Data\STL\Segmentation_DAU_Sesambein.stl"/>
+        <mesh name="DAU-DIP" scale="1 1 1"
+        file="Data\STL\Segmentation_DAU_DIP.stl"/>
+        <mesh name="ROH" scale="1 1 1"
+        file="Data\STL\Segmentation_Rest _of_Hand.stl"/>
+        
+    </asset>
+    <worldbody>
+        <light name="Light" diffuse="1 1 1" pos="500 500 0" dir="-0.5 -0.5 0"/>
+        
+        <geom type="plane" size="1000 1000 0.01" pos = "0 0 -400" rgba="1 1 1 1"/>
+        
+        <geom type="box" size="1 1000 1000" pos = "-500 0 0" quat = "-0.8733046400935156 -0.0 -0.0 -0.4871745124605095" rgba="1 1 1 1"/>
+
+        <body name="ZF_DIP">
+        <geom pos = "0 0 0" quat = "1 0 0 0" type="mesh" mesh="ZF-DIP" rgba="0 0 1 1"/>
+        </body>
+
+        <body name="ZF_PIP">
+        <geom pos = "0 0 0" quat = "1 0 0 0" type="mesh" mesh="ZF-PIP" rgba="0 0 1 1"/>
+        </body>
+
+        <body name="ZF_MCP">
+        <geom pos = "0 0 0" quat = "1 0 0 0" type="mesh" mesh="ZF-MCP" rgba="0 0 1 1"/>
+        </body>
+
+        <body name="ZF_Midhand">
+        <geom pos = "0 0 0" quat = "1 0 0 0" type="mesh" mesh="ZF-Midhand" rgba="0 0 1 1"/>
+        </body>
+
+        <body name="DAU_DIP">
+        <geom pos = "0 0 0" quat = "1 0 0 0" type="mesh" mesh="DAU-DIP" rgba="1 0 0 1"/>
+        </body>
+        
+        <body name="DAU_PIP">
+        <geom pos = "0 0 0" quat = "1 0 0 0" type="mesh" mesh="DAU-PIP" rgba="1 0 0 1" />
+        </body>
+
+        <body name="DAU_Sesam">
+        <geom pos = "0 0 0" quat = "1 0 0 0" type="mesh" mesh="DAU-Sesam" rgba="1 0 0 1" />
+        </body>
+
+        <body name="DAU_MCP">
+        <geom pos = "0 0 0" quat = "1 0 0 0" type="mesh" mesh="DAU-MCP" rgba="1 0 0 1" />
+        </body>        
+        
+        <body name="ROH">
+        <geom pos = "0 0 0" quat = "1 0 0 0" type="mesh" mesh="ROH" rgba="0.6 0.5 0.5 0.5" />
+        </body>
+
+    </worldbody>
+</mujoco>

@@ -89,6 +89,9 @@ def plot_analogs_angles(angles=[], flexor=[], extensor=[], time=[], step_size=50
     flexor = [flex[start:end] for flex in flexor]
     extensor = [ext[start:end] for ext in extensor]
 
+    plt_height = 15
+    plt_width = 10
+
     pos_x = np.arange(max(time), step=step_size)  # type: ignore
     start_ticks = int(time[0]/step_size)
     pos_x = pos_x[start_ticks:]
@@ -96,13 +99,17 @@ def plot_analogs_angles(angles=[], flexor=[], extensor=[], time=[], step_size=50
 
 
     fig, (ax1, ax2, ax3) = plt.subplots(3, sharex=True)
-    ax1.plot(time, np.transpose(angles))
     
+    ax1.plot(time, np.transpose(angles))
+    ax1.figure.set_size_inches(10, plt_height)
+
     ax2.plot(time, np.transpose(flexor))
     ax2.plot(time, np.transpose(extensor), color = 'lightgrey', linewidth=0.5)
-    
+    ax2.figure.set_size_inches(10, plt_height)
+
     ax3.plot(time, np.transpose(extensor))
     ax3.plot(time, np.transpose(flexor), color = 'lightgrey', linewidth=0.5)
+    ax3.figure.set_size_inches(10, plt_height)
 
     ax1.set_ylabel('angle [°]')
     ax2.set_ylabel('force [N]')
@@ -116,9 +123,9 @@ def plot_analogs_angles(angles=[], flexor=[], extensor=[], time=[], step_size=50
     ax3.grid(True)
     ldg1=ax1.legend(legend1, loc='upper center', bbox_to_anchor =(0.5,-0.05), fancybox=True, shadow=True, ncol=4)
     ldg2=ax2.legend(legend2, loc='upper center', bbox_to_anchor =(0.5,-0.05), fancybox=True, shadow=True, ncol=4)
-    ldg3=ax3.legend(legend3, loc='upper center', bbox_to_anchor =(0.5,-0.5), fancybox=True, shadow=True, ncol=4)
+    ldg3=ax3.legend(legend3, loc='upper center', bbox_to_anchor =(0.5,-0.15), fancybox=True, shadow=True, ncol=4)
     plt.xticks(pos_x, x)
-    plt.subplots_adjust(hspace=0.9)
+    plt.subplots_adjust(hspace=0.3)
     if save_plots:
         date_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
         plt.savefig('./plots/angles/' + title + '_' + date_time + '.png',bbox_extra_artists=(ldg2,ldg1,ldg3), dpi=1200, bbox_inches='tight')

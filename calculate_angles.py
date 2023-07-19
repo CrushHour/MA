@@ -196,17 +196,17 @@ if __name__=="__main__":
         index_flexor = [sensor_data[i] for i in [1,2]]
         index_extensor = [sensor_data[i] for i in [4]] #6 hat sich das Offset verändert
         tf.plot_analogs(test_metadata['path'])
-        tf.plot_analogs_angles(angles=[alpha, beta, gamma], flexor=index_flexor, extensor=index_extensor, time=Tracker_DAU_DIP.time, step_size=xtick_range, start=start,end=end,legend1=['alpha (DIP)', 'beta (PIP)', 'gamma (MCP)'],legend2= ['Flexor super','Flexor profundus'], legend3=['Extensor digitorum'], title='Angles in Index finger joints', save_plots=True)
-        tf.plot_analogs_angles(angles=[delta, epsilon, ita, theta], flexor=thumb_flexor, extensor=thumb_extensor, time=Tracker_DAU_DIP.time, step_size=xtick_range, start=start,end=end,legend1=['delta (DI)', 'epsilon (PIP)', 'ita (MCP)', 'theta (perpendicular to MCP)'], legend2=['Flexor','E. Longus'], legend3=['Abductor', 'E. Brevis'], title='Angles in Thumb joints', save_plots=True)
+        tf.plot_analogs_angles(angles=[alpha, beta, gamma], flexor=index_flexor, extensor=index_extensor, time=Tracker_DAU_DIP.time, step_size=xtick_range, start=start,end=end,legend1=['alpha (DIP)', 'beta (PIP)', 'gamma (MCP)'],legend2= ['Flexor super','Flexor profundus'], legend3=['Extensor digitorum'], title='Angles in Index finger joints', save_plots=False)
+        tf.plot_analogs_angles(angles=[delta, epsilon, ita, theta], flexor=thumb_flexor, extensor=thumb_extensor, time=Tracker_DAU_DIP.time, step_size=xtick_range, start=start,end=end,legend1=['delta (DI)', 'epsilon (PIP)', 'ita (MCP)', 'theta (perpendicular to MCP)'], legend2=['Flexor','E. Longus'], legend3=['Abductor', 'E. Brevis'], title='Angles in Thumb joints', save_plots=False)
         
         # plot force torque sensor data
         ft_norm = np.linalg.norm([data['observation']['force_torques'][0]['fz'],data['observation']['force_torques'][0]['fx'],data['observation']['force_torques'][0]['fy']], axis=0)
         # apply facotr from Sensor data to N
         ft_norm = ft_norm / 8.998278583527435
         
-        tf.plot_ft_norm(ft_norm, data['time'], xtick_range, start=start, end=end, title='Grip Force',save_plots=True)
+        tf.plot_ft_norm(ft_norm, data['time'], xtick_range, start=start, end=end, title='Grip Force',save_plots=False)
         
         ft_forces = [data['observation']['force_torques'][0]['fx'],data['observation']['force_torques'][0]['fy'],data['observation']['force_torques'][0]['fz']]
         ft_torques = [data['observation']['force_torques'][0]['mx'],data['observation']['force_torques'][0]['my'],data['observation']['force_torques'][0]['mz']]
-        tf.plot_ft_splitted(ft_forces, ft_torques, data['time'], xtick_range, start=start, end=end, legend1=['fx','fy', 'fz'],legend2=['mx','my', 'mz'], title='FT-Sensor data', save_plots=True)
+        tf.plot_ft_splitted(ft_forces, ft_torques, data['time'], xtick_range, start=start, end=end, legend1=['fx','fy', 'fz'],legend2=['mx','my', 'mz'], title='FT-Sensor data', save_plots=False)
 # %%

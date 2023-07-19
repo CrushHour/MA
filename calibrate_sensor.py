@@ -62,6 +62,10 @@ def calibrate_sensor(calibrated_values, uncalibrated_values):
     return scale[0], offset[0] # type: ignore
 
 def apply_calibration(uncalibrated_values, sensor_id, calibration_file='calibration_parameters_long.json'):
+    
+    sensor_to_newton_factor = 8.998278583527435
+    sensor_to_newton_offset = 1.5587983484301424
+    
     # Load the calibration parameters from the JSON file
     with open(calibration_file, 'r') as f:
         calibration_params = json.load(f)
@@ -77,7 +81,7 @@ def apply_calibration(uncalibrated_values, sensor_id, calibration_file='calibrat
     calibrated_values = scale * uncalibrated_values + offset
     
     #calibration from FT-Sensor to Newton [N] (for documentation look in MA)
-    calibrated_values = calibrated_values / 8.998278583527435 #[Units/N]
+    calibrated_values = (calibrated_values-sensor_to_newton_offset) / sensor_to_newton_factor #[Units/N]
     
     return calibrated_values
 
