@@ -31,9 +31,16 @@ elif test_number == 1:
     test_metadata = tf.get_json('test_metadata.json')['optitrack-20230130-234800.json']
 else:
     test_metadata = tf.get_json('test_metadata.json')['2023_01_31_18_12_48.json']
+    #test_metadata = tf.get_json('test_metadata.json')['2023_01_31_18_10_36.json']
+    #test_metadata = tf.get_json('test_metadata.json')['2023_01_31_18_08_11.json']
+    #test_metadata = tf.get_json('test_metadata.json')['2023_01_31_00_47_54.json']
+    #test_metadata = tf.get_json('test_metadata.json')['2023_01_31_00_42_47.json']
+    #test_metadata = tf.get_json('test_metadata.json')['2023_01_31_00_30_44.json']
     xtick_range = 1000
     start = 1400
+    #start = 900
     end = -1
+    #end = 1550
 # %%Tracker
 #Rotation	Rotation	Rotation	Rotation	Position	Position	Position	Mean Marker Error
 #[X	        Y	        Z	        W]	        [X	        Y	        Z]
@@ -153,7 +160,7 @@ if __name__=="__main__":
         gamma[i] = tf.angle_between(vZF_MCP,Tracker_ZF_midhand.v_opt[i])*180/np.pi
         
         #calculate angeles in DAU joints
-        delta[i] = tf.angle_between(Tracker_DAU_DIP.v_opt[i],vDAU_PIP)*180/np.pi
+        delta[i] = tf.angle_between(vDAU_PIP,Tracker_DAU_DIP.v_opt[i])*180/np.pi
         epsilon[i] = tf.angle_between(np.subtract(Tracker_DAU_MCP.T_dist_opt[i,:3,3],Tracker_DAU_MCP.T_proxi_opt[i,:3,3]),vDAU_PIP)*180/np.pi
 
         #zeta[i] = tf.angle_between(Tracker_DAU_MCP.v_opt[i,:2],Tracker_DAU_MCP.v_opt[0,:2])*180/np.pi
@@ -191,13 +198,13 @@ if __name__=="__main__":
         # calibrate sensor data
         for i in range(len(sensor_data)):
             sensor_data[i] = cs.apply_calibration(sensor_data[i], i, calibration_file='calibration_parameters_long.json')
-        thumb_flexor = [sensor_data[i] for i in [5,7]] # Beuger
-        thumb_extensor = [sensor_data[i] for i in [0,3]] # Strecker
+        thumb_flexor = [sensor_data[i] for i in [3]] # Beuger
+        thumb_extensor = [sensor_data[i] for i in [0,5,7]] # Strecker
         index_flexor = [sensor_data[i] for i in [1,2]]
         index_extensor = [sensor_data[i] for i in [4]] #6 hat sich das Offset verändert
         tf.plot_analogs(test_metadata['path'])
-        tf.plot_analogs_angles(angles=[alpha, beta, gamma], flexor=index_flexor, extensor=index_extensor, time=Tracker_DAU_DIP.time, step_size=xtick_range, start=start,end=end,legend1=['alpha (DIP)', 'beta (PIP)', 'gamma (MCP)'],legend2= ['Flexor super','Flexor profundus'], legend3=['Extensor digitorum'], title='Angles in Index finger joints', save_plots=False)
-        tf.plot_analogs_angles(angles=[delta, epsilon, ita, theta], flexor=thumb_flexor, extensor=thumb_extensor, time=Tracker_DAU_DIP.time, step_size=xtick_range, start=start,end=end,legend1=['delta (DI)', 'epsilon (PIP)', 'ita (MCP)', 'theta (perpendicular to MCP)'], legend2=['Flexor','E. Longus'], legend3=['Abductor', 'E. Brevis'], title='Angles in Thumb joints', save_plots=False)
+        tf.plot_analogs_angles(angles=[alpha, beta, gamma], flexor=index_flexor, extensor=index_extensor, time=Tracker_DAU_DIP.time, step_size=xtick_range, start=start,end=end,legend1=['alpha (DIP)', 'beta (PIP)', 'gamma (MCP)'],legend2= ['Flexor super','Flexor profundus'], legend3=['Extensor digitorum'], title='Angles in Index finger joints', save_plots=True)
+        tf.plot_analogs_angles(angles=[delta, epsilon, ita, theta], flexor=thumb_flexor, extensor=thumb_extensor, time=Tracker_DAU_DIP.time, step_size=xtick_range, start=start,end=end,legend1=['delta (DI)', 'epsilon (PIP)', 'ita (MCP)', 'theta (perpendicular to MCP)'], legend2=['Flexor pollicis longus'], legend3=['Abductor', 'E. longus','E. brevis'], title='Angles in Thumb joints', save_plots=True)
         
         # plot force torque sensor data
         ft_norm = np.linalg.norm([data['observation']['force_torques'][0]['fz'],data['observation']['force_torques'][0]['fx'],data['observation']['force_torques'][0]['fy']], axis=0)
@@ -209,4 +216,19 @@ if __name__=="__main__":
         ft_forces = [data['observation']['force_torques'][0]['fx'],data['observation']['force_torques'][0]['fy'],data['observation']['force_torques'][0]['fz']]
         ft_torques = [data['observation']['force_torques'][0]['mx'],data['observation']['force_torques'][0]['my'],data['observation']['force_torques'][0]['mz']]
         tf.plot_ft_splitted(ft_forces, ft_torques, data['time'], xtick_range, start=start, end=end, legend1=['fx','fy', 'fz'],legend2=['mx','my', 'mz'], title='FT-Sensor data', save_plots=False)
+        
+        # calculate tendon forces by summing up the forces of the flexors and extensors
+        # - extensor forces are negative
+        # - flexor forces are positive
+        sum_tendon_force = thumb_flexor[0] + thumb_flexor[1] - thumb_extensor[0] - thumb_extensor[1] + index_flexor[0] + index_flexor[1] - index_extensor[0] - index_extensor[1]
+        sum_tendon_force -= np.mean(sum_tendon_force)
+        
+        # plot tendon forces over ft sensor data
+        plt.scatter(ft_norm, sum_tendon_force)
+        plt.xlabel('FT-Sensor [N]')
+        plt.ylabel('Sum of tendon forces [N]')
+        plt.show()
+
+        plt.plot(sum_tendon_force)
+        plt.plot(ft_norm)   
 # %%

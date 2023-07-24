@@ -116,8 +116,8 @@ def plot_analogs_angles(angles=[], flexor=[], extensor=[], time=[], step_size=50
     ax3.set_ylabel('force [N]')
     ax3.set_xlabel('time [sec]')
     ax1.set_title(title)
-    ax2.set_title('flexor')
-    ax3.set_title('extensor')
+    ax2.set_title('Flexor')
+    ax3.set_title('Extensor')
     ax1.grid(True)
     ax2.grid(True)
     ax3.grid(True)
@@ -145,8 +145,8 @@ def plot_ft_splitted(forces=[], torques=[], time=[], step_size=5000, start = 0, 
 
     # Set the default color cycle
     #mpl.rcParams['axes.prop_cycle'] = mpl.cycler(color=["r", "k", "c"])    
-    default_cycler = (cycler(color=['r', 'g', 'b', 'y']))
-    plt.rc('axes', prop_cycle=default_cycler)
+    #default_cycler = (cycler(color=['r', 'g', 'b', 'y']))
+    #plt.rc('axes', prop_cycle=default_cycler)
 
     fig, (ax1, ax2) = plt.subplots(2, sharex=True)
     ax1.plot(time, np.transpose(forces))
