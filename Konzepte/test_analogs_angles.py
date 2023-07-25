@@ -22,9 +22,10 @@ def plot_analogs_angles(angles=[], flexor=[], extensor=[], time=[], step_size=50
     plt.close()
 
 # Example usage:
-angles = [10, 20, 30, 40, 50]
-flexor = [5, 10, 15, 20, 25]
-extensor = [25, 20, 15, 10, 5]
-time = [1, 2, 3, 4, 5]
-title = 'Analog Angles'
-plot_analogs_angles(angles, flexor, extensor, time, title=title)
+if __name__ == '__main__':
+    angles = [10, 20, 30, 40, 50]
+    flexor = [5, 10, 15, 20, 25]
+    extensor = [25, 20, 15, 10, 5]
+    time = [1, 2, 3, 4, 5]
+    title = 'Analog Angles'
+    plot_analogs_angles(angles, flexor, extensor, time, title=title)

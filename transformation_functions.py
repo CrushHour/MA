@@ -821,13 +821,20 @@ def angle_projectet(v1,v2,normal):
 
     return angle
 
-# calculate angle beween two vectors
 def angle_between(v1, v2):
     """ Returns the angle in radians between vectors 'v1' and 'v2'::
     """
     v1_u = v1 / np.linalg.norm(v1)
     v2_u = v2 / np.linalg.norm(v2)
-    return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
+    
+    angle = np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
+    
+    # Use the determinant of v1 and v2 (i.e., the cross product's z-component)
+    # to determine the direction of the angle
+    direction = np.sign(np.cross(v1_u, v2_u)[2])
+    
+    return direction * angle
+
 
 # https://automaticaddison.com/how-to-convert-a-quaternion-to-a-rotation-matrix/
 
