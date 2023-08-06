@@ -2,6 +2,7 @@
     "Take 2023-01-31 06.11.42 PM.csv":{
         "path":"./Data/test_01_31/Take 2023-01-31 06.11.42 PM.csv",
         "type":"csv",
+        "name": "Take 2023-01-31 06.11.42 PM",
         "marker_IDs":[
             "Unlabeled 2016",
             "Unlabeled 2023"
@@ -11,42 +12,49 @@
     "optitrack-20230130-234800.json":{
         "path":"./Data/optitrack-20230130-234800.json",
         "type":"json",
+        "name": "optitrack-20230130-234800",
         "marker_IDs":["",""],
         "length": "8393"
     },
     "2023_01_31_18_12_48.json":{
         "path":"Data/test_01_31/2023_01_31_18_12_48.json",
         "type":"json",
+        "name": "2023_01_31_18_12_48",
         "marker_IDs":["",""],
         "length": "1778"
     },    
     "2023_01_31_18_10_36.json":{
         "path":"Data/test_01_31/2023_01_31_18_10_36.json",
         "type":"json",
+        "name": "2023_01_31_18_10_36",
         "marker_IDs":["",""],
         "length": "1778"
     },
     "2023_01_31_18_08_11.json":{
         "path":"Data/test_01_31/2023_01_31_18_08_11.json",
         "type":"json",
+        "name": "2023_01_31_18_08_11",
         "marker_IDs":["",""],
         "length": "1775"
     },
     "2023_01_31_00_42_47.json":{
         "path":"Data/test_01_30/2023_01_31_00_42_47.json",
         "type":"json",
+        "name": "2023_01_31_00_42_47",
         "marker_IDs":["",""],
         "length": "1783"
     },
     "2023_01_31_00_30_44.json":{
         "path":"Data/test_01_30/2023_01_31_00_30_44.json",
         "type":"json",
+        "name": "2023_01_31_00_30_44",
         "marker_IDs":["",""],
         "length": "1781"
     },
     "2023_01_31_00_47_54.json":{
         "path":"Data/test_01_30/2023_01_31_00_47_54.json",
         "type":"json",
+        "name": "2023_01_31_00_47_54",
         "marker_IDs":["",""],
         "length": "1782"
     }

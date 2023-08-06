@@ -1,5 +1,7 @@
 #%% Import
 import sys
+import os
+import time
 sys.path.append('./mujoco')
 import transformation_functions as tf
 import calibrate_sensor as cs
@@ -39,8 +41,9 @@ else:
     xtick_range = 1000
     start = 1400
     #start = 900
-    end = -1
+    #end = 1690
     #end = 1550
+    end = -1
 # %%Tracker
 #Rotation	Rotation	Rotation	Rotation	Position	Position	Position	Mean Marker Error
 #[X	        Y	        Z	        W]	        [X	        Y	        Z]
@@ -63,6 +66,41 @@ def construct_marker_rot(opt_info, ct_info):
     T = Tracker_DAU_DIP.kabsch(ct_info, opt_info)
     return T
 
+def construct_model(i):
+    parameters = {'zf': dict(), 'dau': dict()}
+
+    # STL
+    parameters['zf']['dip'] = mwp.build_parameters([Quaternion(matrix=Tracker_ZF_DIP.T_opt_ct[i,:3,:3]), Tracker_ZF_DIP.T_opt_ct[i,:3,3]])
+    parameters['zf']['pip'] = mwp.build_parameters([Quaternion(matrix=Marker_ZF_intermedial.T_opt_ct[i,:3,:3]), Marker_ZF_intermedial.T_opt_ct[i,:3,3]])
+    parameters['zf']['mcp'] = mwp.build_parameters([Quaternion(matrix=ZF_MCP.T_opt_ct[i,:3,:3]) ,ZF_MCP.T_opt_ct[i,:3,3]])
+    parameters['zf']['midhand'] = mwp.build_parameters([Quaternion(matrix=Tracker_ZF_midhand.T_opt_ct[i,:3,:3]), Tracker_ZF_midhand.T_opt_ct[i,:3,3]])
+
+    # green, red, yellow, white, blue balls
+    parameters['zf']['dip_joint_aussen' ] = mwp.build_parameters([[1,0,0,0], Tracker_ZF_DIP.T_proxi_aussen_opt[i,:3,3]]) 
+    parameters['zf']['dip_joint_innen' ] = mwp.build_parameters([[1,0,0,0], Tracker_ZF_DIP.T_proxi_innen_opt[i,:3,3]]) 
+    parameters['zf']['pip_joint_aussen' ] = mwp.build_parameters([[1,0,0,0], Marker_ZF_intermedial.T_proxi_opt[i,1,:3,3]]) 
+    parameters['zf']['pip_joint_innen' ] = mwp.build_parameters([[1,0,0,0], Marker_ZF_intermedial.T_proxi_opt[i,0,:3,3]]) 
+    parameters['zf']['mcp_joint_aussen' ] = mwp.build_parameters([[1,0,0,0], Tracker_ZF_midhand.T_dist_aussen_opt[i,:3,3]]) 
+    parameters['zf']['mcp_joint_innen' ] = mwp.build_parameters([[1,0,0,0], Tracker_ZF_midhand.T_dist_innen_opt[i,:3,3]]) 
+
+    # STL
+    parameters['dau']['dip'] = mwp.build_parameters([Quaternion(matrix=Tracker_DAU_DIP.T_opt_ct[i,:3,:3]), Tracker_DAU_DIP.T_opt_ct[i,:3,3]])
+    parameters['dau']['pip'] = mwp.build_parameters([Quaternion(matrix=Marker_DAU.T_opt_ct[i,:3,:3]), Marker_DAU.T_opt_ct[i,:3,3]])
+    parameters['dau']['mcp' ] = mwp.build_parameters([Quaternion(matrix=Tracker_DAU_MCP.T_opt_ct[i,:3,:3]), Tracker_DAU_MCP.T_opt_ct[i,:3,3]])
+
+    # green, yellow balls
+    parameters['dau']['dip_joint_aussen'] = mwp.build_parameters([[1,0,0,0], Tracker_DAU_DIP.T_proxi_aussen_opt[i,:3,3]]) 
+    parameters['dau']['dip_joint_innen'] = mwp.build_parameters([[1,0,0,0], Tracker_DAU_DIP.T_proxi_innen_opt[i,:3,3]])
+    parameters['dau']['mcp_joint_aussen'] = mwp.build_parameters([[1,0,0,0], Tracker_DAU_MCP.T_proxi_aussen_opt[i,:3,3]]) 
+    parameters['dau']['mcp_joint_innen'] = mwp.build_parameters([[1,0,0,0], Tracker_DAU_MCP.T_proxi_innen_opt[i,:3,3]]) 
+
+
+    with open("./mujoco/generated_parameters.yaml", "w") as outfile:
+        yaml.dump(parameters, outfile)
+
+    model = mwj.MujocoFingerModel("./mujoco/my_tendom_finger_template_white.xml", "./mujoco/generated_parameters.yaml")
+    print("Model updated!")
+
 for t in tqdm(range(len(Marker_DAU.opt_marker_trace))):
     Marker_DAU.T_opt_ct[t] = construct_marker_rot([Tracker_DAU_DIP.T_proxi_innen_opt[t,:3,3], Tracker_DAU_DIP.T_proxi_aussen_opt[t,:3,3],Tracker_DAU_MCP.T_dist_innen_opt[t,:3,3],Tracker_DAU_MCP.T_dist_aussen_opt[t,:3,3]],\
                                                   [Tracker_DAU_DIP.T_proxi_innen_CT[:3,3], Tracker_DAU_DIP.T_proxi_aussen_CT[:3,3],Tracker_DAU_MCP.T_dist_innen_CT[:3,3],Tracker_DAU_MCP.T_dist_aussen_CT[:3,3]])
@@ -82,55 +120,16 @@ for t in tqdm(range(len(Marker_DAU.opt_marker_trace))):
 
         Marker_ZF_intermedial.T_opt_ct[t] = construct_marker_rot([Tracker_ZF_DIP.T_proxi_innen_opt[t,:3,3],Tracker_ZF_DIP.T_proxi_aussen_opt[t,:3,3], ZF_MCP.T_dist_opt[t,0,:3,3], ZF_MCP.T_dist_opt[t,1,:3,3]], \
                                                           [Tracker_ZF_DIP.T_proxi_innen_CT[:3,3], Tracker_ZF_DIP.T_proxi_aussen_CT[:3,3], ZF_MCP.T_dist_CT[0,:3,3], ZF_MCP.T_dist_CT[1,:3,3]])
-
-
-# %% Build mujoco parameters
+       
 #i = 4553
 #i = 5831
 i=0
-
-parameters = {'zf': dict(), 'dau': dict()}
-
-# STL
-parameters['zf']['dip'] = mwp.build_parameters([Quaternion(matrix=Tracker_ZF_DIP.T_opt_ct[i,:3,:3]), Tracker_ZF_DIP.T_opt_ct[i,:3,3]])
-parameters['zf']['pip'] = mwp.build_parameters([Quaternion(matrix=Marker_ZF_intermedial.T_opt_ct[i,:3,:3]), Marker_ZF_intermedial.T_opt_ct[i,:3,3]])
-parameters['zf']['mcp'] = mwp.build_parameters([Quaternion(matrix=ZF_MCP.T_opt_ct[i,:3,:3]) ,ZF_MCP.T_opt_ct[i,:3,3]])
-parameters['zf']['midhand'] = mwp.build_parameters([Quaternion(matrix=Tracker_ZF_midhand.T_opt_ct[i,:3,:3]), Tracker_ZF_midhand.T_opt_ct[i,:3,3]])
-
-# green, red, yellow, white, blue balls
-parameters['zf']['dip_joint_aussen' ] = mwp.build_parameters([[1,0,0,0], Tracker_ZF_DIP.T_proxi_aussen_opt[i,:3,3]]) 
-parameters['zf']['dip_joint_innen' ] = mwp.build_parameters([[1,0,0,0], Tracker_ZF_DIP.T_proxi_innen_opt[i,:3,3]]) 
-parameters['zf']['pip_joint_aussen' ] = mwp.build_parameters([[1,0,0,0], Marker_ZF_intermedial.T_proxi_opt[i,1,:3,3]]) 
-parameters['zf']['pip_joint_innen' ] = mwp.build_parameters([[1,0,0,0], Marker_ZF_intermedial.T_proxi_opt[i,0,:3,3]]) 
-parameters['zf']['mcp_joint_aussen' ] = mwp.build_parameters([[1,0,0,0], Tracker_ZF_midhand.T_dist_aussen_opt[i,:3,3]]) 
-parameters['zf']['mcp_joint_innen' ] = mwp.build_parameters([[1,0,0,0], Tracker_ZF_midhand.T_dist_innen_opt[i,:3,3]]) 
-parameters['zf']['pip_marker'] = mwp.build_parameters([[1,0,0,0], Marker_ZF_intermedial.opt_marker_trace[i]]) 
-
-# STL
-parameters['dau']['dip'] = mwp.build_parameters([Quaternion(matrix=Tracker_DAU_DIP.T_opt_ct[i,:3,:3]), Tracker_DAU_DIP.T_opt_ct[i,:3,3]])
-parameters['dau']['pip'] = mwp.build_parameters([Quaternion(matrix=Marker_DAU.T_opt_ct[i,:3,:3]), Marker_DAU.T_opt_ct[i,:3,3]])
-parameters['dau']['mcp' ] = mwp.build_parameters([Quaternion(matrix=Tracker_DAU_MCP.T_opt_ct[i,:3,:3]), Tracker_DAU_MCP.T_opt_ct[i,:3,3]])
-
-# green, yellow balls
-parameters['dau']['pip_joint' ] = mwp.build_parameters([[1,0,0,0], Tracker_DAU_DIP.T_proxi_opt[i,:3,3]]) 
-parameters['dau']['mcp_joint' ] = mwp.build_parameters([[1,0,0,0], Tracker_DAU_MCP.T_dist_opt[i,:3,3]])
-parameters['dau']['mcp_joint2' ] = mwp.build_parameters([[1,0,0,0], Tracker_DAU_MCP.T_proxi_opt[i,:3,3]])
-parameters['dau']['pip_marker'] = mwp.build_parameters([[1,0,0,0], Marker_DAU.opt_marker_trace[i]])
-parameters['dau']['mcp_joint_aussen' ] = mwp.build_parameters([[1,0,0,0], Tracker_DAU_MCP.T_proxi_aussen_opt[i,:3,3]]) 
-parameters['dau']['mcp_joint_innen' ] = mwp.build_parameters([[1,0,0,0], Tracker_DAU_MCP.T_proxi_innen_opt[i,:3,3]]) 
-
-
-with open("./mujoco/generated_parameters.yaml", "w") as outfile:
-    yaml.dump(parameters, outfile)
-
-model = mwj.MujocoFingerModel("./mujoco/my_tendom_finger_template.xml", "./mujoco/generated_parameters.yaml")
-print("Model updated!")
-
+construct_model(i)
 # %% plotten von delta und epsilon
 
 
 if __name__=="__main__":
-    save_plots = False
+    save_plots = True
 
     alpha = np.zeros(len(Marker_ZF_intermedial.opt_marker_trace))
     beta = np.zeros(len(Marker_ZF_intermedial.opt_marker_trace))
@@ -170,7 +169,7 @@ if __name__=="__main__":
         epsilon[i] = tf.angle_between(vDAU_PIP,Tracker_DAU_MCP.v_opt[i])*trans
 
         #axis is defined so that the positive (counterclockwise) angle direction is to the inside of the hand
-        axis[i]=np.subtract(Tracker_DAU_MCP.T_proxi_aussen_opt[i,:3,3],Tracker_DAU_MCP.T_proxi_innen_opt[i,:3,3])
+        axis[i]= np.subtract(Tracker_DAU_MCP.T_proxi_innen_opt[i,:3,3],Tracker_DAU_MCP.T_proxi_aussen_opt[i,:3,3])
         axisp = np.cross(axis[i],Tracker_DAU_MCP.v_opt[i])
         iota[i] = tf.angle_projectet(v1=Tracker_DAU_MCP.v_opt[0],v2=Tracker_DAU_MCP.v_opt[i],normal=axis[i])*trans
         theta[i] = tf.angle_projectet(v1=Tracker_DAU_MCP.v_opt[0],v2=Tracker_DAU_MCP.v_opt[i],normal=axisp)*trans
@@ -190,10 +189,10 @@ if __name__=="__main__":
     epsilon = tf.interpolate_1d(epsilon)
     epsilon = Tracker_DAU_DIP.delete_outliers_local(epsilon, 1.5, 300) # tune for csv: 1.5, 1000
     epsilon = tf.interpolate_1d(epsilon)
-    tf.plot_angles([delta[start:end], epsilon[start:end]],Tracker_DAU_DIP.time[start:end], xtick_range, ['delta (DIP)','epsilon (PIP)'], 'Angles in Thumb joints', save_plots=False)
-    tf.plot_angles([alpha[start:end], beta[start:end], gamma[start:end]],Tracker_DAU_DIP.time[start:end], xtick_range, ['alpha (DIP)', 'beta (PIP)', 'gamma (MCP)'], 'Angles in Index finger joints', save_plots=False)
-    #tf.plot_angles([iota[start:end], iota2[start:end]], Tracker_DAU_DIP.time[start:end], xtick_range, ['between vectors', 'around specified axis'], 'Angles in Thumb MCP joint to midhand', save_plots=False)
-    tf.plot_angles([theta[start:end]], Tracker_DAU_DIP.time[start:end], xtick_range, ['perpendicular around specified axis'], 'Angles in Thumb MCP joint to midhand', save_plots=False)
+    tf.plot_angles([delta[start:end], epsilon[start:end]],Tracker_DAU_DIP.time[start:end], xtick_range, ['delta (DIP)','epsilon (PIP)'], 'Angles in Thumb joints', save_plots=save_plots)
+    tf.plot_angles([alpha[start:end], beta[start:end], gamma[start:end]],Tracker_DAU_DIP.time[start:end], xtick_range, ['alpha (DIP)', 'beta (PIP)', 'gamma (MCP)'], 'Angles in Index finger joints', save_plots=save_plots)
+    #tf.plot_angles([iota[start:end], iota2[start:end]], Tracker_DAU_DIP.time[start:end], xtick_range, ['between vectors', 'around specified axis'], 'Angles in Thumb MCP joint to midhand', save_plots=save_plots)
+    tf.plot_angles([theta[start:end]], Tracker_DAU_DIP.time[start:end], xtick_range, ['perpendicular around specified axis'], 'Angles in Thumb MCP joint to midhand', save_plots=save_plots)
 
     if test_number > 1:
         data = tf.get_json(test_metadata['path'])
@@ -206,8 +205,8 @@ if __name__=="__main__":
         index_flexor = [sensor_data[i] for i in [1,2]]
         index_extensor = [sensor_data[i] for i in [4]] #6 hat sich das Offset verändert
         tf.plot_analogs(test_metadata['path'])
-        tf.plot_analogs_angles(angles=[alpha, beta, gamma], flexor=index_flexor, extensor=index_extensor, time=Tracker_DAU_DIP.time, step_size=xtick_range, start=start,end=end,legend1=['alpha (DIP)', 'beta (PIP)', 'gamma (MCP)'],legend2= ['Flexor super','Flexor profundus'], legend3=['Extensor digitorum'], title='Angles in Index finger joints', save_plots=False)
-        tf.plot_analogs_angles(angles=[delta, epsilon, iota, theta], flexor=thumb_flexor, extensor=thumb_extensor, time=Tracker_DAU_DIP.time, step_size=xtick_range, start=start,end=end,legend1=['delta (IP)', 'epsilon (MCP)', 'iota (CMC)', 'theta (perpendicular to CMC)'], legend2=['Flexor pollicis longus'], legend3=['Abductor', 'E. longus','E. brevis'], title='Angles in Thumb joints', save_plots=False)
+        tf.plot_analogs_angles(angles=[alpha, beta, gamma], flexor=index_flexor, extensor=index_extensor, time=Tracker_DAU_DIP.time, step_size=xtick_range, start=start,end=end,legend1=['alpha (DIP)', 'beta (PIP)', 'gamma (MCP)'],legend2= ['Flexor super','Flexor profundus'], legend3=['Extensor digitorum'], title='Angles in Index finger joints', save_plots=save_plots)
+        tf.plot_analogs_angles(angles=[delta, epsilon, iota, theta], flexor=thumb_flexor, extensor=thumb_extensor, time=Tracker_DAU_DIP.time, step_size=xtick_range, start=start,end=end,legend1=['delta (IP)', 'epsilon (MCP)', 'iota (CMC)', 'theta (perpendicular to CMC)'], legend2=['Flexor pollicis longus'], legend3=['Abductor', 'E. longus','E. brevis'], title='Angles in Thumb joints', save_plots=save_plots)
         
         # plot force torque sensor data
         ft_norm = np.linalg.norm([data['observation']['force_torques'][0]['fz'],data['observation']['force_torques'][0]['fx'],data['observation']['force_torques'][0]['fy']], axis=0)
@@ -218,7 +217,7 @@ if __name__=="__main__":
         ft_norm = ft_norm - np.min(ft_norm)
         ft_norm = ft_norm / 8.998278583527435
         
-        tf.plot_ft_norm(ft_norm, data['time'], xtick_range, start=start, end=end, title='Grip Force',save_plots=False)
+        tf.plot_ft_norm(ft_norm, data['time'], xtick_range, start=start, end=end, title='Grip Force',save_plots=save_plots)
         
         ft_forces = [data['observation']['force_torques'][0]['fx'],data['observation']['force_torques'][0]['fy'],data['observation']['force_torques'][0]['fz']]
         ft_torques = [data['observation']['force_torques'][0]['mx'],data['observation']['force_torques'][0]['my'],data['observation']['force_torques'][0]['mz']]
@@ -236,12 +235,13 @@ if __name__=="__main__":
         polyline = np.linspace(min(sum_tendon_force), max(sum_tendon_force), 100)
         plt.scatter(sum_tendon_force, ft_norm, s=1, color='#0065bd', label='data')
         plt.plot(polyline, model(polyline), color='#e37222', label='model ' + str(poly_order) + '-th order')
+        plt.grid()
         plt.ylabel('Grip Force [N]')
         plt.xlabel('Sum of tendon forces [N]')
         plt.title('Tendon forces vs. Grip Force')
         plt.legend()
         if save_plots:
-            plt.savefig('plots/tendon_forces_vs_ft_sensor.png', dpi=1200)
+            plt.savefig('plots/angles/tendon_forces_vs_ft_sensor' + test_metadata['name'] +'.svg', dpi=1200)
         else:
             plt.show()
         plt.close()

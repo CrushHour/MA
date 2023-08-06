@@ -1,6 +1,6 @@
 <mujoco>
     <default>
-        <geom rgba="255 255 255 0.3" size = "5 5 5"/>
+        <geom rgba="255 255 255 0.3" size = "3 3 3"/>
     </default>
     <visual>
         <global offheight="1024"/>
@@ -30,7 +30,7 @@
 
         <camera name="custom" pos="309.236 84.797 -25.717" xyaxes="-0.660 0.751 0.000 -0.174 -0.153 0.973"/>
 
-        <geom type="plane" size="1000 1000 0.01" pos = "0 0 -400" rgba=".3 0.3 0.3 1"/>
+        <geom type="plane" size="1000 1000 0.01" pos = "0 0 -400" rgba="1 1 1 1"/>
 
         <body pos="90 0 0">
             <geom type="box" size="100 .2 .2" rgba=".9 0 0 1"/>
@@ -45,83 +45,83 @@
         </body>
 
         <body name="ZF_DIP">
-        <geom pos = "{{zf.dip.pos}}" quat = "{{zf.dip.quat}}" type="mesh" mesh="ZF-DIP" rgba="0 0 1 0.9"/>
+        <geom pos = "{{zf.dip.pos}}" quat = "{{zf.dip.quat}}" type="mesh" mesh="ZF-DIP" rgba="0 0.3960784313725490196078431372549 0.74117647058823529411764705882353 1"/>
         </body>
 
         <body name="ZF_PIP">
-        <geom pos = "{{zf.pip.pos}}" quat = "{{zf.pip.quat}}" type="mesh" mesh="ZF-PIP" rgba="0 0 1 0.9"/>
+        <geom pos = "{{zf.pip.pos}}" quat = "{{zf.pip.quat}}" type="mesh" mesh="ZF-PIP" rgba="0 0.3960784313725490196078431372549 0.74117647058823529411764705882353 1"/>
         </body>
 
         <body name="ZF_MCP">
-        <geom pos = "{{zf.mcp.pos}}" quat = "{{zf.mcp.quat}}" type="mesh" mesh="ZF-MCP" rgba="0 0 1 0.9"/>
+        <geom pos = "{{zf.mcp.pos}}" quat = "{{zf.mcp.quat}}" type="mesh" mesh="ZF-MCP" rgba="0 0.3960784313725490196078431372549 0.74117647058823529411764705882353 1"/>
         </body>
         
         <body name="ZF_PIP_Marker">
-        <geom pos = "{{zf.pip_marker.pos}}" quat = "{{zf.pip_marker.quat}}" type="sphere" rgba="0 0 1 0.9"/>
+        <geom pos = "{{zf.pip_marker.pos}}" quat = "{{zf.pip_marker.quat}}" type="sphere" rgba="0 0.3960784313725490196078431372549 0.74117647058823529411764705882353 1"/>
         </body>
 
         <body name="ZF_Midhand">
-        <geom pos = "{{zf.midhand.pos}}" quat = "{{zf.midhand.quat}}" type="mesh" mesh="ZF-Midhand" rgba="0 0 1 0.9"/>
+        <geom pos = "{{zf.midhand.pos}}" quat = "{{zf.midhand.quat}}" type="mesh" mesh="ZF-Midhand" rgba="0 0.3960784313725490196078431372549 0.74117647058823529411764705882353 1"/>
         </body>
 
         <body name="DAU_DIP">
-        <geom pos = "{{dau.dip.pos}}" quat = "{{dau.dip.quat}}" type="mesh" mesh="DAU-DIP" rgba="1 0 0 0.9"/>
+        <geom pos = "{{dau.dip.pos}}" quat = "{{dau.dip.quat}}" type="mesh" mesh="DAU-DIP" rgba="0.89019607843137254901960784313725 0.44705882352941176470588235294118 0.13333333333333333333333333333333 1"/>
         </body>
         
         <body name="DAU_PIP">
-        <geom pos = "{{dau.pip.pos}}" quat = "{{dau.pip.quat}}" type="mesh" mesh="DAU-PIP" rgba="1 0 0 0.9"/>
+        <geom pos = "{{dau.pip.pos}}" quat = "{{dau.pip.quat}}" type="mesh" mesh="DAU-PIP" rgba="0.89019607843137254901960784313725 0.44705882352941176470588235294118 0.13333333333333333333333333333333 1"/>
         </body>
 
         <body name="DAU_MCP">
-        <geom pos = "{{dau.mcp.pos}}" quat = "{{dau.mcp.quat}}" type="mesh" mesh="DAU-MCP" rgba="1 0 0 0.9"/>
+        <geom pos = "{{dau.mcp.pos}}" quat = "{{dau.mcp.quat}}" type="mesh" mesh="DAU-MCP" rgba="0.89019607843137254901960784313725 0.44705882352941176470588235294118 0.13333333333333333333333333333333 1"/>
         </body>
 
         <body pos="{{dau.pip_joint.pos}}">
-            <geom type="sphere" size="5 5 5" rgba="0 1 0 0.9"/>
+            <geom type="sphere" size="3 3 3" rgba="0.63529411764 0.67843137254 0 1"/>
         </body>
 
         <body pos="{{dau.mcp_joint.pos}}">
-            <geom type="sphere" size="5 5 5" rgba="1 1 0 0.9"/>
+            <geom type="sphere" size="3 3 3" rgba="0.63529411764 0.67843137254 0 1"/>
         </body>            
         
         <body pos="{{dau.mcp_joint2.pos}}">
-            <geom type="sphere" size="5 5 5" rgba="1 1 0 0.9"/>
+            <geom type="sphere" size="3 3 3" rgba="0.63529411764 0.67843137254 0 1"/>
         </body>        
 
         <body pos="{{dau.pip_marker.pos}}">
-            <geom type="sphere" size="5 5 5" rgba="1 0 0 0.9"/>
+            <geom type="sphere" size="3 3 3" rgba="0.63529411764 0.67843137254 0 1"/>
         </body>  
         
         <body pos="{{zf.dip_joint_aussen.pos}}">
-            <geom type="sphere" size="5 5 5" rgba="0 1 0 0.9"/>
+            <geom type="sphere" size="3 3 3" rgba="0.63529411764 0.67843137254 0 1"/>
         </body>        
         
         <body pos="{{zf.dip_joint_innen.pos}}">
-            <geom type="sphere" size="5 5 5" rgba="1 0 0 0.9"/>
+            <geom type="sphere" size="3 3 3" rgba="0.63529411764 0.67843137254 0 1"/>
         </body>    
 
         <body pos="{{zf.pip_joint_innen.pos}}">
-            <geom type="sphere" size="5 5 5" rgba="1 0 1 0.9"/>
+            <geom type="sphere" size="3 3 3" rgba="0.63529411764 0.67843137254 0 1"/>
         </body>
                 
         <body pos="{{zf.pip_joint_aussen.pos}}">
-            <geom type="sphere" size="5 5 5" rgba="1 1 0 0.9"/>
+            <geom type="sphere" size="3 3 3" rgba="0.63529411764 0.67843137254 0 1"/>
         </body>    
         
         <body pos="{{zf.mcp_joint_innen.pos}}">
-            <geom type="sphere" size="5 5 5" rgba="1 1 1 0.9"/>
+            <geom type="sphere" size="3 3 3" rgba="0.63529411764 0.67843137254 0 1"/>
         </body>
                 
         <body pos="{{zf.mcp_joint_aussen.pos}}">
-            <geom type="sphere" size="5 5 5" rgba="1 1 0 0.9"/>
+            <geom type="sphere" size="3 3 3" rgba="0.63529411764 0.67843137254 0 1"/>
         </body>
 
         <body pos="{{dau.mcp_joint_innen.pos}}">
-            <geom type="sphere" size="5 5 5" rgba="1 1 1 0.9"/>
+            <geom type="sphere" size="3 3 3" rgba="0.63529411764 0.67843137254 0 1"/>
         </body>
                 
         <body pos="{{dau.mcp_joint_aussen.pos}}">
-            <geom type="sphere" size="5 5 5" rgba="1 1 0 0.9"/>
+            <geom type="sphere" size="3 3 3" rgba="0.63529411764 0.67843137254 0 1"/>
         </body>
 
     </worldbody>

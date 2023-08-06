@@ -33,6 +33,11 @@ from tqdm import tqdm
 path_csv = "Data"
 ct_folder = "Slicer3D"
 
+#Set the default color cycle
+#default_cycler = (cycler(color=["#98C6EA", "#64A0C8", "#0065BD", "#005293", "#003359", "#333333", "#E37222", "#A2AD00", "#69085a"]))
+# Blau Orange Grün Rot Lila
+default_cycler = (cycler(color=["#0065BD", "#E37222", "#679a1d", "#c4071b", "#69085a", "#005293", "#69085a", "#003359", "#333333"]))
+
 def plot_analogs_raw(path):
     data = get_json(path)
     sensor_data = data['observation']['analogs']
@@ -89,6 +94,8 @@ def plot_analogs_angles(angles=[], flexor=[], extensor=[], time=[], step_size=50
     flexor = [flex[start:end] for flex in flexor]
     extensor = [ext[start:end] for ext in extensor]
 
+    plt.rc('axes', prop_cycle=default_cycler)
+
     plt_height = 15
     plt_width = 10
 
@@ -128,7 +135,7 @@ def plot_analogs_angles(angles=[], flexor=[], extensor=[], time=[], step_size=50
     plt.subplots_adjust(hspace=0.3)
     if save_plots:
         date_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-        plt.savefig('./plots/angles/' + title + '_' + date_time + '.png',bbox_extra_artists=(ldg2,ldg1,ldg3), dpi=1200, bbox_inches='tight')
+        plt.savefig('./plots/angles/' + title + '_' + date_time + '.pdf',bbox_extra_artists=(ldg2,ldg1,ldg3), dpi=1200, bbox_inches='tight')
     else:
         plt.show()
     plt.close()
@@ -162,7 +169,7 @@ def plot_ft_splitted(forces=[], torques=[], time=[], step_size=5000, start = 0, 
     plt.xticks(pos_x, x)
     if save_plots:
         date_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-        plt.savefig('./plots/angles/' + title + '_' + date_time + '.png', bbox_extra_artists=(lgd2,ldg1), dpi=1200, bbox_inches='tight')
+        plt.savefig('./plots/angles/' + title + '_' + date_time + '.pdf', bbox_extra_artists=(lgd2,ldg1), dpi=1200, bbox_inches='tight')
     else:
         plt.show()
     plt.close()
@@ -176,7 +183,7 @@ def plot_ft_norm(data, time, step_size=5000, start=0, end=1000, title="", save_p
     pos_x = pos_x[start_ticks:]
     x = [int(i / 1000) for i in pos_x]
 
-    plt.plot(time, data, label='normed FT-Sensor force')
+    plt.plot(time, data, label='normed FT-Sensor force', color='#0065BD')
     plt.xticks(pos_x,x)
     plt.legend()
     plt.title(title)
@@ -185,7 +192,7 @@ def plot_ft_norm(data, time, step_size=5000, start=0, end=1000, title="", save_p
     plt.grid(True)
     if save_plots:
         date_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-        plt.savefig('./plots/angles/' + title + '_' + date_time + '.png', dpi=1200)
+        plt.savefig('./plots/angles/' + title + '_' + date_time + '.pdf', dpi=1200)
     else:
         plt.show()
     plt.close()
@@ -1390,10 +1397,10 @@ class marker_bone():
             self.opt_marker_trace = np.zeros((int(test_metadata["length"]),3))
 
         #prepare matrices for transformation
-        self.T_proxi_opt = np.zeros((int(test_metadata["length"]),2,4,4))
-        self.T_dist_opt = np.zeros((int(test_metadata["length"]),2,4,4))
+        self.T_proxi_opt = np.full((int(test_metadata["length"]),2,4,4),np.eye(4))
+        self.T_dist_opt = np.full((int(test_metadata["length"]),2,4,4),np.eye(4))
 
-        self.T_opt_ct = np.zeros((int(test_metadata["length"]),4,4))
+        self.T_opt_ct = np.full((int(test_metadata["length"]),4,4),np.eye(4))
         self.v_opt = np.zeros((int(test_metadata["length"]),3))
     
     def replace_outliers(self, data, threshold = 0, compare_steps = 20, n_std = 5):
