@@ -135,7 +135,7 @@ def plot_analogs_angles(angles=[], flexor=[], extensor=[], time=[], step_size=50
     plt.subplots_adjust(hspace=0.3)
     if save_plots:
         date_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-        plt.savefig('./plots/angles/' + title + '_' + date_time + '.pdf',bbox_extra_artists=(ldg2,ldg1,ldg3), dpi=1200, bbox_inches='tight')
+        plt.savefig('./plots/angles/' + title + '_' + date_time + '.svg',bbox_extra_artists=(ldg2,ldg1,ldg3), dpi=1200, bbox_inches='tight')
     else:
         plt.show()
     plt.close()
@@ -169,7 +169,7 @@ def plot_ft_splitted(forces=[], torques=[], time=[], step_size=5000, start = 0, 
     plt.xticks(pos_x, x)
     if save_plots:
         date_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-        plt.savefig('./plots/angles/' + title + '_' + date_time + '.pdf', bbox_extra_artists=(lgd2,ldg1), dpi=1200, bbox_inches='tight')
+        plt.savefig('./plots/angles/' + title + '_' + date_time + '.svg', bbox_extra_artists=(lgd2,ldg1), dpi=1200, bbox_inches='tight')
     else:
         plt.show()
     plt.close()
@@ -192,7 +192,7 @@ def plot_ft_norm(data, time, step_size=5000, start=0, end=1000, title="", save_p
     plt.grid(True)
     if save_plots:
         date_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-        plt.savefig('./plots/angles/' + title + '_' + date_time + '.pdf', dpi=1200)
+        plt.savefig('./plots/angles/' + title + '_' + date_time + '.svg', dpi=1200)
     else:
         plt.show()
     plt.close()
@@ -600,7 +600,7 @@ def plot_class(i, Trackers1: list = [], Trackers2: list = [], names: list = [], 
     if save:
         dt = datetime.now()
         dt = dt.strftime("%Y-%m-%d_%H-%M-%S")
-        plt.savefig('plots/plot_class_'+str(i)+'.pdf', dpi=600)
+        plt.savefig('plots/plot_class_'+str(i)+'.svg', dpi=600)
     if show:
         plt.show()
     plt.close()
@@ -748,7 +748,7 @@ def plot_tiefpass(marker_data, title: str='', fs: float =120, Gp: float = 0.1, G
         plt.subplots_adjust(hspace=0.35)
         now = datetime.now()
         plot_file_title = "marker_" + now.strftime("%d_%m_%Y_%H_%M_%S")
-        # plt.savefig(plot_file_title + ".pdf", format="pdf")
+        # plt.savefig(plot_file_title + ".svg", format="pdf")
         plt.show()
         plt.close()
     return y
@@ -1222,7 +1222,7 @@ class tracker_bone():
         U, S, V_T = np.linalg.svd(H)
 
         # decide whether we need to correct our rotation matrix to ensure a right-handed coordinate system
-        # https://igl.ethz.ch/projects/ARAP/svd_rot.pdf
+        # https://igl.ethz.ch/projects/ARAP/svd_rot.svg
         # https://en.wikipedia.org/wiki/Kabsch_algorithm
         d = np.sign(np.linalg.det(np.dot(V_T.T, U.T)))
 
