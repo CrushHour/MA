@@ -17,6 +17,13 @@ importlib.reload(tf)
 
 #from scipy.spatial.transform import Rotation as Rot
 
+def create_test_metadata_from_path(path):
+    test_metadata = dict()
+    test_metadata['name'] = path.split('/')[-1]
+    test_metadata['path'] = path
+    test_metadata['marker_IDs'] = ['Marker_1', 'Marker_2']
+    return test_metadata
+
 # %%Definition der Pfade
 hand_metadata = tf.get_json('hand_metadata.json')
 
@@ -32,12 +39,12 @@ if test_number == 0:
 elif test_number == 1:
     test_metadata = tf.get_json('test_metadata.json')['optitrack-20230130-234800.json']
 else:
-    test_metadata = tf.get_json('test_metadata.json')['2023_01_31_18_12_48.json']
+    #test_metadata = tf.get_json('test_metadata.json')['2023_01_31_18_12_48.json']
     #test_metadata = tf.get_json('test_metadata.json')['2023_01_31_18_10_36.json']
     #test_metadata = tf.get_json('test_metadata.json')['2023_01_31_18_08_11.json']
     #test_metadata = tf.get_json('test_metadata.json')['2023_01_31_00_47_54.json']
     #test_metadata = tf.get_json('test_metadata.json')['2023_01_31_00_42_47.json']
-    #test_metadata = tf.get_json('test_metadata.json')['2023_01_31_00_30_44.json']
+    test_metadata = tf.get_json('test_metadata.json')['2023_01_31_00_30_44.json']
     xtick_range = 1000
     start = 1400
     #start = 900
