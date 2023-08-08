@@ -77,11 +77,11 @@
             <geom type="sphere" size="3 3 3" rgba="0.63529411764 0.67843137254 0 1"/>
         </body>    
 
-        <body pos="{{dau.mcp_joint_innen.pos}}">
+        <body pos="{{dau.mcp_joint_aussen.pos}}">
             <geom type="sphere" size="3 3 3" rgba="0.63529411764 0.67843137254 0 1"/>
         </body>
                 
-        <body pos="{{dau.mcp_joint_aussen.pos}}">
+        <body pos="{{dau.mcp_joint_innen.pos}}">
             <geom type="sphere" size="3 3 3" rgba="0.63529411764 0.67843137254 0 1"/>
         </body>         
         

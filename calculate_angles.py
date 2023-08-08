@@ -41,9 +41,9 @@ if test_number == 0:
 elif test_number == 1:
     test_metadata = tf.get_json('test_metadata.json')['optitrack-20230130-234800.json']
 else:
-    path = r'Data/test_01_30/2023_01_31_00_30_44.json'
-    test_metadata = create_test_metadata_from_path(path)
-    #test_metadata = tf.get_json('test_metadata.json')['2023_01_31_18_12_48.json']
+    #path = r'Data/test_01_30/2023_01_31_00_30_44.json'
+    #test_metadata = create_test_metadata_from_path(path)
+    test_metadata = tf.get_json('test_metadata.json')['2023_01_31_18_12_48.json']
     #test_metadata = tf.get_json('test_metadata.json')['2023_01_31_18_10_36.json']
     #test_metadata = tf.get_json('test_metadata.json')['2023_01_31_18_08_11.json']
     #test_metadata = tf.get_json('test_metadata.json')['2023_01_31_00_47_54.json']
@@ -102,8 +102,8 @@ def construct_model(i):
     # green, yellow balls
     parameters['dau']['dip_joint_aussen'] = mwp.build_parameters([[1,0,0,0], Tracker_DAU_DIP.T_proxi_aussen_opt[i,:3,3]]) 
     parameters['dau']['dip_joint_innen'] = mwp.build_parameters([[1,0,0,0], Tracker_DAU_DIP.T_proxi_innen_opt[i,:3,3]])
-    parameters['dau']['mcp_joint_aussen'] = mwp.build_parameters([[1,0,0,0], Tracker_DAU_MCP.T_proxi_aussen_opt[i,:3,3]]) 
-    parameters['dau']['mcp_joint_innen'] = mwp.build_parameters([[1,0,0,0], Tracker_DAU_MCP.T_proxi_innen_opt[i,:3,3]]) 
+    parameters['dau']['mcp_joint_aussen'] = mwp.build_parameters([[1,0,0,0], Tracker_DAU_MCP.T_dist_aussen_opt[i,:3,3]]) 
+    parameters['dau']['mcp_joint_innen'] = mwp.build_parameters([[1,0,0,0], Tracker_DAU_MCP.T_dist_innen_opt[i,:3,3]]) 
 
 
     with open("./mujoco/generated_parameters.yaml", "w") as outfile:
@@ -113,16 +113,22 @@ def construct_model(i):
     print("Model updated!")
 
 for t in tqdm(range(len(Marker_DAU.opt_marker_trace))):
+    
+    
     Marker_DAU.T_opt_ct[t] = construct_marker_rot([Tracker_DAU_DIP.T_proxi_innen_opt[t,:3,3], Tracker_DAU_DIP.T_proxi_aussen_opt[t,:3,3],Tracker_DAU_MCP.T_dist_innen_opt[t,:3,3],Tracker_DAU_MCP.T_dist_aussen_opt[t,:3,3]],\
                                                   [Tracker_DAU_DIP.T_proxi_innen_CT[:3,3], Tracker_DAU_DIP.T_proxi_aussen_CT[:3,3],Tracker_DAU_MCP.T_dist_innen_CT[:3,3],Tracker_DAU_MCP.T_dist_aussen_CT[:3,3]])
     Marker_DAU.update_joints(t)
 
     #Marker_ZF_intermedial.T_opt_ct[t] = construct_marker_rot([Marker_ZF_intermedial.opt_marker_trace[t],Tracker_ZF_DIP.T_proxi_innen_opt[t,:3,3],Tracker_ZF_DIP.T_proxi_aussen_opt[t,:3,3]], \
     #                                                      [np.array(Marker_ZF_intermedial.marker_pos_ct[0]), Tracker_ZF_DIP.T_proxi_innen_CT[:3,3], Tracker_ZF_DIP.T_proxi_aussen_CT[:3,3]])
+    
+    
+    
     Marker_ZF_intermedial.T_opt_ct[t] = Tracker_ZF_DIP.T_opt_ct[t]
 
     # update loop auf basis aller bekannten Punkte
     for j in range(3):
+    
         Marker_ZF_intermedial.update_joints(t)
 
         ZF_MCP.T_opt_ct[t] = construct_marker_rot([Tracker_ZF_midhand.T_dist_innen_opt[t,:3,3],Tracker_ZF_midhand.T_dist_aussen_opt[t,:3,3],Marker_ZF_intermedial.T_proxi_opt[t,0,:3,3],Marker_ZF_intermedial.T_proxi_opt[t,1,:3,3]], \
@@ -131,7 +137,7 @@ for t in tqdm(range(len(Marker_DAU.opt_marker_trace))):
 
         Marker_ZF_intermedial.T_opt_ct[t] = construct_marker_rot([Tracker_ZF_DIP.T_proxi_innen_opt[t,:3,3],Tracker_ZF_DIP.T_proxi_aussen_opt[t,:3,3], ZF_MCP.T_dist_opt[t,0,:3,3], ZF_MCP.T_dist_opt[t,1,:3,3]], \
                                                           [Tracker_ZF_DIP.T_proxi_innen_CT[:3,3], Tracker_ZF_DIP.T_proxi_aussen_CT[:3,3], ZF_MCP.T_dist_CT[0,:3,3], ZF_MCP.T_dist_CT[1,:3,3]])
-       
+        
 #i = 4553
 #i = 5831
 i=0
