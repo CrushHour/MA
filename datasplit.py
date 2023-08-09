@@ -90,8 +90,6 @@ class ForceTorqueSensor(Sensor):
         self.my = 0
         self.mz = 0
 
-        
-
         self._state_vector = [0, 0, 0, 0, 0, 0]
         self._length = len(self._state_vector)
 
@@ -103,8 +101,6 @@ class ForceTorqueSensor(Sensor):
         self.mx = self._state_vector[3]
         self.my = self._state_vector[4]
         self.mz = self._state_vector[5]
-
-
 
 
 class RigidBody(Sensor):
@@ -188,7 +184,7 @@ class RigidBody(Sensor):
 
     def _quat_to_rot(self):
         """add quat to rot to computation graph"""
-        qw, qx, qy, qz = self.qw, self.qx, self.qy. self.qz
+        qw, qx, qy, qz = self.qw, self.qx, self.qy, self.qz
 
         matrix = np.zeros(3, 3)
 
@@ -321,20 +317,4 @@ if __name__ == '__main__':
     # %%
     obs = ObservationHandler()
     obs.get_state_vector_length()
-    # %%
-    obs.motors_length
-    # %%
-
-    a = [1, 2, 3, 4, 5, 6]
-    a[0:4]
-    # %%
-    a[4:6]
-    # %%
-
-    # %%
-    obs.output_dict
-    # %%
-    obs(np.zeros(98).tolist())
-    # %%
-    obs.output_dict
     # %%

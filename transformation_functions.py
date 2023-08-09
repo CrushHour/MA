@@ -25,6 +25,41 @@ from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial import distance
 from scipy.signal import butter, buttord, filtfilt
 from tqdm import tqdm
+import numpy as np
+from scipy.signal import find_peaks, savgol_filter
+
+def find_maxima(data, window_length=11, polyorder=2, relative_height=0.4):
+    """
+    Find maxima in a slightly fluctuating signal.
+
+    Parameters:
+    - data (numpy array): The input signal.
+    - window_length (int): The length of the window for the Savitzky-Golay filter.
+                           Should be an odd number.
+    - polyorder (int): The order of the polynomial used in the Savitzky-Golay filter.
+
+    Returns:
+    - peaks (numpy array): Indices of the maxima in the data.
+    - smoothed_data (numpy array): The smoothed data.
+    """
+
+    # Apply Savitzky-Golay filter
+    smoothed_data = savgol_filter(data, window_length, polyorder)
+    
+    # Set threshold for peak height
+    height_threshold = relative_height * np.max(smoothed_data)
+    
+    # Find peaks in the smoothed data that are above the height threshold
+    peaks, _ = find_peaks(smoothed_data, height=height_threshold)
+    
+    # Calculate mean and std of the peaks
+    mean_peak_value = np.mean(smoothed_data[peaks])
+    std_peak_value = np.std(smoothed_data[peaks])
+    
+    print("Mean of peaks:", mean_peak_value)
+    print("Standard deviation of peaks:", std_peak_value)
+    
+    return peaks, smoothed_data
 
 #plot style
 #sns.set_style('dark')
@@ -84,10 +119,14 @@ def plot_analogs(path):
     plt.close()
 
 def plot_analogs_angles(angles=[], flexor=[], extensor=[], time=[], step_size=5000, start = 0, end = 0, legend1=[], legend2=[], legend3=[], title='', save_plots=False):
-    time = time[start:end]
-    angles = [angle[start:end] for angle in angles]
-    flexor = [flex[start:end] for flex in flexor]
-    extensor = [ext[start:end] for ext in extensor]
+    time = np.array(time[start:end])
+    time = time - time[0]
+    angles = np.array([angle[start:end] for angle in angles])
+    flexor = np.array([flex[start:end] for flex in flexor])
+    extensor = np.array([ext[start:end] for ext in extensor])
+
+    flexor = flexor - np.min(flexor) + 0.3
+    extensor = extensor - np.min(extensor) + 0.3
 
     plt_height = 15
     plt_width = 10
@@ -98,34 +137,41 @@ def plot_analogs_angles(angles=[], flexor=[], extensor=[], time=[], step_size=50
     x = [int(i / 1000) for i in pos_x]
 
 
-    fig, (ax1, ax2, ax3) = plt.subplots(3, sharex=True)
+    fig, (ax1, ax2, ax3) = plt.subplots(3, sharex=True, figsize=(6, 8))
     
     ax1.plot(time, np.transpose(angles))
-    ax1.figure.set_size_inches(10, plt_height)
+    plt.subplot(311)
+    plt.ylim([-30, 110])
+    #ax1.figure.set_size_inches(10, plt_height)
 
     ax2.plot(time, np.transpose(flexor))
     ax2.plot(time, np.transpose(extensor), color = 'lightgrey', linewidth=0.5)
-    ax2.figure.set_size_inches(10, plt_height)
+    plt.subplot(312)
+    plt.ylim([0, 20])
+    #ax2.figure.set_size_inches(10, plt_height)
 
     ax3.plot(time, np.transpose(extensor))
     ax3.plot(time, np.transpose(flexor), color = 'lightgrey', linewidth=0.5)
-    ax3.figure.set_size_inches(10, plt_height)
+    plt.subplot(313)
+    plt.ylim([0, 20])
+    #ax3.figure.set_size_inches(10, plt_height)
 
     ax1.set_ylabel('angle [°]')
-    ax2.set_ylabel('force [N]')
-    ax3.set_ylabel('force [N]')
-    ax3.set_xlabel('time [sec]')
+    ax2.set_ylabel('force flexor [N]')
+    ax3.set_ylabel('force extensor [N]')
+    ax3.set_xlabel('time [s]')
     ax1.set_title(title)
-    ax2.set_title('Flexor')
-    ax3.set_title('Extensor')
+    #ax2.set_title('Flexor')
+    #ax3.set_title('Extensor')
     ax1.grid(True)
     ax2.grid(True)
     ax3.grid(True)
-    ldg1=ax1.legend(legend1, loc='upper center', bbox_to_anchor =(0.5,-0.05), fancybox=True, shadow=True, ncol=4)
-    ldg2=ax2.legend(legend2, loc='upper center', bbox_to_anchor =(0.5,-0.05), fancybox=True, shadow=True, ncol=4)
-    ldg3=ax3.legend(legend3, loc='upper center', bbox_to_anchor =(0.5,-0.15), fancybox=True, shadow=True, ncol=4)
+    ldg1=ax1.legend(legend1, loc='upper right', ncol=1)
+    ldg2=ax2.legend(legend2, loc='upper right', ncol=1)
+    ldg3=ax3.legend(legend3, loc='upper right', ncol=1)
     plt.xticks(pos_x, x)
-    plt.subplots_adjust(hspace=0.3)
+    #plt.subplots_adjust(hspace=0.3)
+    fig.tight_layout()
     if save_plots:
         date_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
         plt.savefig('./plots/angles/' + title + '_' + date_time + '.png',bbox_extra_artists=(ldg2,ldg1,ldg3), dpi=1200, bbox_inches='tight')
@@ -169,26 +215,32 @@ def plot_ft_splitted(forces=[], torques=[], time=[], step_size=5000, start = 0, 
 
 def plot_ft_norm(data, time, step_size=5000, start=0, end=1000, title="", save_plots=False):
     data = data[start:end]
-    time = time[start:end]
+    time = np.array(time[start:end])
+    time = time - time[0]
     
     pos_x = np.arange(max(time), step=step_size)  # type: ignore
     start_ticks = int(time[0]/step_size)
     pos_x = pos_x[start_ticks:]
     x = [int(i / 1000) for i in pos_x]
 
-    plt.plot(time, data, label='normed FT-Sensor force')
+    plt.plot(time, data, label='FT-Sensor')
     plt.xticks(pos_x,x)
     plt.legend()
     plt.title(title)
-    plt.xlabel('time [sec]')
+    plt.xlabel('time [s]')
     plt.ylabel('force [N]')
     plt.grid(True)
+    plt.ylim([0, 3])
     if save_plots:
         date_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
         plt.savefig('./plots/angles/' + title + '_' + date_time + '.png', dpi=1200)
     else:
         plt.show()
     plt.close()
+
+    data = np.array(data)
+    peaks, smoothed_data = find_maxima(data)
+
 
 
 def get_opt_positions(filename):
@@ -474,6 +526,8 @@ def plot_angles(angles, time, step_size, legend, title, save_plots=False):
     if max(pos_x) > 1000.0:
         x = [int(i/1000) for i in pos_x]
 
+
+    fig = plt.figure()
     for i in range(len(angles)):
         #default_x = np.arange(len(angles[i]))
         #plt.plot(default_x, angles[i])
@@ -482,7 +536,7 @@ def plot_angles(angles, time, step_size, legend, title, save_plots=False):
     plt.xticks(pos_x,x)
     plt.legend(legend, loc='upper right')
     plt.ylabel('angle [°]')
-    plt.xlabel('time [sec]')
+    plt.xlabel('time [s]')
     plt.title(title)
     plt.grid(True)
     if save_plots:
