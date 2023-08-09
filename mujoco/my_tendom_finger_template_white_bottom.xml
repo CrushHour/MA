@@ -26,40 +26,40 @@
     <worldbody>
         <light name="Light" diffuse="1 1 1" pos="50 -200 -300" dir="0 0 1"/>
         
-        <camera name="Picture Pos" pos="69.571 -144.983 -299.991" xyaxes="-0.848 0.530 -0.000 0.455 0.727 0.515" zaxis="0 0 1" />        
+        <camera name="Picture Pos" pos="69.571 -144.983 -299.991" xyaxes="-0.848 0.530 -0.000 0.455 0.727 0.515" />        
         
         <geom type="box" size="1000 1000 1" pos = "50 -200 -50" quat = "-0.8733046400935156 -0.0 -0.0 -0.4871745124605095" rgba="1 1 1 1"/>
 
         <body name="ZF_DIP">
-        <geom pos = "0 0 0" quat = "1 0 0 0" type="mesh" mesh="ZF-DIP" rgba="0 0 1 1"/>
+        <geom pos = "0 0 0" quat = "1 0 0 0" type="mesh" mesh="ZF-DIP" rgba="0 0.3960784313725490196078431372549 0.74117647058823529411764705882353 1"/>
         </body>
 
         <body name="ZF_PIP">
-        <geom pos = "0 0 0" quat = "1 0 0 0" type="mesh" mesh="ZF-PIP" rgba="0 0 1 1"/>
+        <geom pos = "0 0 0" quat = "1 0 0 0" type="mesh" mesh="ZF-PIP" rgba="0 0.3960784313725490196078431372549 0.74117647058823529411764705882353 1"/>
         </body>
 
         <body name="ZF_MCP">
-        <geom pos = "0 0 0" quat = "1 0 0 0" type="mesh" mesh="ZF-MCP" rgba="0 0 1 1"/>
+        <geom pos = "0 0 0" quat = "1 0 0 0" type="mesh" mesh="ZF-MCP" rgba="0 0.3960784313725490196078431372549 0.74117647058823529411764705882353 1"/>
         </body>
 
         <body name="ZF_Midhand">
-        <geom pos = "0 0 0" quat = "1 0 0 0" type="mesh" mesh="ZF-Midhand" rgba="0 0 1 1"/>
+        <geom pos = "0 0 0" quat = "1 0 0 0" type="mesh" mesh="ZF-Midhand" rgba="0 0.3960784313725490196078431372549 0.74117647058823529411764705882353 1"/>
         </body>
 
         <body name="DAU_DIP">
-        <geom pos = "0 0 0" quat = "1 0 0 0" type="mesh" mesh="DAU-DIP" rgba="1 0 0 1"/>
+        <geom pos = "0 0 0" quat = "1 0 0 0" type="mesh" mesh="DAU-DIP" rgba="0.89019607843137254901960784313725 0.44705882352941176470588235294118 0.13333333333333333333333333333333 1"/>
         </body>
         
         <body name="DAU_PIP">
-        <geom pos = "0 0 0" quat = "1 0 0 0" type="mesh" mesh="DAU-PIP" rgba="1 0 0 1" />
+        <geom pos = "0 0 0" quat = "1 0 0 0" type="mesh" mesh="DAU-PIP" rgba="0.89019607843137254901960784313725 0.44705882352941176470588235294118 0.13333333333333333333333333333333 1" />
         </body>
 
         <body name="DAU_Sesam">
-        <geom pos = "0 0 0" quat = "1 0 0 0" type="mesh" mesh="DAU-Sesam" rgba="1 0 0 1" />
+        <geom pos = "0 0 0" quat = "1 0 0 0" type="mesh" mesh="DAU-Sesam" rgba="0.89019607843137254901960784313725 0.44705882352941176470588235294118 0.13333333333333333333333333333333 1" />
         </body>
 
         <body name="DAU_MCP">
-        <geom pos = "0 0 0" quat = "1 0 0 0" type="mesh" mesh="DAU-MCP" rgba="1 0 0 1" />
+        <geom pos = "0 0 0" quat = "1 0 0 0" type="mesh" mesh="DAU-MCP" rgba="0.89019607843137254901960784313725 0.44705882352941176470588235294118 0.13333333333333333333333333333333 1" />
         </body>        
         
         <body name="ROH">
@@ -67,11 +67,11 @@
         </body>
 
         <body pos="60.1745976377696 -203.10000000000003 -222.87539895936374">
-            <geom type="sphere" size="2 2 2" rgba="1 1 0 0.9"/>
+            <geom type="sphere" size="2 2 2" rgba="0.63529411764 0.67843137254 0 1"/>
         </body>            
         
         <body pos="49.48520764568454 -197.10000000000003 -214.0910487678483">
-            <geom type="sphere" size="2 2 2" rgba="1 1 0 0.9"/>
+            <geom type="sphere" size="2 2 2" rgba="0.63529411764 0.67843137254 0 1"/>
         </body> 
 
     </worldbody>

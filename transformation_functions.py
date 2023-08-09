@@ -68,6 +68,11 @@ def find_maxima(data, window_length=11, polyorder=2, relative_height=0.4):
 path_csv = "Data"
 ct_folder = "Slicer3D"
 
+#Set the default color cycle
+#default_cycler = (cycler(color=["#98C6EA", "#64A0C8", "#0065BD", "#005293", "#003359", "#333333", "#E37222", "#A2AD00", "#69085a"]))
+# Blau Orange Grün Rot Lila
+default_cycler = (cycler(color=["#0065BD", "#E37222", "#679a1d", "#c4071b", "#69085a", "#005293", "#69085a", "#003359", "#333333"]))
+
 def plot_analogs_raw(path):
     data = get_json(path)
     sensor_data = data['observation']['analogs']
@@ -128,6 +133,8 @@ def plot_analogs_angles(angles=[], flexor=[], extensor=[], time=[], step_size=50
     flexor = flexor - np.min(flexor) + 0.3
     extensor = extensor - np.min(extensor) + 0.3
 
+    plt.rc('axes', prop_cycle=default_cycler)
+
     plt_height = 15
     plt_width = 10
 
@@ -174,7 +181,7 @@ def plot_analogs_angles(angles=[], flexor=[], extensor=[], time=[], step_size=50
     fig.tight_layout()
     if save_plots:
         date_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-        plt.savefig('./plots/angles/' + title + '_' + date_time + '.png',bbox_extra_artists=(ldg2,ldg1,ldg3), dpi=1200, bbox_inches='tight')
+        plt.savefig('./plots/angles/' + title + '_' + date_time + '.svg',bbox_extra_artists=(ldg2,ldg1,ldg3), dpi=1200, bbox_inches='tight')
     else:
         plt.show()
     plt.close()
@@ -208,7 +215,7 @@ def plot_ft_splitted(forces=[], torques=[], time=[], step_size=5000, start = 0, 
     plt.xticks(pos_x, x)
     if save_plots:
         date_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-        plt.savefig('./plots/angles/' + title + '_' + date_time + '.png', bbox_extra_artists=(lgd2,ldg1), dpi=1200, bbox_inches='tight')
+        plt.savefig('./plots/angles/' + title + '_' + date_time + '.svg', bbox_extra_artists=(lgd2,ldg1), dpi=1200, bbox_inches='tight')
     else:
         plt.show()
     plt.close()
@@ -233,7 +240,7 @@ def plot_ft_norm(data, time, step_size=5000, start=0, end=1000, title="", save_p
     plt.ylim([0, 3])
     if save_plots:
         date_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-        plt.savefig('./plots/angles/' + title + '_' + date_time + '.png', dpi=1200)
+        plt.savefig('./plots/angles/' + title + '_' + date_time + '.svg', dpi=1200)
     else:
         plt.show()
     plt.close()
@@ -647,7 +654,7 @@ def plot_class(i, Trackers1: list = [], Trackers2: list = [], names: list = [], 
     if save:
         dt = datetime.now()
         dt = dt.strftime("%Y-%m-%d_%H-%M-%S")
-        plt.savefig('plots/plot_class_'+str(i)+'.pdf', dpi=600)
+        plt.savefig('plots/plot_class_'+str(i)+'.svg', dpi=600)
     if show:
         plt.show()
     plt.close()
@@ -795,7 +802,7 @@ def plot_tiefpass(marker_data, title: str='', fs: float =120, Gp: float = 0.1, G
         plt.subplots_adjust(hspace=0.35)
         now = datetime.now()
         plot_file_title = "marker_" + now.strftime("%d_%m_%Y_%H_%M_%S")
-        # plt.savefig(plot_file_title + ".pdf", format="pdf")
+        # plt.savefig(plot_file_title + ".svg", format="pdf")
         plt.show()
         plt.close()
     return y
@@ -1269,7 +1276,7 @@ class tracker_bone():
         U, S, V_T = np.linalg.svd(H)
 
         # decide whether we need to correct our rotation matrix to ensure a right-handed coordinate system
-        # https://igl.ethz.ch/projects/ARAP/svd_rot.pdf
+        # https://igl.ethz.ch/projects/ARAP/svd_rot.svg
         # https://en.wikipedia.org/wiki/Kabsch_algorithm
         d = np.sign(np.linalg.det(np.dot(V_T.T, U.T)))
 
@@ -1444,10 +1451,10 @@ class marker_bone():
             self.opt_marker_trace = np.zeros((int(test_metadata["length"]),3))
 
         #prepare matrices for transformation
-        self.T_proxi_opt = np.zeros((int(test_metadata["length"]),2,4,4))
-        self.T_dist_opt = np.zeros((int(test_metadata["length"]),2,4,4))
+        self.T_proxi_opt = np.full((int(test_metadata["length"]),2,4,4),np.eye(4))
+        self.T_dist_opt = np.full((int(test_metadata["length"]),2,4,4),np.eye(4))
 
-        self.T_opt_ct = np.zeros((int(test_metadata["length"]),4,4))
+        self.T_opt_ct = np.full((int(test_metadata["length"]),4,4),np.eye(4))
         self.v_opt = np.zeros((int(test_metadata["length"]),3))
     
     def replace_outliers(self, data, threshold = 0, compare_steps = 20, n_std = 5):

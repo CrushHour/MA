@@ -197,4 +197,4 @@ if __name__ == '__main__':
     np.set_printoptions(precision=3, suppress=True, linewidth=100)
 
     finger = MujocoFingerModel(test_metadata['path'])
-    finger.make_video(30, 0)
+    finger.make_video(29.84274685129648, 0)

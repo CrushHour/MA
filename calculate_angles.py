@@ -1,7 +1,8 @@
 # %% Import
 import sys
-
-sys.path.append("./mujoco")
+import os
+import time
+sys.path.append('./mujoco')
 import transformation_functions as tf
 import calibrate_sensor as cs
 import numpy as np
@@ -22,6 +23,15 @@ importlib.reload(tf)
 def exp_func(x, a, b, c):
     return a * np.exp(b * x) + c
 
+
+def create_test_metadata_from_path(path):
+    test_metadata = dict()
+    test_metadata['name'] = path.split('/')[-1][:-5]
+    test_metadata['path'] = path
+    test_metadata['marker_IDs'] = ["",""]
+    test_metadata['type'] = path[-4:]
+    test_metadata['length'] = len(tf.get_json(path)['time'])
+    return test_metadata
 
 # %%Definition der Pfade
 hand_metadata = tf.get_json("hand_metadata.json")
@@ -108,10 +118,14 @@ for t in tqdm(range(len(Marker_DAU.opt_marker_trace))):
 
     # Marker_ZF_intermedial.T_opt_ct[t] = construct_marker_rot([Marker_ZF_intermedial.opt_marker_trace[t],Tracker_ZF_DIP.T_proxi_innen_opt[t,:3,3],Tracker_ZF_DIP.T_proxi_aussen_opt[t,:3,3]], \
     #                                                      [np.array(Marker_ZF_intermedial.marker_pos_ct[0]), Tracker_ZF_DIP.T_proxi_innen_CT[:3,3], Tracker_ZF_DIP.T_proxi_aussen_CT[:3,3]])
+    
+    
+    
     Marker_ZF_intermedial.T_opt_ct[t] = Tracker_ZF_DIP.T_opt_ct[t]
 
     # update loop auf basis aller bekannten Punkte
     for j in range(3):
+    
         Marker_ZF_intermedial.update_joints(t)
 
         ZF_MCP.T_opt_ct[t] = construct_marker_rot(
