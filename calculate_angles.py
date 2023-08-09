@@ -254,9 +254,9 @@ parameters["dau"]["mcp_joint_innen"] = mwp.build_parameters(
 with open("./mujoco/generated_parameters.yaml", "w") as outfile:
     yaml.dump(parameters, outfile)
 
-model = mwj.MujocoFingerModel(
-    "./mujoco/my_tendom_finger_template.xml", "./mujoco/generated_parameters.yaml"
-)
+#model = mwj.MujocoFingerModel(
+#    "./mujoco/my_tendom_finger_template.xml", "./mujoco/generated_parameters.yaml"
+#)
 print("Model updated!")
 
 # %% plotten von delta und epsilon
@@ -331,10 +331,16 @@ if __name__ == "__main__":
             )
             * trans
         )
+    
+    
 
     alpha = tf.interpolate_1d(alpha)
     alpha = Tracker_DAU_DIP.delete_outliers(alpha)
     alpha = tf.interpolate_1d(alpha)
+
+    # catch jumping alphas
+    alpha = np.abs(alpha)
+
     beta = tf.interpolate_1d(beta)
     beta = Tracker_DAU_DIP.delete_outliers(beta, 1.5)
     beta = tf.interpolate_1d(beta)
