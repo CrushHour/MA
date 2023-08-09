@@ -43,12 +43,12 @@ elif test_number == 1:
 else:
     #path = r'Data/test_01_30/2023_01_31_00_30_44.json'
     #test_metadata = create_test_metadata_from_path(path)
-    test_metadata = tf.get_json('test_metadata.json')['2023_01_31_18_12_48.json']
+    #test_metadata = tf.get_json('test_metadata.json')['2023_01_31_18_12_48.json']
     #test_metadata = tf.get_json('test_metadata.json')['2023_01_31_18_10_36.json']
     #test_metadata = tf.get_json('test_metadata.json')['2023_01_31_18_08_11.json']
     #test_metadata = tf.get_json('test_metadata.json')['2023_01_31_00_47_54.json']
     #test_metadata = tf.get_json('test_metadata.json')['2023_01_31_00_42_47.json']
-    #test_metadata = tf.get_json('test_metadata.json')['2023_01_31_00_30_44.json']
+    test_metadata = tf.get_json('test_metadata.json')['2023_01_31_00_30_44.json']
     xtick_range = 1000
     start = 1400
     #start = 900
@@ -146,7 +146,7 @@ construct_model(i)
 
 
 if __name__=="__main__":
-    save_plots = False
+    save_plots = True
 
     alpha = np.zeros(len(Marker_ZF_intermedial.opt_marker_trace))
     beta = np.zeros(len(Marker_ZF_intermedial.opt_marker_trace))
