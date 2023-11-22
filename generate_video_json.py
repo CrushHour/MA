@@ -20,7 +20,7 @@ from dm_control import mujoco as dm_mujoco
 
 class MujocoFingerModel:
 
-    def __init__(self, path) -> None:
+    def __init__(self, path, joint_dis_tresh) -> None:
         self.Tracker_ZF_DIP = tf.tracker_bone('ZF_DIP',path)
         self.Tracker_ZF_midhand = tf.tracker_bone('ZF_midhand',path)
         self.Tracker_DAU_DIP = tf.tracker_bone('DAU_DIP',path)
@@ -29,7 +29,7 @@ class MujocoFingerModel:
         self.Marker_ZF_intermedial = tf.marker_bone(finger_name="ZF_PIP",test_path=test_metadata['path'])
         self.ZF_MCP = tf.marker_bone(finger_name="ZF_MCP",test_path=test_metadata['path'], init_marker_ID='')
 
-        self.construct_all_T_opt_ct()
+        self.construct_all_T_opt_ct(joint_dis_tresh)
 
         self.end_pos = self.Tracker_ZF_DIP.T_opt_ct.shape[0]
         self.offset = 0.85*np.array(self.Tracker_ZF_midhand.T_opt_ct[0,:3,3])
@@ -45,7 +45,7 @@ class MujocoFingerModel:
     
 
     
-    def construct_all_T_opt_ct(self):
+    def construct_all_T_opt_ct(self, joint_dis_tresh):
         for t in tqdm(range(len(self.Marker_DAU.opt_marker_trace))):
             self.Marker_DAU.T_opt_ct[t] = self.construct_marker_rot([self.Tracker_DAU_DIP.T_proxi_innen_opt[t,:3,3], self.Tracker_DAU_DIP.T_proxi_aussen_opt[t,:3,3],self.Tracker_DAU_MCP.T_dist_innen_opt[t,:3,3],self.Tracker_DAU_MCP.T_dist_aussen_opt[t,:3,3]],\
                                                         [self.Tracker_DAU_DIP.T_proxi_innen_CT[:3,3], self.Tracker_DAU_DIP.T_proxi_aussen_CT[:3,3],self.Tracker_DAU_MCP.T_dist_innen_CT[:3,3],self.Tracker_DAU_MCP.T_dist_aussen_CT[:3,3]])
@@ -64,7 +64,29 @@ class MujocoFingerModel:
                 self.Marker_ZF_intermedial.T_opt_ct[t] = self.construct_marker_rot([self.Tracker_ZF_DIP.T_proxi_innen_opt[t,:3,3],self.Tracker_ZF_DIP.T_proxi_aussen_opt[t,:3,3], self.ZF_MCP.T_dist_opt[t,0,:3,3], self.ZF_MCP.T_dist_opt[t,1,:3,3]], \
                                                                 [self.Tracker_ZF_DIP.T_proxi_innen_CT[:3,3], self.Tracker_ZF_DIP.T_proxi_aussen_CT[:3,3], self.ZF_MCP.T_dist_CT[0,:3,3], self.ZF_MCP.T_dist_CT[1,:3,3]])
 
-    
+            dis_joint = list()
+            dis_joint.append(np.linalg.norm(self.Tracker_ZF_DIP.T_opt_ct[t,:3,3]-self.Marker_ZF_intermedial.T_opt_ct[t,:3,3]))
+            dis_joint.append(np.linalg.norm(self.ZF_MCP.T_opt_ct[t,:3,3]-self.Tracker_ZF_midhand.T_opt_ct[t,:3,3]))
+            print(dis_joint)
+            print(joint_dis_tresh)
+            if dis_joint[0] > joint_dis_tresh:
+                print('True')
+                self.Tracker_ZF_DIP.T_opt_ct[t,:3,3] = np.array([np.nan,np.nan,np.nan])
+                self.Marker_ZF_intermedial.T_opt_ct[t,:3,3] = np.array([np.nan,np.nan,np.nan])
+                self.ZF_MCP.T_opt_ct[t,:3,3] = np.array([np.nan,np.nan,np.nan])
+                self.Tracker_ZF_midhand.T_opt_ct[t,:3,3] = np.array([np.nan,np.nan,np.nan])
+                self.Tracker_DAU_DIP.T_opt_ct[t,:3,3] = np.array([np.nan,np.nan,np.nan])
+                self.Marker_DAU.T_opt_ct[t,:3,3] = np.array([np.nan,np.nan,np.nan])
+                self.Tracker_DAU_MCP.T_opt_ct[t,:3,3] = np.array([np.nan,np.nan,np.nan])
+            
+        self.Tracker_ZF_DIP.T_opt_ct[:,:3,3] = tf.nan_helper(self.Tracker_ZF_DIP.T_opt_ct[:,:3,3])
+        self.Marker_ZF_intermedial.T_opt_ct[:,:3,3] = tf.nan_helper(self.Marker_ZF_intermedial.T_opt_ct[:,:3,3])
+        self.ZF_MCP.T_opt_ct[:,:3,3] = tf.nan_helper(self.ZF_MCP.T_opt_ct[:,:3,3])
+        self.Tracker_ZF_midhand.T_opt_ct[:,:3,3] = tf.nan_helper(self.Tracker_ZF_midhand.T_opt_ct[:,:3,3])
+        self.Tracker_DAU_DIP.T_opt_ct[:,:3,3] = tf.nan_helper(self.Tracker_DAU_DIP.T_opt_ct[:,:3,3])
+        self.Marker_DAU.T_opt_ct[:,:3,3] = tf.nan_helper(self.Marker_DAU.T_opt_ct[:,:3,3])
+        self.Tracker_DAU_MCP.T_opt_ct[:,:3,3] = tf.nan_helper(self.Tracker_DAU_MCP.T_opt_ct[:,:3,3])
+
     def update(self, i, offset = np.array([0,0,0])):
         parameters = {'marker': dict(), 'zf': dict(), 'dau': dict()}
 
@@ -196,5 +218,7 @@ if __name__ == '__main__':
     # More legible printing from numpy.
     np.set_printoptions(precision=3, suppress=True, linewidth=100)
 
-    finger = MujocoFingerModel(test_metadata['path'])
-    finger.make_video(29.84274685129648, 0)
+    joint_dis_treshhold = 100.0
+
+    finger = MujocoFingerModel(test_metadata['path'], joint_dis_tresh=joint_dis_treshhold)
+    finger.make_video(29.84274685129648, start_pos=1200)

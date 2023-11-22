@@ -47,14 +47,14 @@ def find_maxima(data, window_length=11, polyorder=2, relative_height=0.4):
     smoothed_data = savgol_filter(data, window_length, polyorder)
     
     # Set threshold for peak height
-    height_threshold = relative_height * np.max(smoothed_data)
+    height_threshold = np.multiply(relative_height, np.max(smoothed_data))
     
     # Find peaks in the smoothed data that are above the height threshold
     peaks, _ = find_peaks(smoothed_data, height=height_threshold)
     
     # Calculate mean and std of the peaks
-    mean_peak_value = np.mean(smoothed_data[peaks])
-    std_peak_value = np.std(smoothed_data[peaks])
+    mean_peak_value = np.mean(smoothed_data[peaks]) #type: ignore
+    std_peak_value = np.std(smoothed_data[peaks]) #type: ignore
     
     print("Mean of peaks:", mean_peak_value)
     print("Standard deviation of peaks:", std_peak_value)
@@ -1362,7 +1362,7 @@ class tracker_bone():
     def delete_outliers(self,data, n_std = 2.0):
         data = np.array(data)
         no_value = np.where(np.isnan(data)==False)
-        if len(no_value) >= 1:
+        if len(no_value) > 0:
             ValueError('NaN values in data.')
         indexes = np.where(abs(data - np.mean(data)) > n_std * np.std(data))
 
