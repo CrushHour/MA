@@ -1623,17 +1623,17 @@ def plot_grip_force_fit_exp(sum_tendon_force, ft_norm, save_plot = False):
         else:
             plt.show()
 
-def plot_grip_force_fit_exp_show_center(sum_tendon_force, ft_norm, index_center, save_plot=False):
+def plot_grip_force_fit_exp_show_center(sum_tendon_force, ft_norm, index_center, center_lable,  save_plot=False):
     
     polyline = np.linspace(0, max(sum_tendon_force), 100)
     
-    plt.scatter(sum_tendon_force, ft_norm, s=1, color="#0065bd", label="data")
+    plt.scatter(sum_tendon_force, ft_norm, s=1, color="#0065bd", label="Data")
 
     # Highlight the data point at index_center in red
-    plt.scatter(sum_tendon_force[index_center], ft_norm[index_center], color="red", label="Highlighted data point")
+    plt.scatter(sum_tendon_force[index_center], ft_norm[index_center], color="red", label="Data point at cluster center")
 
     # Add label for the highlighted data point
-    plt.text(sum_tendon_force[index_center], ft_norm[index_center], f' Index: {index_center}', color='red', verticalalignment='bottom')
+    plt.text(sum_tendon_force[index_center], ft_norm[index_center], center_lable, color='red', verticalalignment='bottom')
 
     params, covariance = curve_fit(exp_func, sum_tendon_force, ft_norm)
     plt.plot(polyline, exp_func(polyline, *params), '--', label='Fitted function', color="#e37222")

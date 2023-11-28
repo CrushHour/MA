@@ -76,8 +76,9 @@ for i in range(n_cluster):
 
     # Find point in threshold, clustered data that is closest to the cluster_center
     timestamp_cluster, _ = find_timestamp_to_cluster_center(kmeans_center[i], cluster)
-    closest_point_in_ft_force = force_cluster[timestamp_cluster[0][0]]
+    closest_point_in_ft_force = force_cluster[timestamp_cluster[0][0]] # type: ignore
     index_cluster_center = np.where(force_cluster == closest_point_in_ft_force)  # Extract the first element of the tuple
 
-    tf.plot_grip_force_fit_exp_show_center(tendon_force_cluster,force_cluster, index_cluster_center)
+    center_str = str(timestamp_total)
+    tf.plot_grip_force_fit_exp_show_center(tendon_force_cluster,force_cluster, index_cluster_center, center_str)
 # %%
