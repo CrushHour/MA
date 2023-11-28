@@ -24,6 +24,7 @@ from scipy.spatial.distance import pdist, squareform
 from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial import distance
 from scipy.signal import butter, buttord, filtfilt
+from scipy.optimize import curve_fit
 from tqdm import tqdm
 import numpy as np
 from scipy.signal import find_peaks, savgol_filter
@@ -1571,3 +1572,80 @@ if __name__ == '__main__':
     #        positions = [[0, 0, 61], [-41, 0, 35], [20, 0, 35], [-10, 31, 35], [-10, -14, 35]] # [[x,y,z],[x2,y2,z2],...]
     #        name, opt_positions = get_opt_positions('Tracker Nico.csv')
     sort_points_relative([[1,1,1],[4,4,4],[10,10,10]],[[11,11,11],[7,7,7],[2,2,2]])
+
+def plot_grip_force_fit_curve(sum_tendon_force, ft_norm, poly_order = 5, save_plots=False):
+        # plot tendon forces over ft sensor data
+        model = np.poly1d(np.polyfit(sum_tendon_force, ft_norm, poly_order))
+        polyline = np.linspace(0, max(sum_tendon_force), 100)
+        plt.scatter(sum_tendon_force, ft_norm, s=1, color="#0065bd", label="data")
+        plt.plot(
+            polyline,
+            model(polyline),
+            color="#e37222",
+            label="model " + str(poly_order) + "-th order",
+        )
+        plt.ylabel("grip force [N]")
+        plt.xlabel("Sum of tendon forces [N]")
+        plt.title("Tendon forces vs. Grip Force")
+        plt.legend()
+        if save_plots:
+            plt.savefig("plots/tendon_forces_vs_ft_sensor.png", dpi=1200)
+        else:
+            plt.show()
+        plt.close()
+
+def exp_func(x, a, b, c):
+    return a * np.exp(b * x) + c
+
+def plot_grip_force_fit_exp(sum_tendon_force, ft_norm, save_plot = False):
+
+        polyline = np.linspace(
+            0, max(sum_tendon_force), 100
+        )
+        plt.scatter(
+            sum_tendon_force,
+            ft_norm,
+            s=1,
+            color="#0065bd",
+            label="data",
+        )
+        params, covariance = curve_fit(exp_func, sum_tendon_force, ft_norm)
+        plt.plot(polyline, exp_func(polyline, *params), 'r--', label='Fitted function')
+        plt.grid(alpha=0.25)
+        plt.ylabel("grip force [N]")
+        plt.xlabel("sum of tendon forces [N]")
+        plt.title("Correlation of tendon forces with grip strength")
+        plt.legend()
+        print(f"Fitted parameters: a = {params[0]:.2f}, b = {params[1]:.2f}, c = {params[2]:.2f}")
+
+        if save_plot:
+            plt.savefig(r'C:\GitHub\MA\plots\Grip_Tendon_exp.pdf')
+        else:
+            plt.show()
+
+def plot_grip_force_fit_exp_show_center(sum_tendon_force, ft_norm, index_center, save_plot=False):
+    
+    polyline = np.linspace(0, max(sum_tendon_force), 100)
+    
+    plt.scatter(sum_tendon_force, ft_norm, s=1, color="#0065bd", label="data")
+
+    # Highlight the data point at index_center in red
+    plt.scatter(sum_tendon_force[index_center], ft_norm[index_center], color="red", label="Highlighted data point")
+
+    # Add label for the highlighted data point
+    plt.text(sum_tendon_force[index_center], ft_norm[index_center], f' Index: {index_center}', color='red', verticalalignment='bottom')
+
+    params, covariance = curve_fit(exp_func, sum_tendon_force, ft_norm)
+    plt.plot(polyline, exp_func(polyline, *params), '--', label='Fitted function', color="#e37222")
+    plt.grid(alpha=0.25)
+    plt.ylabel("grip force [N]")
+    plt.xlabel("sum of tendon forces [N]")
+    plt.title("Correlation of tendon forces with grip strength")
+    plt.legend()
+
+    print(f"Fitted parameters: a = {params[0]:.2f}, b = {params[1]:.2f}, c = {params[2]:.2f}")
+
+    if save_plot:
+        plt.savefig(r'C:\GitHub\MA\plots\Grip_Tendon_exp.pdf')
+    else:
+        plt.show()

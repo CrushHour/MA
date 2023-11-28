@@ -2,6 +2,7 @@
 import sys
 import os
 import time
+import json
 sys.path.append('./mujoco')
 import transformation_functions as tf
 import calibrate_sensor as cs
@@ -490,6 +491,7 @@ if __name__ == "__main__":
         )
         # sum_tendon_force -= np.mean(sum_tendon_force)
         print("mean tendon force: ", np.mean(sum_tendon_force))
+        '''
         # plot tendon forces over ft sensor data
         poly_order = 5
         model = np.poly1d(np.polyfit(sum_tendon_force, ft_norm, poly_order))
@@ -510,35 +512,31 @@ if __name__ == "__main__":
         else:
             plt.show()
         plt.close()
-
+        '''
+        tf.plot_grip_force_fit_curve(sum_tendon_force,ft_norm,5,save_plots)
+        
         threshold = 0.3
         poly_order = 5
         mask = ft_norm > threshold
         filtered_ft_norm = np.array(ft_norm[mask])
         filtered_sum_tendon_force = np.array(sum_tendon_force[mask])
+        tf.plot_grip_force_fit_exp(filtered_sum_tendon_force,filtered_ft_norm)
 
-        # plt.figure(figsize=(12,12))
-        model = np.poly1d(
-            np.polyfit(filtered_sum_tendon_force, filtered_ft_norm, poly_order)
-        )
-        polyline = np.linspace(
-            0, max(filtered_sum_tendon_force), 100
-        )
-        plt.scatter(
-            filtered_sum_tendon_force,
-            filtered_ft_norm,
-            s=1,
-            color="#0065bd",
-            label="data",
-        )
-        params, covariance = curve_fit(exp_func, filtered_sum_tendon_force, filtered_ft_norm)
-        plt.plot(polyline, exp_func(polyline, *params), 'r--', label='Fitted function')
-        plt.grid(alpha=0.25)
-        plt.ylabel("grip force [N]")
-        plt.xlabel("sum of tendon forces [N]")
-        plt.title("Correlation of tendon forces with grip strength")
-        plt.legend()
-        print(f"Fitted parameters: a = {params[0]:.2f}, b = {params[1]:.2f}, c = {params[2]:.2f}")
+# %% save results
+save_path = "./Data/results/output_" + test_metadata["name"]
 
+data = {'alpha': alpha.tolist(), #type: ignore
+        "beta": beta.tolist(), #type: ignore
+        'gamma': gamma.tolist(), #type: ignore
+        "delta": delta.tolist(), #type: ignore
+        'epsilon': epsilon.tolist(), #type: ignore
+        'iota': iota.tolist(), #type: ignore
+        'theta': theta.tolist(), #type: ignore
+        'ft_norm': ft_norm.tolist(), #type: ignore
+        'sum_tendon_force': sum_tendon_force.tolist()  #type: ignore
+        }
+
+with open(save_path + '.json', 'w', encoding='utf-8') as f:
+    json.dump(data, f, ensure_ascii=False, indent=4)
 
 # %%
